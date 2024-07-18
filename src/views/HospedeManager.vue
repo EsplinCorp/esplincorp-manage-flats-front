@@ -31,6 +31,13 @@
             label="Telefone"
             required
           ></v-text-field>
+          <v-select
+            v-model="hospede.localHospedagem"
+            :items="locaisHospedagem"
+            :rules="localHospedagemRules"
+            label="Local de Hospedagem"
+            required
+          ></v-select>
           <v-text-field
             v-model="hospede.dataEntrada"
             label="Data de Check-in"
@@ -123,6 +130,7 @@ export default {
         cpf: "",
         email: "",
         telefone: "",
+        localHospedagem: "",
         checkStatus: "Check-in",
         dataCadastro: new Date().toISOString().substr(0, 10),
         dataCheckIn: new Date().toISOString().substr(0, 10),

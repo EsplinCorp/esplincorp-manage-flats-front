@@ -61,12 +61,12 @@
               </td>
               <td>{{ item.id }}</td>
               <td>{{ item.nome }}</td>
-              <td class="d-none d-md-table-cell">{{ item.cpfOuCnpj }}</td>
+              <td class="d-none d-md-table-cell">{{ item.cpf }}</td>
               <td class="d-none d-md-table-cell">{{ item.email }}</td>
               <td class="d-none d-md-table-cell">{{ item.telefone }}</td>
               <td class="d-none d-md-table-cell">{{ item.localHospedagem }}</td>
-              <td>{{ item.dataCheckIn | formatDate }}</td>
-              <td>{{ item.dataCheckOut | formatDate }}</td>
+              <td>{{ item.dataEntrada | formatDate }}</td>
+              <td>{{ item.dataSaida | formatDate }}</td>
               <td>
                 <v-tooltip bottom>
                   <template v-slot:activator="{ on, attrs }">
@@ -147,12 +147,12 @@ export default {
         { text: "Status", value: "status", sortable: false },
         { text: "ID", value: "id" },
         { text: "Nome", value: "nome" },
-        { text: "CPF/CNPJ", value: "cpfOuCnpj" },
+        { text: "CPF/CNPJ", value: "cpf" },
         { text: "Email", value: "email" },
         { text: "Telefone", value: "telefone" },
         { text: "Local", value: "localHospedagem" },
-        { text: "Check-in", value: "dataCheckIn" },
-        { text: "Check-out", value: "dataCheckOut" },
+        { text: "Check-in", value: "dataEntrada" },
+        { text: "Check-out", value: "dataSaida" },
         { text: "Ações", value: "actions" },
       ],
     };
@@ -174,7 +174,7 @@ export default {
     // Função para determinar o status do hóspede
     getStatus(item) {
       const today = new Date().toISOString().substr(0, 10);
-      if (item.dataCheckIn <= today && item.dataCheckOut >= today) {
+      if (item.dataEntrada <= today && item.dataSaida >= today) {
         return true; // Hóspede está no flat
       } else {
         return false; // Hóspede não está no flat
