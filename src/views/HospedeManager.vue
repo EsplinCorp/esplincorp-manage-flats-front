@@ -32,9 +32,9 @@
             required
           ></v-text-field>
           <v-select
-            v-model="hospede.localHospedagem"
+            v-model="hospede.flatId"
             :items="locaisHospedagem"
-            :rules="localHospedagemRules"
+            :rules="flatIdRules"
             label="Local de Hospedagem"
             required
           ></v-select>
@@ -87,7 +87,7 @@ export default {
         (v) => !!v || "Telefone é obrigatório",
         (v) => (v && v.length >= 8 && v.length <= 15) || "Telefone deve ter entre 8 e 15 caracteres",
       ],
-      localHospedagemRules: [(v) => !!v || "Local da Hospedagem é obrigatório"],
+      flatIdRules: [(v) => !!v || "Local da Hospedagem é obrigatório"],
     };
   },
   methods: {
@@ -130,7 +130,7 @@ export default {
         cpf: "",
         email: "",
         telefone: "",
-        localHospedagem: "",
+        flatId: "",
         checkStatus: "Check-in",
         dataCadastro: new Date().toISOString().substr(0, 10),
         dataCheckIn: new Date().toISOString().substr(0, 10),

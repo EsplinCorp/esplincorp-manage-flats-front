@@ -59,12 +59,12 @@
                   }}</span>
                 </v-tooltip>
               </td>
-              <td>{{ item.id }}</td>
+              <!-- <td>{{ item.id }}</td> -->
               <td>{{ item.nome }}</td>
               <td class="d-none d-md-table-cell">{{ item.cpf }}</td>
               <td class="d-none d-md-table-cell">{{ item.email }}</td>
               <td class="d-none d-md-table-cell">{{ item.telefone }}</td>
-              <td class="d-none d-md-table-cell">{{ item.localHospedagem }}</td>
+              <td class="d-none d-md-table-cell">{{ item.flatId }}</td>
               <td>{{ item.dataEntrada | formatDate }}</td>
               <td>{{ item.dataSaida | formatDate }}</td>
               <td>
@@ -145,7 +145,7 @@ export default {
       loading: false,
       headers: [
         { text: "Status", value: "status", sortable: false },
-        { text: "ID", value: "id" },
+        // { text: "ID", value: "id" },
         { text: "Nome", value: "nome" },
         { text: "CPF/CNPJ", value: "cpf" },
         { text: "Email", value: "email" },
