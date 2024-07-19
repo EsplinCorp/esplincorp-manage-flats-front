@@ -10,13 +10,13 @@ import FlatsView from "@/views/FlatsView.vue";
 import ReceitasDespesasView from "@/views/ReceitasDespesasView.vue";
 import BalancoView from "@/views/BalancoView.vue";
 import RelatoriosView from "@/views/RelatoriosView.vue";
-import LoginUser from '@/views/LoginUser.vue';
+import LoginUser from "@/views/LoginUser.vue";
 
 Vue.use(Router);
 
 // Verifica se o usuário está logado
 function isLoggedIn() {
-    return !!localStorage.getItem('userToken');
+  return !!localStorage.getItem("userToken");
 }
 
 const router = new Router({
@@ -24,91 +24,81 @@ const router = new Router({
   base: process.env.BASE_URL,
   routes: [
     {
-        path: '/login',
-        name: 'loginUser',
-        component: LoginUser
+      path: "/login",
+      name: "loginUser",
+      component: LoginUser,
     },
     {
       path: "/",
       name: "dashboardView",
       component: DashboardView,
-      meta: { requiresAuth: true }
-
+      meta: { requiresAuth: true },
     },
     {
       path: "/hospedes",
       name: "Hospedes",
       component: HospedesTable,
-      meta: { requiresAuth: true }
-
+      meta: { requiresAuth: true },
     },
     {
       path: "/gerenciar-hospedes",
       name: "HospedeManager",
       component: HospedeManager,
-      meta: { requiresAuth: true }
-
+      meta: { requiresAuth: true },
     },
     {
       path: "/flats",
       name: "flats",
       component: FlatsView,
-      meta: { requiresAuth: true }
-
+      meta: { requiresAuth: true },
     },
     {
       path: "/financas",
       name: "financas",
       component: FinancasView,
-      meta: { requiresAuth: true }
-
+      meta: { requiresAuth: true },
     },
     {
       path: "/financas/receitas-despesas",
       name: "receitas-despesas",
       component: ReceitasDespesasView,
-      meta: { requiresAuth: true }
-
+      meta: { requiresAuth: true },
     },
     {
       path: "/financas/balanco",
       name: "balanco",
       component: BalancoView,
-      meta: { requiresAuth: true }
-
+      meta: { requiresAuth: true },
     },
     {
       path: "/financas/pagamento-funcionarios",
       name: "pagamentos",
       component: PagamentosView,
-      meta: { requiresAuth: true }
-
+      meta: { requiresAuth: true },
     },
     {
       path: "/relatorios",
       name: "Relatorios",
       component: RelatoriosView,
-      meta: { requiresAuth: true }
-
+      meta: { requiresAuth: true },
     },
     {
       path: "/404",
       alias: "*",
       name: "NotFound",
       component: NotFoundComponents,
-      meta: { requiresAuth: true }
-
+      meta: { requiresAuth: true },
     },
   ],
 });
 
 // Guard global para verificar a autenticação antes de cada navegação de rota (Navegation Guard)
 router.beforeEach((to, from, next) => {
-    if (to.matched.some(record => record.meta.requiresAuth) && !isLoggedIn()) {
-        next({ name: 'loginUser' });
-    } else {
-        next();
-    }
+  if (to.matched.some((record) => record.meta.requiresAuth) && !isLoggedIn()) {
+    next({ name: "loginUser" });
+  } else {
+    next();
+  }
 });
 
 export default router;

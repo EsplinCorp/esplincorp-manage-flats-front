@@ -26,6 +26,19 @@
         </v-btn>
         <hospede-manager ref="hospedeManager"></hospede-manager>
 
+        <!-- Campo de Pesquisa -->
+        <v-row justify="center">
+          <v-col cols="12" md="8" class="mb-7">
+            <v-text-field
+              v-model="search"
+              append-icon="mdi-magnify"
+              label="Pesquisar hóspedes"
+              single-line
+              hide-details
+            ></v-text-field>
+          </v-col>
+        </v-row>
+
         <!-- Tabela de Hóspedes -->
         <v-data-table
           :headers="headers"
@@ -88,7 +101,7 @@
                       icon
                       v-bind="attrs"
                       v-on="on"
-                      @click="openDeleteDialog(item)"
+                      @click="confirmDeleteHospede(item)"
                     >
                       <v-icon>mdi-delete-outline</v-icon>
                     </v-btn>
@@ -99,32 +112,6 @@
             </tr>
           </template>
         </v-data-table>
-
-        <!-- Diálogo de Confirmação de Exclusão -->
-        <v-dialog v-model="deleteDialog" persistent max-width="500px">
-          <v-card>
-            <v-card-title class="d-flex justify-space-between">
-              Excluir Hóspede
-              <v-btn icon @click="closeDeleteDialog">
-                <v-icon>mdi-close</v-icon>
-              </v-btn>
-            </v-card-title>
-            <v-card-text>
-              Você tem certeza que deseja excluir o hóspede
-              <strong>{{ selectedHospede?.nome }}</strong
-              >?
-            </v-card-text>
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn class="delete-button" text @click="deletarHospede">
-                Excluir Hóspede
-              </v-btn>
-              <v-btn class="cancel-button" text @click="closeDeleteDialog">
-                Cancelar
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
       </v-container>
     </v-col>
   </v-row>
@@ -133,6 +120,7 @@
 <script>
 import { mapActions, mapState } from "vuex";
 import HospedeManager from "@/views/HospedeManager.vue";
+import Swal from "sweetalert2";
 
 export default {
   components: {
@@ -140,12 +128,11 @@ export default {
   },
   data() {
     return {
-      deleteDialog: false,
+      search: "",
       selectedHospede: null,
       loading: false,
       headers: [
         { text: "Status", value: "status", sortable: false },
-        // { text: "ID", value: "id" },
         { text: "Nome", value: "nome" },
         { text: "CPF/CNPJ", value: "cpf" },
         { text: "Email", value: "email" },
@@ -160,7 +147,13 @@ export default {
   computed: {
     ...mapState(["hospedes"]),
     filteredHospedes() {
-      // Retorna todos os hóspedes sem filtro de status
+      if (this.search) {
+        return this.hospedes.filter((hospede) =>
+          Object.values(hospede).some((value) =>
+            String(value).toLowerCase().includes(this.search.toLowerCase()),
+          ),
+        );
+      }
       return this.hospedes;
     },
   },
@@ -171,14 +164,9 @@ export default {
       "createHospede",
       "updateHospede",
     ]),
-    // Função para determinar o status do hóspede
     getStatus(item) {
       const today = new Date().toISOString().substr(0, 10);
-      if (item.dataEntrada <= today && item.dataSaida >= today) {
-        return true; // Hóspede está no flat
-      } else {
-        return false; // Hóspede não está no flat
-      }
+      return item.dataEntrada <= today && item.dataSaida >= today;
     },
     openNewHospedeDialog() {
       this.$refs.hospedeManager.openDialog();
@@ -189,35 +177,98 @@ export default {
         this.$refs.hospedeManager.hospede = { ...hospede };
       });
     },
-    openDeleteDialog(hospede) {
-      this.selectedHospede = hospede;
-      this.deleteDialog = true;
+    confirmDeleteHospede(hospede) {
+      Swal.fire({
+        title: "Tem certeza?",
+        text: `Deseja excluir o hóspede ${hospede.nome}?`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Sim, excluir",
+        cancelButtonText: "Cancelar",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.deletarHospede(hospede);
+        }
+      });
     },
-    closeDeleteDialog() {
-      this.deleteDialog = false;
-      this.selectedHospede = null;
+    deletarHospede(hospede) {
+      this.loading = true;
+      this.deleteHospede(hospede.id)
+        .then(() => {
+          Swal.fire(
+            "Excluído!",
+            "O hóspede foi excluído com sucesso.",
+            "success",
+          );
+          this.fetchHospedes();
+        })
+        .catch((error) => {
+          console.error("Erro ao excluir o hóspede:", error);
+          if (error.response && error.response.status === 401) {
+            this.$router.push("/login");
+            Swal.fire(
+              "Sessão expirada",
+              "Por favor, faça login novamente.",
+              "error",
+            );
+          } else {
+            Swal.fire(
+              "Erro",
+              "Erro ao excluir o hóspede. Por favor, tente novamente.",
+              "error",
+            );
+          }
+        })
+        .finally(() => {
+          this.loading = false;
+        });
     },
-    deletarHospede() {
-      if (this.selectedHospede) {
-        this.loading = true;
-        this.deleteHospede(this.selectedHospede.id)
-          .then(() => {
-            this.closeDeleteDialog();
-            this.fetchHospedes();
-          })
-          .catch((error) => {
-            console.error("Erro ao excluir o hóspede:", error);
-            if (error.response && error.response.status === 401) {
-              this.$router.push("/login");
-              alert("Sessão expirada, por favor faça login novamente.");
-            } else {
-              alert("Erro ao excluir o hóspede. Por favor, tente novamente.");
-            }
-          })
-          .finally(() => {
-            this.loading = false;
-          });
-      }
+    showSuccessMessage(message) {
+      Swal.fire({
+        icon: "success",
+        title: "Sucesso",
+        text: message,
+        timer: 3000,
+        showConfirmButton: false,
+      });
+    },
+    showEditSuccessMessage() {
+      this.showSuccessMessage("Hóspede editado com sucesso!");
+    },
+    showCreateSuccessMessage() {
+      this.showSuccessMessage("Hóspede cadastrado com sucesso!");
+    },
+    createHospede(hospedeData) {
+      this.loading = true;
+      this.createHospede(hospedeData)
+        .then(() => {
+          this.showCreateSuccessMessage();
+          this.fetchHospedes();
+        })
+        .catch((error) => {
+          console.error("Erro ao cadastrar hóspede:", error);
+          // lógica para tratar erros
+        })
+        .finally(() => {
+          this.loading = false;
+        });
+    },
+    updateHospede(hospedeData) {
+      this.loading = true;
+      this.updateHospede(hospedeData)
+        .then(() => {
+          this.showEditSuccessMessage();
+          this.fetchHospedes();
+        })
+        .catch((error) => {
+          console.error("Erro ao editar hóspede:", error);
+          // lógica para tratar erros
+        })
+        .finally(() => {
+          this.loading = false;
+        });
     },
   },
   filters: {
@@ -234,7 +285,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-/* Estilos personalizados podem ser adicionados aqui */
-</style>

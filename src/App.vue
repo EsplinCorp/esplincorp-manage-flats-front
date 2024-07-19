@@ -5,7 +5,9 @@
       <v-app-bar-nav-icon @click="toggleDrawer"></v-app-bar-nav-icon>
       <v-spacer></v-spacer>
       <v-btn icon @click="toggleDarkTheme">
-        <v-icon>{{ darkTheme ? "mdi-white-balance-sunny" : "mdi-weather-night" }}</v-icon>
+        <v-icon>{{
+          darkTheme ? "mdi-white-balance-sunny" : "mdi-weather-night"
+        }}</v-icon>
       </v-btn>
       <v-btn icon @click="performLogout">
         <v-icon>mdi-logout</v-icon>
@@ -15,19 +17,28 @@
     <!-- Menu Lateral -->
     <v-navigation-drawer v-if="shouldShowNavBar" v-model="drawer" app>
       <v-list>
-        <v-list-item :class="{ 'selected-item': isSelected('/') }" @click="navigateTo('/')">
+        <v-list-item
+          :class="{ 'selected-item': isSelected('/') }"
+          @click="navigateTo('/')"
+        >
           <v-list-item-icon>
             <v-icon>mdi-chart-bar</v-icon>
           </v-list-item-icon>
           <v-list-item-title v-if="drawer">Dashboard</v-list-item-title>
         </v-list-item>
-        <v-list-item :class="{ 'selected-item': isSelected('/hospedes') }" @click="navigateTo('/hospedes')">
+        <v-list-item
+          :class="{ 'selected-item': isSelected('/hospedes') }"
+          @click="navigateTo('/hospedes')"
+        >
           <v-list-item-icon>
             <v-icon>mdi-account-group</v-icon>
           </v-list-item-icon>
           <v-list-item-title v-if="drawer">Hóspedes</v-list-item-title>
         </v-list-item>
-        <v-list-item :class="{ 'selected-item': isSelected('/flats') }" @click="navigateTo('/flats')">
+        <v-list-item
+          :class="{ 'selected-item': isSelected('/flats') }"
+          @click="navigateTo('/flats')"
+        >
           <v-list-item-icon>
             <v-icon>mdi-home-city</v-icon>
           </v-list-item-icon>
@@ -70,14 +81,14 @@
       <router-view />
     </v-main>
 
-     <!-- Rodapé -->
-     <FooterComponent v-if="shouldShowNavBar" />
+    <!-- Rodapé -->
+    <FooterComponent v-if="shouldShowNavBar" />
   </v-app>
-  
 </template>
 
 <script>
 import { mapActions } from "vuex";
+import "./styles/global.css";
 
 export default {
   data() {
@@ -106,7 +117,7 @@ export default {
     },
     shouldShowNavBar() {
       const isAuthenticated = !!localStorage.getItem("userToken");
-      const isLoginRoute = this.$route.name === 'loginUser';
+      const isLoginRoute = this.$route.name === "loginUser";
       return isAuthenticated && !isLoginRoute;
     },
   },

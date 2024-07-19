@@ -2,7 +2,9 @@
   <v-dialog v-model="dialog" persistent max-width="600px">
     <v-card>
       <v-card-title class="text-h5">
-        <div class="flex-grow-1">{{ editMode ? "Editar Hóspede" : "Novo Hóspede" }}</div>
+        <div class="flex-grow-1">
+          {{ editMode ? "Editar Hóspede" : "Novo Hóspede" }}
+        </div>
         <v-btn icon @click="closeDialog"><v-icon>mdi-close</v-icon></v-btn>
       </v-card-title>
       <v-card-text>
@@ -54,7 +56,9 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn text @click="salvarHospede">{{ editMode ? "Atualizar" : "Gravar" }}</v-btn>
+        <v-btn text @click="salvarHospede">{{
+          editMode ? "Atualizar" : "Gravar"
+        }}</v-btn>
         <v-btn text @click="closeDialog">Cancelar</v-btn>
       </v-card-actions>
     </v-card>
@@ -64,6 +68,7 @@
 <script>
 import api from "@/services/api/api.js";
 import { mapActions } from "vuex";
+import Swal from "sweetalert2";
 
 export default {
   props: {
@@ -81,34 +86,60 @@ export default {
         (v) => (v && v.length >= 3) || "Nome deve ter mais de 2 caracteres",
         (v) => (v && v.length <= 50) || "Nome deve ter menos de 50 caracteres",
       ],
-      cpfCnpjRules: [(v) => !!v || "CPF é obrigatório", (v) => (v && v.length === 11) || "CPF deve ter 11 caracteres"],
-      emailRules: [(v) => !!v || "E-mail é obrigatório", (v) => /.+@.+/.test(v) || "E-mail deve ser válido"],
+      cpfCnpjRules: [
+        (v) => !!v || "CPF é obrigatório",
+        (v) => (v && v.length === 11) || "CPF deve ter 11 caracteres",
+      ],
+      emailRules: [
+        (v) => !!v || "E-mail é obrigatório",
+        (v) => /.+@.+/.test(v) || "E-mail deve ser válido",
+      ],
       telefoneRules: [
         (v) => !!v || "Telefone é obrigatório",
-        (v) => (v && v.length >= 8 && v.length <= 15) || "Telefone deve ter entre 8 e 15 caracteres",
+        (v) =>
+          (v && v.length >= 8 && v.length <= 15) ||
+          "Telefone deve ter entre 8 e 15 caracteres",
       ],
       flatIdRules: [(v) => !!v || "Local da Hospedagem é obrigatório"],
     };
   },
   methods: {
-    salvarHospede() {
+    async salvarHospede() {
       if (this.$refs.form.validate()) {
-        api.post("/api/hospedes/registrar", this.hospede)
-          .then(() => {
-            this.closeDialog();
-            this.$emit("hospedeAtualizado");
-            this.fetchHospedes(); // Atualiza a lista de hóspedes após salvar/atualizar
-          })
-          .catch((error) => {
-            console.error("Erro ao processar o hóspede:", error);
-          });
+        try {
+          if (this.editMode) {
+            await api.post(
+              `/api/hospedes/${this.hospede.id}/atualizar`,
+              this.hospede,
+            );
+          } else {
+            await api.post("/api/hospedes/registrar", this.hospede);
+          }
+          this.closeDialog();
+          this.$emit("hospedeAtualizado");
+          this.fetchHospedes(); // Atualiza a lista de hóspedes após salvar/atualizar
+          Swal.fire(
+            "Sucesso!",
+            this.editMode
+              ? "Hóspede atualizado com sucesso!"
+              : "Hóspede cadastrado com sucesso!",
+            "success",
+          );
+        } catch (error) {
+          console.error("Erro ao processar o hóspede:", error);
+          Swal.fire(
+            "Erro!",
+            "Ocorreu um erro ao processar o hóspede. Por favor, tente novamente.",
+            "error",
+          );
+        }
       }
     },
     closeDialog() {
       this.dialog = false;
-      this.resetForm();
+      this.resetHospedeForm();
     },
-    resetForm() {
+    resetHospedeForm() {
       if (this.$refs.form) {
         this.$refs.form.resetValidation();
       }
@@ -131,13 +162,11 @@ export default {
         email: "",
         telefone: "",
         flatId: "",
-        checkStatus: "Check-in",
-        dataCadastro: new Date().toISOString().substr(0, 10),
-        dataCheckIn: new Date().toISOString().substr(0, 10),
-        dataCheckOut: "",
+        dataEntrada: new Date().toISOString().substr(0, 10),
+        dataSaida: "",
       };
     },
-    ...mapActions(["fetchHospedes"]), // Mapeia a action fetchHospedes do Vuex para usar no componente
+    ...mapActions(["fetchHospedes"]),
   },
   watch: {
     hospedeParaEditar(newValue) {
@@ -146,7 +175,7 @@ export default {
         this.editMode = true;
       } else {
         this.editMode = false;
-        this.resetForm();
+        this.resetHospedeForm();
       }
     },
   },

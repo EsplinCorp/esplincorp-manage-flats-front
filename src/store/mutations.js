@@ -27,7 +27,7 @@ export default {
 
   // Atualiza um hóspede existente no estado
   UPDATE_HOSPEDE(state, updatedHospede) {
-    const index = state.hospedes.findIndex(h => h.id === updatedHospede.id);
+    const index = state.hospedes.findIndex((h) => h.id === updatedHospede.id);
     if (index !== -1) {
       state.hospedes.splice(index, 1, updatedHospede);
     }
@@ -35,6 +35,6 @@ export default {
 
   // Remove um hóspede do estado
   DELETE_HOSPEDE(state, hospedeId) {
-    state.hospedes = state.hospedes.filter(h => h.id !== hospedeId);
+    state.hospedes = state.hospedes.filter((h) => h.id !== hospedeId);
   },
 };
