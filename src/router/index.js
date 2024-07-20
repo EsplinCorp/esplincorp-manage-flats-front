@@ -1,14 +1,14 @@
 import Vue from "vue";
 import Router from "vue-router";
 import DashboardView from "@/views/DashboardView.vue";
-import HospedesTable from "@/components/clients/HospedesTable.vue";
-import HospedeManager from "@/views/HospedeManager.vue";
+import HospedesView from "@/views/HospedesView.vue";
 import NotFoundComponents from "@/views/NotFoundComponents.vue";
 import FinancasView from "@/views/FinancasView.vue";
 import PagamentosView from "@/views/PagamentosView.vue";
 import FlatsView from "@/views/FlatsView.vue";
 import ReceitasDespesasView from "@/views/ReceitasDespesasView.vue";
 import BalancoView from "@/views/BalancoView.vue";
+import LembretesView from "@/views/LembretesView.vue";
 import RelatoriosView from "@/views/RelatoriosView.vue";
 import LoginUser from "@/views/LoginUser.vue";
 
@@ -36,14 +36,8 @@ const router = new Router({
     },
     {
       path: "/hospedes",
-      name: "Hospedes",
-      component: HospedesTable,
-      meta: { requiresAuth: true },
-    },
-    {
-      path: "/gerenciar-hospedes",
-      name: "HospedeManager",
-      component: HospedeManager,
+      name: "hospedes",
+      component: HospedesView,
       meta: { requiresAuth: true },
     },
     {
@@ -80,6 +74,12 @@ const router = new Router({
       path: "/relatorios",
       name: "Relatorios",
       component: RelatoriosView,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: "/lembretes",
+      name: "Lembretes",
+      component: LembretesView,
       meta: { requiresAuth: true },
     },
     {

@@ -140,16 +140,6 @@ export default {
       localStorage.removeItem("userInfo");
       this.$router.push("/login");
     },
-    goToHelpSite() {
-      window.open("https://unifeso.gitbook.io/orange-dragon", "_blank");
-    },
-    openFeedbackDialog() {
-      this.dialog = true;
-    },
-    cancelFeedback() {
-      this.dialog = false;
-      this.resetForm();
-    },
     resetForm() {
       this.$refs.form.reset();
     },
@@ -166,7 +156,9 @@ export default {
       }
     },
     navigateTo(route) {
-      this.$router.push(route);
+      if (this.$route.path !== route) {
+        this.$router.push(route);
+      }
     },
     isSelected(route) {
       return this.$route.path === route;

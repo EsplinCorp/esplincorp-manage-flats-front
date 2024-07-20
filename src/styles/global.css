@@ -1,3 +1,7 @@
+.font-weight-normal {
+  font-weight: normal;
+}
+
 .swal2-popup {
   font-family: "Roboto", sans-serif;
 }
@@ -10,10 +14,42 @@
   color: #000000;
 }
 
-.swal2-confirm {
+.swal2-confirm,
+.swal2-cancel {
   color: #ffffff !important;
+  border-radius: 5px;
+}
+
+.swal2-confirm {
+  background-color: var(--primary-color) !important;
 }
 
 .swal2-cancel {
+  background-color: var(--secondary-color) !important;
+}
+
+.action-button {
+  border-radius: 5px;
+  text-transform: none;
+}
+
+.edit-button,
+.delete-button {
+  border-radius: 5px;
   color: #ffffff !important;
+  text-transform: none;
+  margin: 5px;
+}
+
+.edit-button {
+  background-color: var(--primary-color);
+}
+
+.delete-button {
+  background-color: var(--secondary-color);
+}
+
+.edit-icon,
+.delete-icon {
+  color: var(--primary-color) !important;
 }

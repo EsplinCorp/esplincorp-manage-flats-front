@@ -1,287 +1,187 @@
 <template>
-  <v-row justify="center">
-    <v-col cols="12" md="10" lg="12">
-      <v-container>
-        <!-- Espaçamento no topo -->
-        <div class="mt-5"></div>
-
-        <!-- Título Hóspedes com ícone -->
-        <v-row align="center">
-          <v-col cols="12" sm="auto" class="d-flex align-items-center">
-            <v-icon large>mdi-account-group</v-icon>
-            <h2 class="ml-2 mb-0 font-weight-normal">Hóspedes</h2>
-          </v-col>
-        </v-row>
-
-        <!-- Linha horizontal personalizada -->
-        <v-divider class="my-3" :style="{ backgroundColor: '' }"></v-divider>
-
-        <!-- Botão de Novo Hóspede -->
-        <v-btn
-          class="action-button mb-7 mt-5"
-          color=""
-          @click="openNewHospedeDialog"
-        >
-          Novo Hóspede
-        </v-btn>
-        <hospede-manager ref="hospedeManager"></hospede-manager>
-
-        <!-- Campo de Pesquisa -->
-        <v-row justify="center">
-          <v-col cols="12" md="8" class="mb-7">
-            <v-text-field
-              v-model="search"
-              append-icon="mdi-magnify"
-              label="Pesquisar hóspedes"
-              single-line
-              hide-details
-            ></v-text-field>
-          </v-col>
-        </v-row>
-
-        <!-- Tabela de Hóspedes -->
-        <v-data-table
-          :headers="headers"
-          :items="filteredHospedes"
-          :loading="loading"
-          class="elevation-1"
-          mobile-breakpoint="500"
-          dense
-          item-key="id"
-        >
-          <template v-slot:item="{ item }">
-            <tr>
-              <td>
-                <v-tooltip bottom>
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-icon
-                      :color="getStatus(item) ? 'green' : 'grey'"
-                      v-bind="attrs"
-                      v-on="on"
-                      class="d-flex align-center justify-center"
-                    >
-                      {{
-                        getStatus(item)
-                          ? "mdi-account-check"
-                          : "mdi-account-cancel"
-                      }}
-                    </v-icon>
-                  </template>
-                  <span>{{
-                    getStatus(item) ? "Hospedado" : "Não Hospedado"
-                  }}</span>
-                </v-tooltip>
-              </td>
-              <!-- <td>{{ item.id }}</td> -->
-              <td>{{ item.nome }}</td>
-              <td class="d-none d-md-table-cell">{{ item.cpf }}</td>
-              <td class="d-none d-md-table-cell">{{ item.email }}</td>
-              <td class="d-none d-md-table-cell">{{ item.telefone }}</td>
-              <td class="d-none d-md-table-cell">{{ item.flatId }}</td>
-              <td>{{ item.dataEntrada | formatDate }}</td>
-              <td>{{ item.dataSaida | formatDate }}</td>
-              <td>
-                <v-tooltip bottom>
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-btn
-                      icon
-                      v-bind="attrs"
-                      v-on="on"
-                      @click="editarHospede(item)"
-                    >
-                      <v-icon>mdi-pencil-outline</v-icon>
-                    </v-btn>
-                  </template>
-                  <span>Editar Hóspede</span>
-                </v-tooltip>
-
-                <v-tooltip bottom>
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-btn
-                      icon
-                      v-bind="attrs"
-                      v-on="on"
-                      @click="confirmDeleteHospede(item)"
-                    >
-                      <v-icon>mdi-delete-outline</v-icon>
-                    </v-btn>
-                  </template>
-                  <span>Excluir Hóspede</span>
-                </v-tooltip>
-              </td>
-            </tr>
-          </template>
-        </v-data-table>
-      </v-container>
-    </v-col>
-  </v-row>
+  <v-dialog v-model="dialog" persistent max-width="600px">
+    <v-card>
+      <v-card-title class="text-h5">
+        <div class="flex-grow-1">
+          {{ editMode ? "Editar Hóspede" : "Novo Hóspede" }}
+        </div>
+        <v-btn icon @click="closeDialog"><v-icon>mdi-close</v-icon></v-btn>
+      </v-card-title>
+      <v-card-text>
+        <v-form ref="form" v-model="valid" lazy-validation>
+          <v-text-field
+            v-model="hospede.nome"
+            :rules="nameRules"
+            label="Nome"
+            required
+          ></v-text-field>
+          <v-text-field
+            v-model="hospede.cpf"
+            :rules="cpfCnpjRules"
+            label="CPF/CNPJ"
+            required
+          ></v-text-field>
+          <v-text-field
+            v-model="hospede.email"
+            :rules="emailRules"
+            label="Email"
+            required
+          ></v-text-field>
+          <v-text-field
+            v-model="hospede.telefone"
+            :rules="telefoneRules"
+            label="Telefone"
+            required
+          ></v-text-field>
+          <v-select
+            v-model="hospede.flatId"
+            :items="locaisHospedagem"
+            :rules="flatIdRules"
+            label="Local de Hospedagem"
+            required
+          ></v-select>
+          <v-text-field
+            v-model="hospede.dataEntrada"
+            label="Data de Check-in"
+            type="date"
+            required
+          ></v-text-field>
+          <v-text-field
+            v-model="hospede.dataSaida"
+            label="Data de Check-out"
+            type="date"
+            required
+          ></v-text-field>
+        </v-form>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn class="edit-button" text @click="salvarHospede">{{
+          editMode ? "Atualizar" : "Gravar"
+        }}</v-btn>
+        <v-btn class="delete-button" text @click="closeDialog">Cancelar</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script>
-import { mapActions, mapState } from "vuex";
-import HospedeManager from "@/views/HospedeManager.vue";
+import api from "@/services/api/api.js";
+import { mapActions } from "vuex";
 import Swal from "sweetalert2";
 
 export default {
-  components: {
-    HospedeManager,
+  props: {
+    hospedeParaEditar: Object,
   },
   data() {
     return {
-      search: "",
-      selectedHospede: null,
-      loading: false,
-      headers: [
-        { text: "Status", value: "status", sortable: false },
-        { text: "Nome", value: "nome" },
-        { text: "CPF/CNPJ", value: "cpf" },
-        { text: "Email", value: "email" },
-        { text: "Telefone", value: "telefone" },
-        { text: "Local", value: "localHospedagem" },
-        { text: "Check-in", value: "dataEntrada" },
-        { text: "Check-out", value: "dataSaida" },
-        { text: "Ações", value: "actions" },
+      dialog: false,
+      valid: false,
+      editMode: false,
+      locaisHospedagem: ["Ipanema", "Leblon", "Casa Cubo"],
+      hospede: this.getDefaultHospede(),
+      nameRules: [
+        (v) => !!v || "Nome é obrigatório",
+        (v) => (v && v.length >= 3) || "Nome deve ter mais de 2 caracteres",
+        (v) => (v && v.length <= 50) || "Nome deve ter menos de 50 caracteres",
       ],
+      cpfCnpjRules: [
+        (v) => !!v || "CPF é obrigatório",
+        (v) => (v && v.length === 11) || "CPF deve ter 11 caracteres",
+      ],
+      emailRules: [(v) => !v || /.+@.+/.test(v) || "E-mail deve ser válido"],
+      telefoneRules: [
+        (v) => !!v || "Telefone é obrigatório",
+        (v) =>
+          (v && v.length >= 8 && v.length <= 15) ||
+          "Telefone deve ter entre 8 e 15 caracteres",
+      ],
+      flatIdRules: [(v) => !!v || "Local da Hospedagem é obrigatório"],
     };
   },
-  computed: {
-    ...mapState(["hospedes"]),
-    filteredHospedes() {
-      if (this.search) {
-        return this.hospedes.filter((hospede) =>
-          Object.values(hospede).some((value) =>
-            String(value).toLowerCase().includes(this.search.toLowerCase()),
-          ),
-        );
-      }
-      return this.hospedes;
-    },
-  },
   methods: {
-    ...mapActions([
-      "fetchHospedes",
-      "deleteHospede",
-      "createHospede",
-      "updateHospede",
-    ]),
-    getStatus(item) {
-      const today = new Date().toISOString().substr(0, 10);
-      return item.dataEntrada <= today && item.dataSaida >= today;
-    },
-    openNewHospedeDialog() {
-      this.$refs.hospedeManager.openDialog();
-    },
-    editarHospede(hospede) {
-      this.$refs.hospedeManager.openDialog(true);
-      this.$nextTick(() => {
-        this.$refs.hospedeManager.hospede = { ...hospede };
-      });
-    },
-    confirmDeleteHospede(hospede) {
-      Swal.fire({
-        title: "Tem certeza?",
-        text: `Deseja excluir o hóspede ${hospede.nome}?`,
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Sim, excluir",
-        cancelButtonText: "Cancelar",
-      }).then((result) => {
-        if (result.isConfirmed) {
-          this.deletarHospede(hospede);
-        }
-      });
-    },
-    deletarHospede(hospede) {
-      this.loading = true;
-      this.deleteHospede(hospede.id)
-        .then(() => {
-          Swal.fire(
-            "Excluído!",
-            "O hóspede foi excluído com sucesso.",
-            "success",
-          );
-          this.fetchHospedes();
-        })
-        .catch((error) => {
-          console.error("Erro ao excluir o hóspede:", error);
-          if (error.response && error.response.status === 401) {
-            this.$router.push("/login");
-            Swal.fire(
-              "Sessão expirada",
-              "Por favor, faça login novamente.",
-              "error",
+    async salvarHospede() {
+      if (this.$refs.form.validate()) {
+        try {
+          if (this.editMode) {
+            await api.post(
+              `/api/hospedes/${this.hospede.id}/atualizar`,
+              this.hospede,
             );
           } else {
-            Swal.fire(
-              "Erro",
-              "Erro ao excluir o hóspede. Por favor, tente novamente.",
-              "error",
-            );
+            await api.post("/api/hospedes/registrar", this.hospede);
           }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
+          this.closeDialog();
+          this.$emit("hospedeAtualizado");
+          this.fetchHospedes(); // Atualiza a lista de hóspedes após salvar/atualizar
+          Swal.fire(
+            "Sucesso!",
+            this.editMode
+              ? "Hóspede atualizado com sucesso!"
+              : "Hóspede cadastrado com sucesso!",
+            "success",
+          );
+        } catch (error) {
+          console.error("Erro ao processar o hóspede:", error);
+          Swal.fire(
+            "Erro!",
+            "Ocorreu um erro ao processar o hóspede. Por favor, tente novamente.",
+            "error",
+          );
+        }
+      }
     },
-    showSuccessMessage(message) {
-      Swal.fire({
-        icon: "success",
-        title: "Sucesso",
-        text: message,
-        timer: 3000,
-        showConfirmButton: false,
-      });
+    closeDialog() {
+      this.dialog = false;
+      this.resetHospedeForm();
     },
-    showEditSuccessMessage() {
-      this.showSuccessMessage("Hóspede editado com sucesso!");
+    resetHospedeForm() {
+      if (this.$refs.form) {
+        this.$refs.form.resetValidation();
+      }
+      this.hospede = this.getDefaultHospede();
+      this.valid = false;
     },
-    showCreateSuccessMessage() {
-      this.showSuccessMessage("Hóspede cadastrado com sucesso!");
+    openDialog(edit = false) {
+      this.editMode = edit;
+      this.dialog = true;
+      if (edit && this.hospedeParaEditar) {
+        this.hospede = { ...this.hospedeParaEditar };
+      } else {
+        this.hospede = this.getDefaultHospede();
+      }
     },
-    createHospede(hospedeData) {
-      this.loading = true;
-      this.createHospede(hospedeData)
-        .then(() => {
-          this.showCreateSuccessMessage();
-          this.fetchHospedes();
-        })
-        .catch((error) => {
-          console.error("Erro ao cadastrar hóspede:", error);
-          // lógica para tratar erros
-        })
-        .finally(() => {
-          this.loading = false;
-        });
+    getDefaultHospede() {
+      return {
+        nome: "",
+        cpf: "",
+        email: "",
+        telefone: "",
+        flatId: "",
+        dataEntrada: new Date().toISOString().substr(0, 10),
+        dataSaida: "",
+      };
     },
-    updateHospede(hospedeData) {
-      this.loading = true;
-      this.updateHospede(hospedeData)
-        .then(() => {
-          this.showEditSuccessMessage();
-          this.fetchHospedes();
-        })
-        .catch((error) => {
-          console.error("Erro ao editar hóspede:", error);
-          // lógica para tratar erros
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
+    ...mapActions(["fetchHospedes"]),
   },
-  filters: {
-    formatDate(value) {
-      if (value) {
-        const date = new Date(value);
-        date.setDate(date.getDate() + 1); // Adiciona 1 dia à data
-        return new Intl.DateTimeFormat("pt-BR").format(date);
+  watch: {
+    hospedeParaEditar(newValue) {
+      if (newValue) {
+        this.hospede = { ...newValue };
+        this.editMode = true;
+      } else {
+        this.editMode = false;
+        this.resetHospedeForm();
       }
     },
   },
   created() {
     this.fetchHospedes();
+    if (this.hospedeParaEditar) {
+      this.hospede = { ...this.hospedeParaEditar };
+      this.editMode = true;
+    }
   },
 };
 </script>
