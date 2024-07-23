@@ -31,7 +31,9 @@
             <p>Disponíveis: {{ flat.quantidadeFlatsDisponiveis }}</p>
           </v-card-text>
           <v-card-actions>
-            <v-btn @click="checkAvailability(flat.id)" color="primary">Ver Disponibilidade</v-btn>
+            <v-btn @click="checkAvailability(flat.id)" color="#474747">Ver Disponibilidade</v-btn>
+            <v-btn @click="openEditFlatDialog(flat)" color="#474747">Editar</v-btn>
+            <v-btn @click="confirmDeleteFlat(flat.id)" color="#474747">Excluir</v-btn>
           </v-card-actions>
         </v-card>
       </v-col>
@@ -98,8 +100,13 @@
       </v-card>
     </v-dialog>
 
-    <!-- Componente de diálogo para adicionar novo flat -->
-    <new-flat-dialog @flatAdded="fetchFlats" ref="newFlatDialog" />
+    <!-- Componente de diálogo para adicionar/editar flat -->
+    <new-flat-dialog
+      @flatSaved="fetchFlats"
+      :flatData="selectedFlat"
+      :isEditing="isEditing"
+      ref="newFlatDialog"
+    />
   </v-container>
 </template>
 
@@ -124,7 +131,9 @@ export default {
       months: [
         'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
         'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-      ]
+      ],
+      selectedFlat: null,
+      isEditing: false
     };
   },
   created() {
@@ -132,7 +141,30 @@ export default {
   },
   methods: {
     openNewFlatDialog() {
+      this.isEditing = false;
+      this.selectedFlat = null;
       this.$refs.newFlatDialog.openDialog();
+    },
+    openEditFlatDialog(flat) {
+      this.isEditing = true;
+      this.selectedFlat = { ...flat };
+      this.$refs.newFlatDialog.openDialog();
+    },
+    confirmDeleteFlat(flatId) {
+      if (confirm('Tem certeza que deseja excluir este flat?')) {
+        axios
+          .delete(`http://localhost:8080/api/flats/${flatId}`, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+            },
+          })
+          .then(() => {
+            this.fetchFlats();
+          })
+          .catch(error => {
+            console.error("Erro ao excluir flat:", error);
+          });
+      }
     },
     fetchFlats() {
       axios
