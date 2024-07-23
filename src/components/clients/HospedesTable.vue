@@ -35,7 +35,9 @@
           ></v-text-field>
           <v-select
             v-model="hospede.flatId"
-            :items="locaisHospedagem"
+            :items="flats"
+            item-value="id"
+            item-text="nome"
             :rules="flatIdRules"
             label="Local de Hospedagem"
             required
@@ -66,7 +68,7 @@
 </template>
 
 <script>
-import api from "@/services/api/api.js";
+import axios from "axios";
 import { mapActions } from "vuex";
 import Swal from "sweetalert2";
 
@@ -79,7 +81,7 @@ export default {
       dialog: false,
       valid: false,
       editMode: false,
-      locaisHospedagem: ["Ipanema", "Leblon", "Casa Cubo"],
+      flats: [], // Lista de flats
       hospede: this.getDefaultHospede(),
       nameRules: [
         (v) => !!v || "Nome é obrigatório",
@@ -105,12 +107,12 @@ export default {
       if (this.$refs.form.validate()) {
         try {
           if (this.editMode) {
-            await api.post(
+            await axios.post(
               `/api/hospedes/${this.hospede.id}/atualizar`,
-              this.hospede,
+              this.hospede
             );
           } else {
-            await api.post("/api/hospedes/registrar", this.hospede);
+            await axios.post("/api/hospedes/registrar", this.hospede);
           }
           this.closeDialog();
           this.$emit("hospedeAtualizado");
@@ -120,14 +122,14 @@ export default {
             this.editMode
               ? "Hóspede atualizado com sucesso!"
               : "Hóspede cadastrado com sucesso!",
-            "success",
+            "success"
           );
         } catch (error) {
           console.error("Erro ao processar o hóspede:", error);
           Swal.fire(
             "Erro!",
             "Ocorreu um erro ao processar o hóspede. Por favor, tente novamente.",
-            "error",
+            "error"
           );
         }
       }
@@ -163,6 +165,18 @@ export default {
         dataSaida: "",
       };
     },
+    async fetchFlats() {
+      try {
+        const response = await axios.get("http://localhost:8080/api/flats/listar", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`
+          }
+        });
+        this.flats = response.data;
+      } catch (error) {
+        console.error("Erro ao buscar flats:", error);
+      }
+    },
     ...mapActions(["fetchHospedes"]),
   },
   watch: {
@@ -178,6 +192,7 @@ export default {
   },
   created() {
     this.fetchHospedes();
+    this.fetchFlats(); // Busca a lista de flats
     if (this.hospedeParaEditar) {
       this.hospede = { ...this.hospedeParaEditar };
       this.editMode = true;
