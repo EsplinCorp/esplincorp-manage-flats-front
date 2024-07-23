@@ -103,17 +103,33 @@ export default {
     };
   },
   methods: {
-    async salvarHospede() {
-      if (this.$refs.form.validate()) {
-        try {
-          if (this.editMode) {
-            await axios.post(
-              `/api/hospedes/${this.hospede.id}/atualizar`,
-              this.hospede
-            );
-          } else {
-            await axios.post("/api/hospedes/registrar", this.hospede);
-          }
+  formatDateToBrazilian(dateString) {
+    const [year, month, day] = dateString.split('-');
+    return `${day}/${month}/${year}`;
+  },
+  async salvarHospede() {
+    if (this.$refs.form.validate()) {
+      try {
+        // Formatar as datas para o formato esperado pelo backend
+        this.hospede.dataEntrada = this.formatDateToBrazilian(this.hospede.dataEntrada);
+        this.hospede.dataSaida = this.formatDateToBrazilian(this.hospede.dataSaida);
+
+        if (this.editMode) {
+          await axios.post(
+            `/api/hospedes/${this.hospede.id}/atualizar`,
+            this.hospede,
+          );
+        } else {
+          await axios.post(
+            "http://localhost:8080/api/hospedes/registrar",
+            this.hospede,
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+              },
+            },
+          );
+        }
           this.closeDialog();
           this.$emit("hospedeAtualizado");
           this.fetchHospedes(); // Atualiza a lista de hóspedes após salvar/atualizar
@@ -122,14 +138,14 @@ export default {
             this.editMode
               ? "Hóspede atualizado com sucesso!"
               : "Hóspede cadastrado com sucesso!",
-            "success"
+            "success",
           );
         } catch (error) {
           console.error("Erro ao processar o hóspede:", error);
           Swal.fire(
             "Erro!",
             "Ocorreu um erro ao processar o hóspede. Por favor, tente novamente.",
-            "error"
+            "error",
           );
         }
       }
@@ -167,11 +183,14 @@ export default {
     },
     async fetchFlats() {
       try {
-        const response = await axios.get("http://localhost:8080/api/flats/listar", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("userToken")}`
-          }
-        });
+        const response = await axios.get(
+          "http://localhost:8080/api/flats/listar",
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+            },
+          },
+        );
         this.flats = response.data;
       } catch (error) {
         console.error("Erro ao buscar flats:", error);
