@@ -8,7 +8,7 @@
         <h2 class="ml-3 mt-3 font-weight-normal">Flats</h2>
       </v-col>
     </v-row>
-    <v-divider class="my-3" :style="{ backgroundColor: 'tertiary' }"></v-divider>
+    <v-divider class="my-3"></v-divider>
 
     <v-btn
       class="action-button mb-7 mt-5"
@@ -48,6 +48,39 @@
           </v-btn>
         </v-card-title>
         <v-card-text>
+          <div class="calendar-header">
+            <v-btn icon @click="prevMonth">
+              <v-icon>mdi-chevron-left</v-icon>
+            </v-btn>
+            <v-menu
+              v-model="monthMenu"
+              :close-on-content-click="false"
+              :nudge-bottom="10"
+              transition="scale-transition"
+              offset-y
+              min-width="auto"
+            >
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn v-bind="attrs" v-on="on" class="calendar-month-selector">
+                  {{ formatDate(currentMonth, 'MMMM yyyy') }}
+                  <v-icon right>mdi-chevron-down</v-icon>
+                </v-btn>
+              </template>
+              <v-list>
+                <v-list-item
+                  v-for="(month, index) in months"
+                  :key="index"
+                  @click="selectMonth(index)"
+                >
+                  <v-list-item-title>{{ month }}</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-menu>
+            
+            <v-btn icon @click="nextMonth">
+              <v-icon>mdi-chevron-right</v-icon>
+            </v-btn>
+          </div>
           <v-calendar
             ref="calendar"
             v-model="currentMonth"
@@ -59,15 +92,8 @@
             :weekdays="[0, 1, 2, 3, 4, 5, 6]"
             :type="type"
             @click:date="onClickDate"
+            class="calendar"
           ></v-calendar>
-          <v-row justify="center" class="mt-2">
-            <v-btn icon @click="prevMonth">
-              <v-icon>mdi-chevron-left</v-icon>
-            </v-btn>
-            <v-btn icon @click="nextMonth">
-              <v-icon>mdi-chevron-right</v-icon>
-            </v-btn>
-          </v-row>
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -79,7 +105,8 @@
 
 <script>
 import axios from "axios";
-import { addMonths, subMonths } from "date-fns";
+import { addMonths, subMonths, format, setMonth, startOfMonth } from "date-fns";
+import { ptBR } from 'date-fns/locale';
 import NewFlatDialog from '@/components/clients/NewFlatDialog.vue';
 
 export default {
@@ -93,6 +120,11 @@ export default {
       events: [],
       type: 'month',
       currentMonth: new Date(),
+      monthMenu: false,
+      months: [
+        'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+        'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+      ]
     };
   },
   created() {
@@ -149,6 +181,14 @@ export default {
     },
     onClickDate(date) {
       console.log("Date clicked:", date);
+    },
+    formatDate(date, formatString) {
+      return format(date, formatString, { locale: ptBR });
+    },
+    selectMonth(index) {
+      const newDate = setMonth(this.currentMonth, index);
+      this.currentMonth = startOfMonth(newDate);
+      this.monthMenu = false;
     }
   }
 };
@@ -157,5 +197,36 @@ export default {
 <style scoped>
 .font-weight-normal {
   font-weight: normal;
+}
+
+.calendar {
+  margin: 0 auto;
+}
+
+.v-calendar__day--event {
+  border-radius: 50%;
+  border: 2px solid red;
+}
+
+.v-btn {
+  margin: 0 4px;
+}
+
+.calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.calendar-header span {
+  margin: 0 16px;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.calendar-month-selector {
+  display: flex;
+  align-items: center;
 }
 </style>
