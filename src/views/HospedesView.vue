@@ -81,7 +81,7 @@
               <td class="d-none d-md-table-cell">{{ item.cpf }}</td>
               <td class="d-none d-md-table-cell">{{ item.email }}</td>
               <td class="d-none d-md-table-cell">{{ item.telefone }}</td>
-              <td class="d-none d-md-table-cell">{{ item.flatId }}</td>
+              <td class="d-none d-md-table-cell">{{ item.flatName }}</td>
               <td>{{ item.dataEntrada | formatDate }}</td>
               <td>{{ item.dataSaida | formatDate }}</td>
               <td>
@@ -169,6 +169,7 @@ export default {
       "deleteHospede",
       "createHospede",
       "updateHospede",
+      "fetchFlats", // map the fetchFlats action
     ]),
     getStatus(item) {
       const today = new Date().toISOString().substr(0, 10);
@@ -277,19 +278,20 @@ export default {
         });
     },
   },
-  filters: {
-    formatDate(value) {
-      if (value) {
-        const date = new Date(value);
-        date.setDate(date.getDate() + 1); // Adiciona 1 dia à data
-        return new Intl.DateTimeFormat("pt-BR").format(date);
-      }
-    },
-  },
-  created() {
-    this.fetchHospedes();
+  mounted() {
+    this.loading = true;
+    this.fetchHospedes()
+      .then(() => this.fetchFlats()) 
+      .catch((error) => {
+        console.error("Erro ao buscar hóspedes:", error);
+      })
+      .finally(() => {
+        this.loading = false;
+      });
   },
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+
+</style>

@@ -103,6 +103,42 @@ export default {
     };
   },
   methods: {
+    async fetchFlats() {
+    try {
+      const response = await axios.get(
+        "http://localhost:8080/api/flats/listar",
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+        },
+      );
+      this.flats = response.data;
+    } catch (error) {
+      console.error("Erro ao buscar flats:", error);
+    }
+  },
+  async fetchHospedes() {
+    try {
+      const response = await axios.get(
+        "http://localhost:8080/api/hospedes/listar",
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+        },
+      );
+      this.hospedes = response.data.map(hospede => {
+        const flat = this.flats.find(flat => flat.id === hospede.flatId);
+        return {
+          ...hospede,
+          flatName: flat ? flat.nome : 'N/A'
+        };
+      });
+    } catch (error) {
+      console.error("Erro ao buscar hóspedes:", error);
+    }
+  },
   formatDateToBrazilian(dateString) {
     const [year, month, day] = dateString.split('-');
     return `${day}/${month}/${year}`;
@@ -177,25 +213,12 @@ export default {
         email: "",
         telefone: "",
         flatId: "",
+        FlatName:"",
         dataEntrada: new Date().toISOString().substr(0, 10),
         dataSaida: "",
       };
     },
-    async fetchFlats() {
-      try {
-        const response = await axios.get(
-          "http://localhost:8080/api/flats/listar",
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-            },
-          },
-        );
-        this.flats = response.data;
-      } catch (error) {
-        console.error("Erro ao buscar flats:", error);
-      }
-    },
+    
     ...mapActions(["fetchHospedes"]),
   },
   watch: {
