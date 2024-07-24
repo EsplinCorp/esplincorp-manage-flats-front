@@ -45,33 +45,35 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn @click="closeDialog" color="blue darken-1" text>Cancelar</v-btn>
-        <v-btn @click="saveFlat" color="blue darken-1">{{ isEditing ? 'Atualizar' : 'Salvar' }}</v-btn>
+        <v-btn @click="saveFlat" class="edit-button">{{
+          isEditing ? "Atualizar" : "Gravar"
+        }}</v-btn>
+        <v-btn @click="closeDialog" class="delete-button" text>Cancelar</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
 <script>
-import axios from 'axios';
-import Swal from 'sweetalert2';
+import axios from "axios";
+import Swal from "sweetalert2";
 
 export default {
   props: {
     flatData: {
       type: Object,
       default: () => ({
-        nome: '',
-        local: '',
-        endereco: '',
+        nome: "",
+        local: "",
+        endereco: "",
         quantidadeHospedesSuportados: 0,
-        quantidadeFlatsDisponiveis: 0
-      })
+        quantidadeFlatsDisponiveis: 0,
+      }),
     },
     isEditing: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   data() {
     return {
@@ -81,25 +83,22 @@ export default {
       isEditingLocal: this.isEditing,
       rules: {
         nome: [
-          v => !!v || 'Nome é obrigatório',
-          v => (v && v.length >= 3) || 'Nome deve ter mais de 2 caracteres',
-          v => (v && v.length <= 50) || 'Nome deve ter menos de 50 caracteres'
+          (v) => !!v || "Nome é obrigatório",
+          (v) => (v && v.length >= 3) || "Nome deve ter mais de 2 caracteres",
+          (v) =>
+            (v && v.length <= 50) || "Nome deve ter menos de 50 caracteres",
         ],
-        local: [
-          v => !!v || 'Localização é obrigatória'
-        ],
-        endereco: [
-          v => !!v || 'Endereço é obrigatório'
-        ],
+        local: [(v) => !!v || "Localização é obrigatória"],
+        endereco: [(v) => !!v || "Endereço é obrigatório"],
         quantidadeHospedesSuportados: [
-          v => !!v || 'Capacidade é obrigatória',
-          v => !isNaN(v) || 'Deve ser um número'
+          (v) => !!v || "Capacidade é obrigatória",
+          (v) => !isNaN(v) || "Deve ser um número",
         ],
         quantidadeFlatsDisponiveis: [
-          v => !!v || 'Flats Disponíveis é obrigatório',
-          v => !isNaN(v) || 'Deve ser um número'
-        ]
-      }
+          (v) => !!v || "Flats Disponíveis é obrigatório",
+          (v) => !isNaN(v) || "Deve ser um número",
+        ],
+      },
     };
   },
   methods: {
@@ -114,37 +113,39 @@ export default {
       if (this.$refs.form.validate()) {
         const url = this.isEditingLocal
           ? `http://localhost:8080/api/flats/${this.flat.id}/atualizar`
-          : 'http://localhost:8080/api/flats/registrar';
-        const method = this.isEditingLocal ? 'put' : 'post';
+          : "http://localhost:8080/api/flats/registrar";
+        const method = this.isEditingLocal ? "put" : "post";
 
         axios[method](url, this.flat, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('userToken')}`
-          }
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
         })
-        .then(response => {
-          this.$emit('flatSaved', response.data);
-          this.closeDialog();
-          Swal.fire(
-            'Sucesso!',
-            this.isEditingLocal ? 'Flat atualizado com sucesso!' : 'Flat cadastrado com sucesso!',
-            'success'
-          );
-        })
-        .catch(error => {
-          console.error('Erro ao salvar flat:', error);
-          Swal.fire(
-            'Erro!',
-            'Ocorreu um erro ao salvar o flat. Por favor, tente novamente.',
-            'error'
-          );
-        });
+          .then((response) => {
+            this.$emit("flatSaved", response.data);
+            this.closeDialog();
+            Swal.fire(
+              "Sucesso!",
+              this.isEditingLocal
+                ? "Flat atualizado com sucesso!"
+                : "Flat cadastrado com sucesso!",
+              "success",
+            );
+          })
+          .catch((error) => {
+            console.error("Erro ao salvar flat:", error);
+            Swal.fire(
+              "Erro!",
+              "Ocorreu um erro ao salvar o flat. Por favor, tente novamente.",
+              "error",
+            );
+          });
       }
     },
     resetForm() {
       this.flat = { ...this.flatData };
       this.$refs.form.resetValidation();
-    }
+    },
   },
   watch: {
     flatData(newValue) {
@@ -155,13 +156,13 @@ export default {
         this.isEditingLocal = false;
         this.resetForm();
       }
-    }
+    },
   },
   created() {
     if (this.flatData) {
       this.flat = { ...this.flatData };
       this.isEditingLocal = true;
     }
-  }
+  },
 };
 </script>

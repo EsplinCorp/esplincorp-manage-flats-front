@@ -189,8 +189,8 @@ export default {
         text: `Deseja excluir o hóspede ${hospede.nome}?`,
         icon: "warning",
         showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
+        confirmButtonColor: "#primary",
+        cancelButtonColor: "#secondary",
         confirmButtonText: "Sim, excluir",
         cancelButtonText: "Cancelar",
       }).then((result) => {

@@ -4,8 +4,8 @@
 
     <v-row align="center">
       <v-col cols="12" sm="auto" class="d-flex align-items-center">
-        <v-icon class="mt-2" size="35">mdi-home-city</v-icon>
-        <h2 class="ml-3 mt-3 font-weight-normal">Flats</h2>
+        <v-icon color="primary" class="mt-2" size="35">mdi-home-city</v-icon>
+        <h2 class="ml-3 mt-3 font-weight-normal primary--text">Flats</h2>
       </v-col>
     </v-row>
     <v-divider class="my-3"></v-divider>
@@ -22,18 +22,67 @@
 
     <v-row>
       <v-col v-for="flat in flats" :key="flat.id" cols="12" md="4">
-        <v-card>
-          <v-card-title>{{ flat.nome }}</v-card-title>
-          <v-card-subtitle>{{ flat.local }}</v-card-subtitle>
+        <v-card class="mb-4">
+          <v-card-title class="text-h6">{{ flat.nome }}</v-card-title>
+          <v-card-subtitle class="font-weight-bold text-subtitle-1 mb-2">{{
+            flat.local
+          }}</v-card-subtitle>
           <v-card-text>
-            <p>Endereço: {{ flat.endereco }}</p>
-            <p>Capacidade: {{ flat.quantidadeHospedesSuportados }} hóspedes</p>
-            <p>Disponíveis: {{ flat.quantidadeFlatsDisponiveis }}</p>
+            <v-list dense>
+              <v-list-item>
+                <v-list-item-icon>
+                  <v-icon>mdi-map-marker</v-icon>
+                </v-list-item-icon>
+                <v-list-item-content>
+                  <v-list-item-title class="font-weight-bold"
+                    >Endereço</v-list-item-title
+                  >
+                  <v-list-item-subtitle>{{
+                    flat.endereco
+                  }}</v-list-item-subtitle>
+                </v-list-item-content>
+              </v-list-item>
+              <v-list-item>
+                <v-list-item-icon>
+                  <v-icon>mdi-account-group</v-icon>
+                </v-list-item-icon>
+                <v-list-item-content>
+                  <v-list-item-title class="font-weight-bold"
+                    >Capacidade</v-list-item-title
+                  >
+                  <v-list-item-subtitle
+                    >{{
+                      flat.quantidadeHospedesSuportados
+                    }}
+                    hóspedes</v-list-item-subtitle
+                  >
+                </v-list-item-content>
+              </v-list-item>
+              <v-list-item>
+                <v-list-item-icon>
+                  <v-icon>mdi-home-group</v-icon>
+                </v-list-item-icon>
+                <v-list-item-content>
+                  <v-list-item-title class="font-weight-bold"
+                    >Disponíveis</v-list-item-title
+                  >
+                  <v-list-item-subtitle>{{
+                    flat.quantidadeFlatsDisponiveis
+                  }}</v-list-item-subtitle>
+                </v-list-item-content>
+              </v-list-item>
+            </v-list>
           </v-card-text>
           <v-card-actions>
-            <v-btn @click="checkAvailability(flat.id)" color="#474747">Ver Disponibilidade</v-btn>
-            <v-btn @click="openEditFlatDialog(flat)" color="#474747">Editar</v-btn>
-            <v-btn @click="confirmDeleteFlat(flat.id)" color="#474747">Excluir</v-btn>
+            <v-btn @click="checkAvailability(flat.id)" class="edit-button" text
+              >Ver Disponibilidade</v-btn
+            >
+            <v-btn @click="openEditFlatDialog(flat)" class="edit-button" text
+              >Editar</v-btn
+            >
+            <v-btn @click="confirmDeleteFlat(flat)" class="delete-button" text
+              >Excluir</v-btn
+            >
           </v-card-actions>
         </v-card>
       </v-col>
@@ -42,7 +91,7 @@
     <!-- Modal de Disponibilidade -->
     <v-dialog v-model="availabilityDialog" max-width="600px">
       <v-card>
-        <v-card-title>
+        <v-card-title class="action-button mb-7 mt-5">
           Disponibilidade do Flat
           <v-spacer></v-spacer>
           <v-btn icon @click="availabilityDialog = false">
@@ -64,7 +113,7 @@
             >
               <template v-slot:activator="{ on, attrs }">
                 <v-btn v-bind="attrs" v-on="on" class="calendar-month-selector">
-                  {{ formatDate(currentMonth, 'MMMM yyyy') }}
+                  {{ formatDate(currentMonth, "MMMM yyyy") }}
                   <v-icon right>mdi-chevron-down</v-icon>
                 </v-btn>
               </template>
@@ -78,7 +127,7 @@
                 </v-list-item>
               </v-list>
             </v-menu>
-            
+
             <v-btn icon @click="nextMonth">
               <v-icon>mdi-chevron-right</v-icon>
             </v-btn>
@@ -112,28 +161,39 @@
 
 <script>
 import axios from "axios";
+import Swal from "sweetalert2";
 import { addMonths, subMonths, format, setMonth, startOfMonth } from "date-fns";
-import { ptBR } from 'date-fns/locale';
-import NewFlatDialog from '@/components/clients/NewFlatDialog.vue';
+import { ptBR } from "date-fns/locale";
+import NewFlatDialog from "@/components/clients/NewFlatDialog.vue";
 
 export default {
   components: {
-    NewFlatDialog
+    NewFlatDialog,
   },
   data() {
     return {
       flats: [],
       availabilityDialog: false,
       events: [],
-      type: 'month',
+      type: "month",
       currentMonth: new Date(),
       monthMenu: false,
       months: [
-        'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-        'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+        "Janeiro",
+        "Fevereiro",
+        "Março",
+        "Abril",
+        "Maio",
+        "Junho",
+        "Julho",
+        "Agosto",
+        "Setembro",
+        "Outubro",
+        "Novembro",
+        "Dezembro",
       ],
       selectedFlat: null,
-      isEditing: false
+      isEditing: false,
     };
   },
   created() {
@@ -150,21 +210,38 @@ export default {
       this.selectedFlat = { ...flat };
       this.$refs.newFlatDialog.openDialog();
     },
-    confirmDeleteFlat(flatId) {
-      if (confirm('Tem certeza que deseja excluir este flat?')) {
-        axios
-          .delete(`http://localhost:8080/api/flats/${flatId}`, {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-            },
-          })
-          .then(() => {
-            this.fetchFlats();
-          })
-          .catch(error => {
-            console.error("Erro ao excluir flat:", error);
-          });
-      }
+    confirmDeleteFlat(flat) {
+      Swal.fire({
+        title: "Tem certeza?",
+        text: `Deseja excluir o flat ${flat.nome}?`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#primary",
+        cancelButtonColor: "#secondary",
+        confirmButtonText: "Sim, excluir",
+        cancelButtonText: "Cancelar",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          axios
+            .delete(`http://localhost:8080/api/flats/${flat.id}`, {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+              },
+            })
+            .then(() => {
+              Swal.fire(
+                "Excluído!",
+                "O flat foi excluído com sucesso.",
+                "success",
+              );
+              this.fetchFlats();
+            })
+            .catch((error) => {
+              console.error("Erro ao excluir flat:", error);
+              Swal.fire("Erro!", "Não foi possível deletar o flat.", "error");
+            });
+        }
+      });
     },
     fetchFlats() {
       axios
@@ -173,10 +250,10 @@ export default {
             Authorization: `Bearer ${localStorage.getItem("userToken")}`,
           },
         })
-        .then(response => {
+        .then((response) => {
           this.flats = response.data;
         })
-        .catch(error => {
+        .catch((error) => {
           console.error("Erro ao buscar flats:", error);
         });
     },
@@ -187,21 +264,21 @@ export default {
             Authorization: `Bearer ${localStorage.getItem("userToken")}`,
           },
         })
-        .then(response => {
+        .then((response) => {
           const hospedes = response.data;
           const reservedDates = hospedes
-            .filter(hospede => hospede.flatId === flatId)
-            .map(hospede => ({
+            .filter((hospede) => hospede.flatId === flatId)
+            .map((hospede) => ({
               name: `Reservado para ${hospede.nome}`,
               start: new Date(hospede.dataEntrada),
               end: new Date(hospede.dataSaida),
-              color: 'red',
+              color: "red",
             }));
 
           this.events = reservedDates;
           this.availabilityDialog = true;
         })
-        .catch(error => {
+        .catch((error) => {
           console.error("Erro ao buscar hóspedes:", error);
         });
     },
@@ -221,14 +298,31 @@ export default {
       const newDate = setMonth(this.currentMonth, index);
       this.currentMonth = startOfMonth(newDate);
       this.monthMenu = false;
-    }
-  }
+    },
+  },
 };
 </script>
 
 <style scoped>
 .font-weight-normal {
   font-weight: normal;
+}
+
+.font-weight-bold {
+  font-weight: bold;
+}
+
+.v-card-title,
+.v-card-subtitle {
+  padding-bottom: 0;
+}
+
+.v-card-text p {
+  margin: 8px 0;
+}
+
+.v-btn {
+  margin: 0 4px;
 }
 
 .calendar {
@@ -238,10 +332,6 @@ export default {
 .v-calendar__day--event {
   border-radius: 50%;
   border: 2px solid red;
-}
-
-.v-btn {
-  margin: 0 4px;
 }
 
 .calendar-header {
