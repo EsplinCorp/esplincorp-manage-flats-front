@@ -76,7 +76,6 @@
                   }}</span>
                 </v-tooltip>
               </td>
-              <!-- <td>{{ item.id }}</td> -->
               <td>{{ item.nome }}</td>
               <td class="d-none d-md-table-cell">{{ item.cpf }}</td>
               <td class="d-none d-md-table-cell">{{ item.email }}</td>
@@ -84,6 +83,7 @@
               <td class="d-none d-md-table-cell">{{ item.flatName }}</td>
               <td>{{ item.dataEntrada | formatDate }}</td>
               <td>{{ item.dataSaida | formatDate }}</td>
+              <td class="d-none d-md-table-cell text-center">{{ "R$ " + item.valorTotal }}</td>        
               <td>
                 <v-tooltip bottom>
                   <template v-slot:activator="{ on, attrs }">
@@ -146,6 +146,7 @@ export default {
         { text: "Local", value: "localHospedagem" },
         { text: "Check-in", value: "dataEntrada" },
         { text: "Check-out", value: "dataSaida" },
+        { text: "Valor Total da Reserva", value: "valorTotal" },
         { text: "Ações", value: "actions", sortable: false },
       ],
     };
@@ -174,6 +175,13 @@ export default {
     getStatus(item) {
       const today = new Date().toISOString().substr(0, 10);
       return item.dataEntrada <= today && item.dataSaida >= today;
+    },
+    calcularValorTotal(hospede) {
+      const dataEntrada = new Date(hospede.dataEntrada);
+      const dataSaida = new Date(hospede.dataSaida);
+      const diffTime = Math.abs(dataSaida - dataEntrada);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays * hospede.valorDiaria;
     },
     openNewHospedeDialog() {
       this.$refs.hospedesTable.openDialog();

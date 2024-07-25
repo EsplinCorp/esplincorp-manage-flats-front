@@ -35,9 +35,9 @@
             required
           ></v-text-field>
           <v-text-field
-            v-model="flat.quantidadeFlatsDisponiveis"
-            :rules="rules.quantidadeFlatsDisponiveis"
-            label="Flats Disponíveis"
+            v-model="flat.valorDiaria"
+            :rules="rules.valorDiaria"
+            label="Valor da diária R$"
             type="number"
             required
           ></v-text-field>
@@ -67,7 +67,7 @@ export default {
         local: "",
         endereco: "",
         quantidadeHospedesSuportados: 0,
-        quantidadeFlatsDisponiveis: 0,
+        valorDiaria: 0,
       }),
     },
     isEditing: {
@@ -94,8 +94,8 @@ export default {
           (v) => !!v || "Capacidade é obrigatória",
           (v) => !isNaN(v) || "Deve ser um número",
         ],
-        quantidadeFlatsDisponiveis: [
-          (v) => !!v || "Flats Disponíveis é obrigatório",
+        valorDiaria: [
+          (v) => !!v || "O valor da diária é obrigatório",
           (v) => !isNaN(v) || "Deve ser um número",
         ],
       },

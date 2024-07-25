@@ -60,14 +60,14 @@
               </v-list-item>
               <v-list-item>
                 <v-list-item-icon>
-                  <v-icon>mdi-home-group</v-icon>
+                  <v-icon>mdi-currency-usd</v-icon>
                 </v-list-item-icon>
                 <v-list-item-content>
                   <v-list-item-title class="font-weight-bold"
-                    >Disponíveis</v-list-item-title
+                    >Valor da diária</v-list-item-title
                   >
                   <v-list-item-subtitle>{{
-                    flat.quantidadeFlatsDisponiveis
+                    'R$ '+ flat.valorDiaria
                   }}</v-list-item-subtitle>
                 </v-list-item-content>
               </v-list-item>

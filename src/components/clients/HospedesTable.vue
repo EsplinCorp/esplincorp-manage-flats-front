@@ -54,6 +54,7 @@
             type="date"
             required
           ></v-text-field>
+          
         </v-form>
       </v-card-text>
       <v-card-actions>
@@ -78,6 +79,8 @@ export default {
   },
   data() {
     return {
+      reservas: [],
+      selectedReserva: null,
       dialog: false,
       valid: false,
       editMode: false,
@@ -104,45 +107,81 @@ export default {
   },
   methods: {
     async fetchFlats() {
-    try {
-      const response = await axios.get(
-        "http://localhost:8080/api/flats/listar",
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+      try {
+        const response = await axios.get(
+          "http://localhost:8080/api/flats/listar",
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+            },
           },
-        },
-      );
-      this.flats = response.data;
-    } catch (error) {
-      console.error("Erro ao buscar flats:", error);
-    }
-  },
-  async fetchHospedes() {
-    try {
-      const response = await axios.get(
-        "http://localhost:8080/api/hospedes/listar",
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-          },
-        },
-      );
-      this.hospedes = response.data.map(hospede => {
-        const flat = this.flats.find(flat => flat.id === hospede.flatId);
-        return {
-          ...hospede,
-          flatName: flat ? flat.nome : 'N/A'
-        };
-      });
-    } catch (error) {
-      console.error("Erro ao buscar hóspedes:", error);
-    }
-  },
-  formatDateToBrazilian(dateString) {
-    const [year, month, day] = dateString.split('-');
-    return `${day}/${month}/${year}`;
-  },
+        );
+        this.flats = response.data;
+      } catch (error) {
+        console.error("Erro ao buscar flats:", error);
+      }
+    },
+    async fetchReservas() {
+      try {
+        const response = await axios.get(
+          "http://localhost:8080/api/reservas/listar",
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+            },
+          }
+        );
+        this.reservas = response.data;
+      } catch (error) {
+        console.error("Erro ao buscar reservas:", error);
+      }
+    },
+    selectReserva(reserva) {
+      this.selectedReserva = reserva;
+    },
+    calcularValorTotal(reserva) {
+      return reserva.valorTotal; 
+    },
+
+    async fetchHospedes() {
+      try {
+        const responseHospedes = await axios.get(
+          "http://localhost:8080/api/hospedes/listar",
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+            },
+          }
+        );
+        const hospedes = responseHospedes.data;
+
+        const responseReservas = await axios.get(
+          "http://localhost:8080/api/reservas/listar",
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+            },
+          }
+        );
+        const reservas = responseReservas.data;
+
+        this.hospedes = hospedes.map(hospede => {
+          const reserva = reservas.find(reserva => reserva.hospedeId === hospede.id);
+          const valorTotal = reserva ? reserva.valorTotal : 'N/A';
+          return {
+            ...hospede,
+            valorTotal: valorTotal
+          };
+        });
+      } catch (error) {
+        console.error("Erro ao buscar hóspedes:", error);
+      }
+    },
+
+    formatDateToBrazilian(dateString) {
+      const [year, month, day] = dateString.split('-');
+      return `${day}/${month}/${year}`;
+    },
   async salvarHospede() {
     if (this.$refs.form.validate()) {
       try {

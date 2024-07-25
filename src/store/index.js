@@ -12,6 +12,7 @@ export default new Vuex.Store({
     token: null,
     hospedes: [],
     flats: [],
+    reservas:[],
   },
   mutations: {
     ...mutations,
@@ -20,6 +21,9 @@ export default new Vuex.Store({
     },
     setFlats(state, flats) {
       state.flats = flats;
+    },
+    setReservas(state, reservas) { 
+      state.reservas = reservas;
     },
   },
   actions: {
@@ -39,12 +43,30 @@ export default new Vuex.Store({
         console.error("Erro ao buscar flats:", error);
       }
     },
-    async fetchHospedes({ commit, state }) {
+    async fetchReservas({ commit }) {
+      try {
+        const response = await axios.get(
+          "http://localhost:8080/api/reservas/listar",
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+            },
+          }
+        );
+        commit("setReservas", response.data);
+      } catch (error) {
+        console.error("Erro ao buscar reservas:", error);
+      }
+    },
+    async fetchHospedes({ commit, state, dispatch }) {
       try {
         if (state.flats.length === 0) {
-          await this.dispatch("fetchFlats");
+          await dispatch("fetchFlats");
         }
-
+        if (state.reservas.length === 0) {
+          await dispatch("fetchReservas");
+        }
+    
         const response = await axios.get(
           "http://localhost:8080/api/hospedes/listar",
           {
@@ -53,15 +75,17 @@ export default new Vuex.Store({
             },
           }
         );
-
+    
         const hospedes = response.data.map((hospede) => {
           const flat = state.flats.find((flat) => flat.id === hospede.flatId);
+          const reserva = state.reservas.find((reserva) => reserva.hospedeId === hospede.id);
           return {
             ...hospede,
             flatName: flat ? flat.nome : "N/A",
+            valorTotal: reserva ? reserva.valorTotal : "N/A",
           };
         });
-
+    
         commit("setHospedes", hospedes);
       } catch (error) {
         console.error("Erro ao buscar hóspedes:", error);
