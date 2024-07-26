@@ -176,13 +176,6 @@ export default {
       const today = new Date().toISOString().substr(0, 10);
       return item.dataEntrada <= today && item.dataSaida >= today;
     },
-    calcularValorTotal(hospede) {
-      const dataEntrada = new Date(hospede.dataEntrada);
-      const dataSaida = new Date(hospede.dataSaida);
-      const diffTime = Math.abs(dataSaida - dataEntrada);
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      return diffDays * hospede.valorDiaria;
-    },
     openNewHospedeDialog() {
       this.$refs.hospedesTable.openDialog();
     },

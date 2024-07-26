@@ -191,21 +191,30 @@ export default {
 
         if (this.editMode) {
           await axios.post(
-            `/api/hospedes/${this.hospede.id}/atualizar`,
-            this.hospede,
-          );
-        } else {
-          await axios.post(
-            "http://localhost:8080/api/hospedes/registrar",
+            `http://localhost:8080/api/hospedes/${this.hospede.id}/atualizar`,
             this.hospede,
             {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("userToken")}`,
               },
-            },
-          );
-        }
-          this.closeDialog();
+            }
+          ).then(() => {
+            window.location.reload();
+          });
+          } else {
+            await axios.post(
+              "http://localhost:8080/api/hospedes/registrar",
+              this.hospede,
+              {
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+                },
+              }
+            ).then(() => {
+              window.location.reload();
+            });
+          }
+            this.closeDialog();
           this.$emit("hospedeAtualizado");
           this.fetchHospedes(); // Atualiza a lista de hóspedes após salvar/atualizar
           Swal.fire(

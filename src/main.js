@@ -4,13 +4,10 @@ import router from "./router";
 import store from "./store";
 import vuetify from "./plugins/vuetify";
 import "./services/axios/axios-config";
+import { formatDate } from './filters/dateFilter';
 
-Vue.filter("formatDate", function (value) {
-  if (value) {
-    return new Date(value).toLocaleDateString();
-  }
-  return "";
-});
+Vue.filter('formatDate', formatDate);
+
 
 Vue.config.productionTip = false;
 
