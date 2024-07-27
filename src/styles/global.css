@@ -62,4 +62,16 @@
 
 .container-color {
   background-color: rgba(90, 131, 244, 0.05);
+
+}
+
+.my-drawer {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100vh;
+}
+
+.footer {
+  flex-shrink: 0;
 }

@@ -15,7 +15,12 @@
     </v-app-bar>
 
     <!-- Menu Lateral -->
-    <v-navigation-drawer v-if="shouldShowNavBar" v-model="drawer" app>
+    <v-navigation-drawer
+      v-if="shouldShowNavBar"
+      v-model="drawer"
+      app
+      class="my-drawer"
+    >
       <v-list>
         <v-list-item
           :class="{ 'selected-item': isSelected('/') }"
@@ -31,7 +36,7 @@
           @click="navigateTo('/reservas')"
         >
           <v-list-item-icon>
-            <v-icon>mdi-calendar</v-icon>
+            <v-icon>mdi-calendar-check</v-icon>
           </v-list-item-icon>
           <v-list-item-title v-if="drawer">Reservas</v-list-item-title>
         </v-list-item>
@@ -73,15 +78,23 @@
     </v-main>
 
     <!-- Rodapé -->
-    <FooterComponent v-if="shouldShowNavBar" />
+    <AppFooter
+      :isMenuExpanded="drawer"
+      v-if="shouldShowNavBar"
+      class="footer"
+    />
   </v-app>
 </template>
 
 <script>
 import { mapActions } from "vuex";
+import AppFooter from "@/components/common/AppFooter.vue"; // Import the AppFooter component
 import "./styles/global.css";
 
 export default {
+  components: {
+    AppFooter,
+  },
   data() {
     return {
       drawer: false,
@@ -160,31 +173,10 @@ export default {
 </script>
 
 <style scoped>
-.my-drawer {
-  top: -10px !important;
-}
-
-.menu-button {
-  font-weight: normal;
-  text-transform: none;
-  font-size: 15px;
-}
-
-.logo-image {
-  max-height: 300px;
-  max-width: 165px;
-  margin-left: 5px;
-}
-
-.v-app-bar {
-  justify-content: space-between;
-}
-
-.centered-snackbar {
-  align-items: center;
-}
-
-.container-color {
-  background-color: rgba(90, 131, 244, 0.05);
+.footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  transition: margin-left 0.3s;
 }
 </style>

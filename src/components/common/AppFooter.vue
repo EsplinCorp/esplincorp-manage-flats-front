@@ -1,5 +1,5 @@
 <template>
-  <v-footer padless fixed>
+  <v-footer :class="{ 'footer-expanded': isMenuExpanded }" padless fixed>
     <v-col class="footer-content" cols="12">
       © {{ currentYear }} - Esplin Software | Direitos Reservados
       <v-img
@@ -15,6 +15,12 @@
 <script>
 export default {
   name: "FooterComponent",
+  props: {
+    isMenuExpanded: {
+      type: Boolean,
+      required: true,
+    },
+  },
   computed: {
     currentYear() {
       return new Date().getFullYear();
@@ -29,10 +35,7 @@ export default {
   height: 50px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  text-align: right;
-  color: #f17ea1;
-  background-color: #f17ea1; /* Cor de fundo aplicada tanto para o tema claro quanto para o escuro */
+  justify-content: flex-end;
   position: relative;
 }
 
@@ -43,12 +46,10 @@ export default {
   left: 0;
   right: 0;
   height: 1px;
-  background-color: #f17ea1; /* Linha decorativa aplicada em ambos os temas */
+  background-color: #006ee6 !important;
 }
 
-.footer-logo {
-  height: auto;
-  max-width: 100px;
-  margin-left: auto;
+.footer-expanded {
+  margin-right: 256px;
 }
 </style>
