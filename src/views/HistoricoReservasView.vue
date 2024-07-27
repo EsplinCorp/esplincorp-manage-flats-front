@@ -1,13 +1,11 @@
 <template>
   <v-row justify="center">
     <v-col cols="12" md="10" lg="12">
-      <v-container>
+      <v-container class="container-color">
         <hospedes-table ref="hospedesTable"></hospedes-table>
 
-        <v-col cols="12" md="3" class="mb-2"> </v-col>
-
         <v-row>
-          <v-col cols="12" md="3" class="mb-7">
+          <v-col cols="12" md="3">
             <v-text-field
               v-model="search"
               append-icon="mdi-magnify"
@@ -77,11 +75,6 @@
         >
           <template v-slot:item="{ item }">
             <tr>
-              <td>
-                <v-chip :color="getStatus(item).color" dark class="small-chip">
-                  {{ getStatus(item).text }}
-                </v-chip>
-              </td>
               <td>{{ item.nome }}</td>
               <td class="d-none d-md-table-cell">{{ item.cpf }}</td>
               <td class="d-none d-md-table-cell">{{ item.email }}</td>
@@ -96,37 +89,6 @@
                     currency: "BRL",
                   }).format(item.valorTotal)
                 }}
-              </td>
-              <td>
-                <v-tooltip bottom>
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-btn
-                      class="edit-icon"
-                      icon
-                      v-bind="attrs"
-                      v-on="on"
-                      @click="editarHospede(item)"
-                    >
-                      <v-icon>mdi-pencil-outline</v-icon>
-                    </v-btn>
-                  </template>
-                  <span>Editar Hóspede</span>
-                </v-tooltip>
-
-                <v-tooltip bottom>
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-btn
-                      class="delete-icon"
-                      icon
-                      v-bind="attrs"
-                      v-on="on"
-                      @click="confirmDeleteHospede(item)"
-                    >
-                      <v-icon>mdi-delete-outline</v-icon>
-                    </v-btn>
-                  </template>
-                  <span>Excluir Hóspede</span>
-                </v-tooltip>
               </td>
             </tr>
           </template>
@@ -156,7 +118,6 @@ export default {
       menuCheckOut: false,
       loading: false,
       headers: [
-        { text: "Status", value: "status", sortable: false },
         { text: "Nome", value: "nome" },
         { text: "CPF/CNPJ", value: "cpf" },
         { text: "Email", value: "email" },
@@ -165,7 +126,6 @@ export default {
         { text: "Check-out", value: "dataSaida" },
         { text: "Local", value: "localHospedagem" },
         { text: "Total", value: "valorTotal" },
-        { text: "Ações", value: "actions", sortable: false },
       ],
     };
   },

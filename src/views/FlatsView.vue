@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container class="container-color">
     <v-btn
       class="action-button mb-7 mt-5"
       color="primary"

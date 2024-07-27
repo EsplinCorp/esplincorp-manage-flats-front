@@ -3,9 +3,7 @@
     <div class="mt-5"></div>
     <v-row align="center">
       <v-col cols="12" sm="auto" class="d-flex align-items-center">
-        <v-icon color="primary" class="mt-2" size="35"
-          >mdi-calendar-check</v-icon
-        >
+        <v-icon color="primary" class="mt-2" size="35">mdi-calendar</v-icon>
         <h2 class="ml-2 mt-3 font-weight-normal primary--text">Reservas</h2>
       </v-col>
     </v-row>
@@ -13,7 +11,7 @@
     <div class="mt-10"></div>
 
     <!-- Vuetify Tabs Component -->
-    <v-tabs v-model="tab" background-color="transparent" class="custom-tabs">
+    <v-tabs v-model="tab" class="custom-tabs">
       <v-tab class="custom-tab" :class="{ 'selected-tab': tab === 0 }">
         <v-icon left>mdi-account-group</v-icon> Hóspedes
       </v-tab>
@@ -21,11 +19,11 @@
         <v-icon left>mdi-home</v-icon> Flats
       </v-tab>
       <v-tab class="custom-tab" :class="{ 'selected-tab': tab === 2 }">
-        <v-icon left>mdi-clipboard-text</v-icon> Histórico de Reservas
+        <v-icon left>mdi-calendar-check</v-icon> Reservas Concluídas
       </v-tab>
     </v-tabs>
 
-    <v-tabs-items v-model="tab">
+    <v-tabs-items background-color="#dee2e6" v-model="tab">
       <v-tab-item>
         <Hospedes />
       </v-tab-item>

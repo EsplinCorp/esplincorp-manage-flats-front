@@ -1,7 +1,7 @@
 <template>
   <v-row justify="center">
     <v-col cols="12" md="10" lg="12">
-      <v-container>
+      <v-container class="container-color">
         <v-btn
           class="action-button mb-5 mt-5"
           color="primary"

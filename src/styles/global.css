@@ -57,4 +57,9 @@
 .edit-icon,
 .delete-icon {
   color: var(--primary-color) !important;
+
+}
+
+.container-color {
+  background-color: rgba(90, 131, 244, 0.05);
 }

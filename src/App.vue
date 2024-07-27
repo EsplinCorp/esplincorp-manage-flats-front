@@ -26,30 +26,12 @@
           </v-list-item-icon>
           <v-list-item-title v-if="drawer">Dashboard</v-list-item-title>
         </v-list-item>
-        <!-- <v-list-item
-          :class="{ 'selected-item': isSelected('/hospedes') }"
-          @click="navigateTo('/hospedes')"
-        >
-          <v-list-item-icon>
-            <v-icon>mdi-account-group</v-icon>
-          </v-list-item-icon>
-          <v-list-item-title v-if="drawer">Hóspedes</v-list-item-title>
-        </v-list-item>
-        <v-list-item
-          :class="{ 'selected-item': isSelected('/flats') }"
-          @click="navigateTo('/flats')"
-        >
-          <v-list-item-icon>
-            <v-icon>mdi-home-city</v-icon>
-          </v-list-item-icon>
-          <v-list-item-title v-if="drawer">Flats</v-list-item-title>
-        </v-list-item> -->
         <v-list-item
           :class="{ 'selected-item': isSelected('/reservas') }"
           @click="navigateTo('/reservas')"
         >
           <v-list-item-icon>
-            <v-icon>mdi-calendar-check</v-icon>
+            <v-icon>mdi-calendar</v-icon>
           </v-list-item-icon>
           <v-list-item-title v-if="drawer">Reservas</v-list-item-title>
         </v-list-item>
@@ -200,5 +182,9 @@ export default {
 
 .centered-snackbar {
   align-items: center;
+}
+
+.container-color {
+  background-color: rgba(90, 131, 244, 0.05);
 }
 </style>
