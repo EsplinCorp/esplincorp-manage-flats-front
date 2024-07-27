@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <v-app :dark="darkTheme">
     <!-- Barra de Navegação Superior -->
     <v-app-bar v-if="shouldShowNavBar" app>
       <v-app-bar-nav-icon @click="toggleDrawer"></v-app-bar-nav-icon>
@@ -26,7 +26,7 @@
           </v-list-item-icon>
           <v-list-item-title v-if="drawer">Dashboard</v-list-item-title>
         </v-list-item>
-        <v-list-item
+        <!-- <v-list-item
           :class="{ 'selected-item': isSelected('/hospedes') }"
           @click="navigateTo('/hospedes')"
         >
@@ -43,6 +43,15 @@
             <v-icon>mdi-home-city</v-icon>
           </v-list-item-icon>
           <v-list-item-title v-if="drawer">Flats</v-list-item-title>
+        </v-list-item> -->
+        <v-list-item
+          :class="{ 'selected-item': isSelected('/reservas') }"
+          @click="navigateTo('/reservas')"
+        >
+          <v-list-item-icon>
+            <v-icon>mdi-calendar-check</v-icon>
+          </v-list-item-icon>
+          <v-list-item-title v-if="drawer">Reservas</v-list-item-title>
         </v-list-item>
         <v-list-group prepend-icon="mdi-currency-usd" no-action>
           <template v-slot:activator>
@@ -93,8 +102,8 @@ import "./styles/global.css";
 export default {
   data() {
     return {
-      drawer: true,
-      darkTheme: true,
+      drawer: false,
+      darkTheme: JSON.parse(localStorage.getItem("darkTheme")) || false,
       dialog: false,
       snackbar: false,
       titulo: "",
@@ -124,6 +133,7 @@ export default {
   watch: {
     darkTheme(newVal) {
       this.$vuetify.theme.dark = newVal;
+      localStorage.setItem("darkTheme", JSON.stringify(newVal));
     },
   },
   methods: {

@@ -1,15 +1,5 @@
 <template>
   <v-container>
-    <div class="mt-5"></div>
-
-    <v-row align="center">
-      <v-col cols="12" sm="auto" class="d-flex align-items-center">
-        <v-icon color="primary" class="mt-2" size="35">mdi-home-city</v-icon>
-        <h2 class="ml-3 mt-3 font-weight-normal primary--text">Flats</h2>
-      </v-col>
-    </v-row>
-    <v-divider class="my-3"></v-divider>
-
     <v-btn
       class="action-button mb-7 mt-5"
       color="primary"
@@ -22,13 +12,37 @@
 
     <v-row>
       <v-col v-for="flat in flats" :key="flat.id" cols="12" md="4">
-        <v-card class="mb-4">
+        <v-card
+          class="mb-4"
+          :class="{
+            'status-occupied': flat.status === 'Ocupado',
+            'status-available': flat.status === 'Disponível',
+          }"
+        >
           <v-card-title class="text-h6">{{ flat.nome }}</v-card-title>
           <v-card-subtitle class="font-weight-bold text-subtitle-1 mb-2">{{
             flat.local
           }}</v-card-subtitle>
           <v-card-text>
             <v-list dense>
+              <v-list-item>
+                <v-list-item-icon>
+                  <v-icon :color="flat.status === 'Ocupado' ? 'red' : 'green'"
+                    >mdi-label</v-icon
+                  >
+                </v-list-item-icon>
+                <v-list-item-content>
+                  <v-list-item-title class="font-weight-bold"
+                    >Status</v-list-item-title
+                  >
+                  <v-list-item-subtitle
+                    :class="
+                      flat.status === 'Ocupado' ? 'text-danger' : 'text-success'
+                    "
+                    >{{ flat.status }}</v-list-item-subtitle
+                  >
+                </v-list-item-content>
+              </v-list-item>
               <v-list-item>
                 <v-list-item-icon>
                   <v-icon>mdi-map-marker</v-icon>
@@ -66,21 +80,35 @@
                   <v-list-item-title class="font-weight-bold"
                     >Valor da diária</v-list-item-title
                   >
-                  <v-list-item-subtitle>{{
-                    'R$ '+ flat.valorDiaria
-                  }}</v-list-item-subtitle>
+                  <v-list-item-subtitle>
+                    {{
+                      new Intl.NumberFormat("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                      }).format(flat.valorDiaria)
+                    }}
+                  </v-list-item-subtitle>
                 </v-list-item-content>
               </v-list-item>
             </v-list>
           </v-card-text>
           <v-card-actions>
-            <v-btn @click="checkAvailability(flat.id)" class="edit-button" text
+            <v-btn
+              @click="checkAvailability(flat.id)"
+              class="edit-button mb-7 mt-5"
+              text
               >Ver Disponibilidade</v-btn
             >
-            <v-btn @click="openEditFlatDialog(flat)" class="edit-button" text
+            <v-btn
+              @click="openEditFlatDialog(flat)"
+              class="edit-button mb-7 mt-5"
+              text
               >Editar</v-btn
             >
-            <v-btn @click="confirmDeleteFlat(flat)" class="delete-button" text
+            <v-btn
+              @click="confirmDeleteFlat(flat)"
+              class="delete-button mb-7 mt-5"
+              text
               >Excluir</v-btn
             >
           </v-card-actions>
@@ -127,7 +155,6 @@
                 </v-list-item>
               </v-list>
             </v-menu>
-
             <v-btn icon @click="nextMonth">
               <v-icon>mdi-chevron-right</v-icon>
             </v-btn>
@@ -251,7 +278,29 @@ export default {
           },
         })
         .then((response) => {
-          this.flats = response.data;
+          const flats = response.data;
+          axios
+            .get("http://localhost:8080/api/hospedes/listar", {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+              },
+            })
+            .then((response) => {
+              const hospedes = response.data;
+              flats.forEach((flat) => {
+                const isOccupied = hospedes.some(
+                  (hospede) =>
+                    hospede.flatId === flat.id &&
+                    new Date(hospede.dataEntrada) <= new Date() &&
+                    new Date(hospede.dataSaida) >= new Date(),
+                );
+                flat.status = isOccupied ? "Ocupado" : "Disponível";
+              });
+              this.flats = flats;
+            })
+            .catch((error) => {
+              console.error("Erro ao buscar hóspedes:", error);
+            });
         })
         .catch((error) => {
           console.error("Erro ao buscar flats:", error);
@@ -350,5 +399,13 @@ export default {
 .calendar-month-selector {
   display: flex;
   align-items: center;
+}
+
+.status-occupied {
+  border: 1px solid red;
+}
+
+.status-available {
+  border: 1px solid green;
 }
 </style>

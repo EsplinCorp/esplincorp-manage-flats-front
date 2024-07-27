@@ -54,7 +54,6 @@
             type="date"
             required
           ></v-text-field>
-          
         </v-form>
       </v-card-text>
       <v-card-actions>
@@ -129,7 +128,7 @@ export default {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("userToken")}`,
             },
-          }
+          },
         );
         this.reservas = response.data;
       } catch (error) {
@@ -140,7 +139,7 @@ export default {
       this.selectedReserva = reserva;
     },
     calcularValorTotal(reserva) {
-      return reserva.valorTotal; 
+      return reserva.valorTotal;
     },
 
     async fetchHospedes() {
@@ -151,7 +150,7 @@ export default {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("userToken")}`,
             },
-          }
+          },
         );
         const hospedes = responseHospedes.data;
 
@@ -161,16 +160,18 @@ export default {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("userToken")}`,
             },
-          }
+          },
         );
         const reservas = responseReservas.data;
 
-        this.hospedes = hospedes.map(hospede => {
-          const reserva = reservas.find(reserva => reserva.hospedeId === hospede.id);
-          const valorTotal = reserva ? reserva.valorTotal : 'N/A';
+        this.hospedes = hospedes.map((hospede) => {
+          const reserva = reservas.find(
+            (reserva) => reserva.hospedeId === hospede.id,
+          );
+          const valorTotal = reserva ? reserva.valorTotal : "N/A";
           return {
             ...hospede,
-            valorTotal: valorTotal
+            valorTotal: valorTotal,
           };
         });
       } catch (error) {
@@ -179,51 +180,64 @@ export default {
     },
 
     formatDateToBrazilian(dateString) {
-      const [year, month, day] = dateString.split('-');
+      const [year, month, day] = dateString.split("-");
       return `${day}/${month}/${year}`;
     },
-  async salvarHospede() {
-    if (this.$refs.form.validate()) {
-      try {
-        // Formatar as datas para o formato esperado pelo backend
-        this.hospede.dataEntrada = this.formatDateToBrazilian(this.hospede.dataEntrada);
-        this.hospede.dataSaida = this.formatDateToBrazilian(this.hospede.dataSaida);
+    async salvarHospede() {
+      if (this.$refs.form.validate()) {
+        try {
+          // Formatar as datas para o formato esperado pelo backend
+          this.hospede.dataEntrada = this.formatDateToBrazilian(
+            this.hospede.dataEntrada,
+          );
+          this.hospede.dataSaida = this.formatDateToBrazilian(
+            this.hospede.dataSaida,
+          );
 
-        if (this.editMode) {
-          await axios.post(
-            `http://localhost:8080/api/hospedes/${this.hospede.id}/atualizar`,
-            this.hospede,
-            {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-              },
-            }
-          ).then(() => {
-            window.location.reload();
-          });
-          } else {
-            await axios.post(
-              "http://localhost:8080/api/hospedes/registrar",
-              this.hospede,
-              {
-                headers: {
-                  Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          if (this.editMode) {
+            await axios
+              .post(
+                `http://localhost:8080/api/hospedes/${this.hospede.id}/atualizar`,
+                this.hospede,
+                {
+                  headers: {
+                    Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+                  },
                 },
-              }
-            ).then(() => {
-              window.location.reload();
-            });
+              )
+              .then(() => {
+                setTimeout(() => {
+                  window.location.reload();
+                }, 1500);
+              });
+          } else {
+            await axios
+              .post(
+                "http://localhost:8080/api/hospedes/registrar",
+                this.hospede,
+                {
+                  headers: {
+                    Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+                  },
+                },
+              )
+              .then(() => {
+                setTimeout(() => {
+                  window.location.reload();
+                }, 1500);
+              });
           }
-            this.closeDialog();
+          this.closeDialog();
           this.$emit("hospedeAtualizado");
           this.fetchHospedes(); // Atualiza a lista de hóspedes após salvar/atualizar
-          Swal.fire(
-            "Sucesso!",
-            this.editMode
+          Swal.fire({
+            title: "Sucesso!",
+            text: this.editMode
               ? "Hóspede atualizado com sucesso!"
               : "Hóspede cadastrado com sucesso!",
-            "success",
-          );
+            icon: "success",
+            showConfirmButton: false,
+          });
         } catch (error) {
           console.error("Erro ao processar o hóspede:", error);
           Swal.fire(
@@ -261,12 +275,12 @@ export default {
         email: "",
         telefone: "",
         flatId: "",
-        FlatName:"",
+        FlatName: "",
         dataEntrada: new Date().toISOString().substr(0, 10),
         dataSaida: "",
       };
     },
-    
+
     ...mapActions(["fetchHospedes"]),
   },
   watch: {

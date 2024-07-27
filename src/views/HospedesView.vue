@@ -2,23 +2,6 @@
   <v-row justify="center">
     <v-col cols="12" md="10" lg="12">
       <v-container>
-        <!-- Espaçamento no topo -->
-        <div class="mt-5"></div>
-
-        <!-- Título Hóspedes com ícone -->
-        <v-row align="center">
-          <v-col cols="12" sm="auto" class="d-flex align-items-center">
-            <v-icon class="mt-2" size="35" color="primary"
-              >mdi-account-group</v-icon
-            >
-            <h2 class="ml-3 mt-3 font-weight-normal primary--text">Hóspedes</h2>
-          </v-col>
-        </v-row>
-
-        <!-- Linha horizontal personalizada -->
-        <v-divider class="my-3" :style="{ backgroundColor: '' }"></v-divider>
-
-        <!-- Botão de Novo Hóspede -->
         <v-btn
           class="action-button mb-7 mt-5"
           color="primary"
@@ -30,9 +13,8 @@
         </v-btn>
         <hospedes-table ref="hospedesTable"></hospedes-table>
 
-        <!-- Campo de Pesquisa -->
-        <v-row justify="center">
-          <v-col cols="12" md="8" class="mb-7">
+        <v-row>
+          <v-col cols="12" md="3" class="mb-7">
             <v-text-field
               v-model="search"
               append-icon="mdi-magnify"
@@ -43,12 +25,11 @@
           </v-col>
         </v-row>
 
-        <!-- Tabela de Hóspedes -->
         <v-data-table
           :headers="headers"
           :items="filteredHospedes"
           :loading="loading"
-          class="elevation-1"
+          class="elevation-1 small-text"
           mobile-breakpoint="500"
           dense
           item-key="id"
@@ -56,35 +37,24 @@
           <template v-slot:item="{ item }">
             <tr>
               <td>
-                <v-tooltip bottom>
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-icon
-                      :color="getStatus(item) ? 'green' : 'grey'"
-                      v-bind="attrs"
-                      v-on="on"
-                      class="d-flex align-center justify-center"
-                    >
-                      {{
-                        getStatus(item)
-                          ? "mdi-account-check"
-                          : "mdi-account-cancel"
-                      }}
-                    </v-icon>
-                  </template>
-                  <span>{{
-                    getStatus(item) ? "Hospedado" : "Não Hospedado"
-                  }}</span>
-                </v-tooltip>
+                <v-chip :color="getStatus(item).color" dark class="small-chip">
+                  {{ getStatus(item).text }}
+                </v-chip>
               </td>
               <td>{{ item.nome }}</td>
               <td class="d-none d-md-table-cell">{{ item.cpf }}</td>
               <td class="d-none d-md-table-cell">{{ item.email }}</td>
               <td class="d-none d-md-table-cell">{{ item.telefone }}</td>
-              <td class="d-none d-md-table-cell">{{ item.flatName }}</td>
               <td>{{ item.dataEntrada | formatDate }}</td>
               <td>{{ item.dataSaida | formatDate }}</td>
-              <td class="d-none d-md-table-cell text-center">
-                {{ "R$ " + item.valorTotal }}
+              <td class="d-none d-md-table-cell">{{ item.flatName }}</td>
+              <td class="d-none d-md-table-cell text-left">
+                {{
+                  new Intl.NumberFormat("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  }).format(item.valorTotal)
+                }}
               </td>
               <td>
                 <v-tooltip bottom>
@@ -137,7 +107,6 @@ export default {
   data() {
     return {
       search: "",
-      selectedHospede: null,
       loading: false,
       headers: [
         { text: "Status", value: "status", sortable: false },
@@ -145,9 +114,9 @@ export default {
         { text: "CPF/CNPJ", value: "cpf" },
         { text: "Email", value: "email" },
         { text: "Telefone", value: "telefone" },
-        { text: "Local", value: "localHospedagem" },
         { text: "Check-in", value: "dataEntrada" },
         { text: "Check-out", value: "dataSaida" },
+        { text: "Local", value: "localHospedagem" },
         { text: "Total", value: "valorTotal" },
         { text: "Ações", value: "actions", sortable: false },
       ],
@@ -156,34 +125,37 @@ export default {
   computed: {
     ...mapState(["hospedes"]),
     filteredHospedes() {
-      if (this.search) {
-        return this.hospedes.filter((hospede) =>
-          Object.values(hospede).some((value) =>
+      const today = new Date().toISOString().substr(0, 10);
+      return this.hospedes.filter((hospede) => {
+        const checkOutDate = new Date(hospede.dataSaida)
+          .toISOString()
+          .substr(0, 10);
+        return (
+          checkOutDate >= today &&
+          (Object.values(hospede).some((value) =>
             String(value).toLowerCase().includes(this.search.toLowerCase()),
-          ),
+          ) ||
+            this.getStatus(hospede)
+              .text.toLowerCase()
+              .includes(this.search.toLowerCase()))
         );
-      }
-      return this.hospedes;
+      });
     },
   },
   methods: {
-    ...mapActions([
-      "fetchHospedes",
-      "deleteHospede",
-      "createHospede",
-      "updateHospede",
-      "fetchFlats", // map the fetchFlats action
-    ]),
+    ...mapActions(["fetchHospedes", "deleteHospede"]),
     getStatus(item) {
       const today = new Date().toISOString().substr(0, 10);
-      return item.dataEntrada <= today && item.dataSaida >= today;
-    },
-    calcularValorTotal(hospede) {
-      const dataEntrada = new Date(hospede.dataEntrada);
-      const dataSaida = new Date(hospede.dataSaida);
-      const diffTime = Math.abs(dataSaida - dataEntrada);
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      return diffDays * hospede.valorDiaria;
+      const checkInDate = new Date(item.dataEntrada)
+        .toISOString()
+        .substr(0, 10);
+      const checkOutDate = new Date(item.dataSaida).toISOString().substr(0, 10);
+      if (checkInDate <= today && checkOutDate >= today) {
+        return { text: "Hospedado", color: "green" };
+      } else if (checkInDate > today) {
+        return { text: "Reservado", color: "orange" };
+      }
+      return { text: "Não Hospedado", color: "grey" };
     },
     openNewHospedeDialog() {
       this.$refs.hospedesTable.openDialog();
@@ -200,7 +172,6 @@ export default {
         };
       });
     },
-
     confirmDeleteHospede(hospede) {
       Swal.fire({
         title: "Tem certeza?",
@@ -249,53 +220,6 @@ export default {
           this.loading = false;
         });
     },
-    showSuccessMessage(message) {
-      Swal.fire({
-        icon: "success",
-        title: "Sucesso",
-        text: message,
-        timer: 3000,
-        showConfirmButton: false,
-      });
-    },
-    showEditSuccessMessage() {
-      this.showSuccessMessage("Hóspede editado com sucesso!");
-    },
-    showCreateSuccessMessage() {
-      this.showSuccessMessage("Hóspede cadastrado com sucesso!");
-    },
-    createHospede(hospedeData) {
-      this.loading = true;
-      this.createHospede(hospedeData)
-        .then(() => {
-          this.showCreateSuccessMessage();
-          this.fetchHospedes();
-        })
-        .catch((error) => {
-          console.error("Erro ao cadastrar hóspede:", error);
-          // lógica para tratar erros
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    updateHospede(hospedeData) {
-      const updatedHospede = {
-        ...hospedeData,
-        dataEntrada: new Date(hospedeData.dataEntrada).toISOString(),
-        dataSaida: new Date(hospedeData.dataSaida).toISOString(),
-      };
-      this.updateHospede(updatedHospede);
-    },
-  },
-  filters: {
-    formatDate(value) {
-      if (value) {
-        const date = new Date(value);
-        date.setDate(date.getDate() + 1); // Adiciona 1 dia à data
-        return new Intl.DateTimeFormat("pt-BR").format(date);
-      }
-    },
   },
   created() {
     this.fetchHospedes();
@@ -303,4 +227,19 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.small-chip {
+  font-size: 0.75rem;
+  height: auto;
+  padding: 0.25rem;
+  border-radius: 6px;
+}
+.small-text .v-data-table-header th,
+.small-text .v-data-table__wrapper td {
+  font-size: 0.875rem;
+  padding: 8px 16px;
+}
+.text-left {
+  text-align: left;
+}
+</style>

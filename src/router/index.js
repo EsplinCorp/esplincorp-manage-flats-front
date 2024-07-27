@@ -6,6 +6,7 @@ import NotFoundComponents from "@/views/NotFoundComponents.vue";
 import FinancasView from "@/views/FinancasView.vue";
 import PagamentosView from "@/views/PagamentosView.vue";
 import FlatsView from "@/views/FlatsView.vue";
+import ReservasView from "@/views/ReservasView.vue";
 import ReceitasDespesasView from "@/views/ReceitasDespesasView.vue";
 import BalancoView from "@/views/BalancoView.vue";
 import LembretesView from "@/views/LembretesView.vue";
@@ -44,6 +45,12 @@ const router = new Router({
       path: "/flats",
       name: "flats",
       component: FlatsView,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: "/reservas",
+      name: "reservas",
+      component: ReservasView,
       meta: { requiresAuth: true },
     },
     {
