@@ -208,7 +208,7 @@ export default {
               .then(() => {
                 setTimeout(() => {
                   window.location.reload();
-                }, 1500);
+                }, 1200);
               });
           } else {
             await axios
@@ -224,7 +224,7 @@ export default {
               .then(() => {
                 setTimeout(() => {
                   window.location.reload();
-                }, 1500);
+                }, 1200);
               });
           }
           this.closeDialog();

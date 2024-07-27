@@ -3,7 +3,7 @@
     <v-col cols="12" md="10" lg="12">
       <v-container>
         <v-btn
-          class="action-button mb-7 mt-5"
+          class="action-button mb-5 mt-5"
           color="primary"
           @click="openNewHospedeDialog"
           rounded
@@ -192,11 +192,13 @@ export default {
       this.loading = true;
       this.deleteHospede(hospede.id)
         .then(() => {
-          Swal.fire(
-            "Excluído!",
-            "O hóspede foi excluído com sucesso.",
-            "success",
-          );
+          Swal.fire({
+            title: "Excluído!",
+            text: "O hóspede foi excluído com sucesso.",
+            icon: "success",
+            showConfirmButton: false,
+            timer: 1200,
+          });
           this.fetchHospedes();
         })
         .catch((error) => {

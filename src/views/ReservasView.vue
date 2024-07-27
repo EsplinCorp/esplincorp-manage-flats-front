@@ -9,15 +9,17 @@
         <h2 class="ml-2 mt-3 font-weight-normal primary--text">Reservas</h2>
       </v-col>
     </v-row>
-    <v-divider
-      class="my-3"
-      :style="{ backgroundColor: 'tertiary' }"
-    ></v-divider>
+
+    <div class="mt-10"></div>
 
     <!-- Vuetify Tabs Component -->
-    <v-tabs v-model="tab" background-color="transparent">
-      <v-tab>Hóspedes</v-tab>
-      <v-tab>Flats</v-tab>
+    <v-tabs v-model="tab" background-color="transparent" class="custom-tabs">
+      <v-tab class="custom-tab" :class="{ 'selected-tab': tab === 0 }">
+        <v-icon left>mdi-account-group</v-icon> Hóspedes
+      </v-tab>
+      <v-tab class="custom-tab" :class="{ 'selected-tab': tab === 1 }">
+        <v-icon left>mdi-home</v-icon> Flats
+      </v-tab>
     </v-tabs>
 
     <v-tabs-items v-model="tab">
@@ -78,5 +80,30 @@ export default {
 </script>
 
 <style scoped>
-/* Add any specific styles here if needed */
+.v-tab {
+  text-transform: none;
+}
+.custom-tabs {
+  border-bottom: 1px solid #dee2e6;
+}
+
+.custom-tab {
+  border: 1px solid transparent;
+  border-top-left-radius: 0.25rem;
+  border-top-right-radius: 0.25rem;
+  margin-bottom: -1px;
+  padding: 0.5rem 1rem;
+  transition:
+    border-color 0.15s ease-in-out,
+    background-color 0.15s ease-in-out;
+}
+
+.custom-tab:hover {
+  border-color: #e9ecef #e9ecef #dee2e6;
+}
+
+.selected-tab {
+  border-color: #dee2e6;
+  border-bottom: 1px solid #dee2e6;
+}
 </style>

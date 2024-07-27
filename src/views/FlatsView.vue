@@ -11,7 +11,18 @@
     </v-btn>
 
     <v-row>
-      <v-col v-for="flat in flats" :key="flat.id" cols="12" md="4">
+      <v-col cols="12" md="3" class="mb-3">
+        <v-text-field
+          v-model="search"
+          append-icon="mdi-magnify"
+          label="Pesquisar flats"
+          single-line
+          hide-details
+        ></v-text-field>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col v-for="flat in filteredFlats" :key="flat.id" cols="12" md="4">
         <v-card
           class="mb-4"
           :class="{
@@ -92,22 +103,22 @@
               </v-list-item>
             </v-list>
           </v-card-text>
-          <v-card-actions>
+          <v-card-actions class="center-actions">
             <v-btn
               @click="checkAvailability(flat.id)"
-              class="edit-button mb-7 mt-5"
+              class="edit-button mb-5 mt-2"
               text
               >Ver Disponibilidade</v-btn
             >
             <v-btn
               @click="openEditFlatDialog(flat)"
-              class="edit-button mb-7 mt-5"
+              class="edit-button mb-5 mt-2"
               text
               >Editar</v-btn
             >
             <v-btn
               @click="confirmDeleteFlat(flat)"
-              class="delete-button mb-7 mt-5"
+              class="delete-button mb-5 mt-2"
               text
               >Excluir</v-btn
             >
@@ -199,6 +210,7 @@ export default {
   },
   data() {
     return {
+      search: "",
       flats: [],
       availabilityDialog: false,
       events: [],
@@ -256,11 +268,13 @@ export default {
               },
             })
             .then(() => {
-              Swal.fire(
-                "Excluído!",
-                "O flat foi excluído com sucesso.",
-                "success",
-              );
+              Swal.fire({
+                title: "Excluído!",
+                text: "O flat foi excluído com sucesso.",
+                icon: "success",
+                showConfirmButton: false,
+                timer: 1200,
+              });
               this.fetchFlats();
             })
             .catch((error) => {
@@ -349,63 +363,44 @@ export default {
       this.monthMenu = false;
     },
   },
+  computed: {
+    filteredFlats() {
+      if (!this.search) {
+        return this.flats;
+      }
+      const searchTerm = this.search.toLowerCase();
+      return this.flats.filter((flat) => {
+        return (
+          flat.nome.toLowerCase().includes(searchTerm) ||
+          flat.local.toLowerCase().includes(searchTerm) ||
+          flat.endereco.toLowerCase().includes(searchTerm) ||
+          flat.status.toLowerCase().includes(searchTerm)
+        );
+      });
+    },
+  },
 };
 </script>
 
 <style scoped>
-.font-weight-normal {
-  font-weight: normal;
+.v-card {
+  border-radius: 16px;
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
 }
-
-.font-weight-bold {
-  font-weight: bold;
+.v-card:hover {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+  transform: translateY(-5px);
 }
-
-.v-card-title,
-.v-card-subtitle {
-  padding-bottom: 0;
-}
-
-.v-card-text p {
-  margin: 8px 0;
-}
-
-.v-btn {
-  margin: 0 4px;
-}
-
-.calendar {
-  margin: 0 auto;
-}
-
-.v-calendar__day--event {
-  border-radius: 50%;
-  border: 2px solid red;
-}
-
-.calendar-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 16px;
-}
-
-.calendar-header span {
-  margin: 0 16px;
-  font-weight: bold;
-  font-size: 18px;
-}
-
-.calendar-month-selector {
-  display: flex;
-  align-items: center;
-}
-
 .status-occupied {
   border: 1px solid red;
 }
-
 .status-available {
   border: 1px solid green;
+}
+.center-actions {
+  display: flex;
+  justify-content: right;
 }
 </style>

@@ -4,14 +4,10 @@
 
     <v-row align="center">
       <v-col cols="12" sm="auto" class="d-flex align-items-center">
-        <v-icon class="mt-2" size="40">mdi-chart-bar</v-icon>
-        <h2 class="ml-2 mt-3 font-weight-normal">Dashboard</h2>
+        <v-icon color="primary" class="mt-2" size="40">mdi-chart-bar</v-icon>
+        <h2 class="ml-2 mt-3 font-weight-normal primary--text">Dashboard</h2>
       </v-col>
     </v-row>
-    <v-divider
-      class="my-3"
-      :style="{ backgroundColor: 'tertiary' }"
-    ></v-divider>
   </v-container>
 </template>
 

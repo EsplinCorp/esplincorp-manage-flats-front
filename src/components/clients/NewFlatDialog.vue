@@ -124,13 +124,15 @@ export default {
           .then((response) => {
             this.$emit("flatSaved", response.data);
             this.closeDialog();
-            Swal.fire(
-              "Sucesso!",
-              this.isEditingLocal
+            Swal.fire({
+              title: "Sucesso!",
+              text: this.editMode
                 ? "Flat atualizado com sucesso!"
                 : "Flat cadastrado com sucesso!",
-              "success",
-            );
+              icon: "success",
+              showConfirmButton: false,
+              timer: 1200,
+            });
           })
           .catch((error) => {
             console.error("Erro ao salvar flat:", error);

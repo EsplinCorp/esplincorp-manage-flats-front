@@ -4,14 +4,14 @@
 
     <v-row align="center">
       <v-col cols="12" sm="auto" class="d-flex align-items-center">
-        <v-icon class="mt-2" size="40">mdi-cash-register</v-icon>
-        <h2 class="ml-2 mt-3 font-weight-normal">Receitas e Despesas</h2>
+        <v-icon color="primary" class="mt-2" size="40"
+          >mdi-cash-register</v-icon
+        >
+        <h2 class="ml-2 mt-3 font-weight-normal primary--text">
+          Receitas e Despesas
+        </h2>
       </v-col>
     </v-row>
-    <v-divider
-      class="my-3"
-      :style="{ backgroundColor: 'tertiary' }"
-    ></v-divider>
   </v-container>
 </template>
 
