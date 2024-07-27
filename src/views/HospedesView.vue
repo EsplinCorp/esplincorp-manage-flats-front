@@ -242,7 +242,7 @@ export default {
       if (checkInDate <= today && checkOutDate >= today) {
         return { text: "Hospedado", color: "green" };
       } else if (checkInDate > today) {
-        return { text: "Reservada Confirmada", color: "orange" };
+        return { text: "Reserva Confirmada", color: "orange" };
       }
       return { text: "Não Hospedado", color: "grey" };
     },
