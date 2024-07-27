@@ -24,7 +24,7 @@
     <v-row>
       <v-col v-for="flat in filteredFlats" :key="flat.id" cols="12" md="4">
         <v-card
-          class="mb-4"
+          class="custom-card mb-4"
           :class="{
             'status-occupied': flat.status === 'Ocupado',
             'status-available': flat.status === 'Disponível',
@@ -44,7 +44,7 @@
                 </v-list-item-icon>
                 <v-list-item-content>
                   <v-list-item-title class="font-weight-bold"
-                    >Status</v-list-item-title
+                    >Status Atual</v-list-item-title
                   >
                   <v-list-item-subtitle
                     :class="
@@ -383,21 +383,30 @@ export default {
 </script>
 
 <style scoped>
-.v-card {
+.v-card,
+.custom-card {
   border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
   transition:
     box-shadow 0.3s ease,
     transform 0.3s ease;
 }
-.v-card:hover {
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
-  transform: translateY(-5px);
+
+.v-card:hover,
+.custom-card:hover {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3) !important;
+  transform: translateY(-10px);
 }
-.status-occupied {
-  border: 1px solid red;
+
+.dark-mode .v-card,
+.dark-mode .custom-card {
+  box-shadow: 0 px 15px rgba(255, 255, 255, 0.2) !important;
 }
-.status-available {
-  border: 1px solid green;
+
+.dark-mode .v-card:hover,
+.dark-mode .custom-card:hover {
+  box-shadow: 0 8px 30px rgba(255, 255, 255, 0.3) !important;
+  transform: translateY(-10px);
 }
 .center-actions {
   display: flex;

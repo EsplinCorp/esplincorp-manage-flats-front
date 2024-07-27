@@ -48,12 +48,10 @@
 
 .edit-button {
   background-color: var(--primary-color) !important;
-  ;
 }
 
 .delete-button {
   background-color: var(--secondary-color) !important;
-  ;
 }
 
 .edit-icon,

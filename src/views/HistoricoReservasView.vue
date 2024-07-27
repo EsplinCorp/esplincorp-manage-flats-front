@@ -2,16 +2,9 @@
   <v-row justify="center">
     <v-col cols="12" md="10" lg="12">
       <v-container>
-        <v-btn
-          class="action-button mb-5 mt-5"
-          color="primary"
-          @click="openNewHospedeDialog"
-          rounded
-          elevation="2"
-        >
-          Novo Hóspede
-        </v-btn>
         <hospedes-table ref="hospedesTable"></hospedes-table>
+
+        <v-col cols="12" md="3" class="mb-2"> </v-col>
 
         <v-row>
           <v-col cols="12" md="3" class="mb-7">
@@ -93,8 +86,8 @@
               <td class="d-none d-md-table-cell">{{ item.cpf }}</td>
               <td class="d-none d-md-table-cell">{{ item.email }}</td>
               <td class="d-none d-md-table-cell">{{ item.telefone }}</td>
-              <td>{{ item.dataEntrada | formatDate }}</td>
-              <td>{{ item.dataSaida | formatDate }}</td>
+              <td>{{ formatDate(item.dataEntrada) }}</td>
+              <td>{{ formatDate(item.dataSaida) }}</td>
               <td class="d-none d-md-table-cell">{{ item.flatName }}</td>
               <td class="d-none d-md-table-cell text-left">
                 {{
@@ -157,7 +150,6 @@ export default {
   data() {
     return {
       search: "",
-      statusFilter: ["Hospedado", "Reservado"],
       checkInDate: "",
       checkOutDate: "",
       menuCheckIn: false,
@@ -202,7 +194,7 @@ export default {
           .split("T")[0];
 
         // Verifica se o hóspede já foi hospedado
-        const wasHosted = hospedeCheckOut > today;
+        const wasHosted = hospedeCheckOut < today;
 
         // Verifica se as datas de check-in e check-out estão dentro do intervalo definido
         const dateInRange =
@@ -226,12 +218,6 @@ export default {
       }
       return "";
     },
-    filterGuests() {
-      // Filtrando hóspedes com base no status
-      this.filteredGuests = this.guests.filter((guest) =>
-        this.statusFilter.includes(guest.status),
-      );
-    },
     getStatus(item) {
       const today = new Date().toISOString().split("T")[0];
       const checkInDate = new Date(item.dataEntrada)
@@ -244,7 +230,7 @@ export default {
       } else if (checkInDate > today) {
         return { text: "Reservada Confirmada", color: "orange" };
       }
-      return { text: "Não Hospedado", color: "grey" };
+      return { text: "Hospedagem Concluída", color: "grey" };
     },
     openNewHospedeDialog() {
       this.$refs.hospedesTable.openDialog();
@@ -278,40 +264,16 @@ export default {
       });
     },
     deletarHospede(hospede) {
-      this.deleteHospede(hospede.id)
-        .then(() => {
-          Swal.fire({
-            title: "Excluído!",
-            text: "O hóspede foi excluído com sucesso.",
-            icon: "success",
-            showConfirmButton: false,
-            timer: 1200,
-          });
-          this.fetchHospedes();
-        })
-        .catch((error) => {
-          console.error("Erro ao excluir o hóspede:", error);
-          if (error.response && error.response.status === 401) {
-            this.$router.push("/login");
-            Swal.fire(
-              "Sessão expirada",
-              "Por favor, faça login novamente.",
-              "error",
-            );
-          } else {
-            Swal.fire(
-              "Erro",
-              "Erro ao excluir o hóspede. Por favor, tente novamente.",
-              "error",
-            );
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
+      this.deleteHospede(hospede.id).then(() => {
+        Swal.fire(
+          "Excluído!",
+          `O hóspede ${hospede.nome} foi excluído.`,
+          "success",
+        );
+      });
     },
   },
-  created() {
+  mounted() {
     this.fetchHospedes();
   },
 };

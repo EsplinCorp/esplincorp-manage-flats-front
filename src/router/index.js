@@ -7,6 +7,7 @@ import FinancasView from "@/views/FinancasView.vue";
 import PagamentosView from "@/views/PagamentosView.vue";
 import FlatsView from "@/views/FlatsView.vue";
 import ReservasView from "@/views/ReservasView.vue";
+import HistoricoReservasView from "@/views/HistoricoReservasView.vue";
 import ReceitasDespesasView from "@/views/ReceitasDespesasView.vue";
 import BalancoView from "@/views/BalancoView.vue";
 import LembretesView from "@/views/LembretesView.vue";

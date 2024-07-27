@@ -20,6 +20,9 @@
       <v-tab class="custom-tab" :class="{ 'selected-tab': tab === 1 }">
         <v-icon left>mdi-home</v-icon> Flats
       </v-tab>
+      <v-tab class="custom-tab" :class="{ 'selected-tab': tab === 2 }">
+        <v-icon left>mdi-clipboard-text</v-icon> Histórico de Reservas
+      </v-tab>
     </v-tabs>
 
     <v-tabs-items v-model="tab">
@@ -29,6 +32,9 @@
       <v-tab-item>
         <Flats />
       </v-tab-item>
+      <v-tab-item>
+        <HistoricoReservas />
+      </v-tab-item>
     </v-tabs-items>
   </v-container>
 </template>
@@ -37,6 +43,7 @@
 import { mapActions, mapState } from "vuex";
 import Hospedes from "@/views/HospedesView.vue";
 import Flats from "@/views/FlatsView.vue";
+import HistoricoReservas from "@/views/HistoricoReservasView.vue";
 
 export default {
   data() {
@@ -75,6 +82,7 @@ export default {
   components: {
     Hospedes,
     Flats,
+    HistoricoReservas,
   },
 };
 </script>
@@ -83,8 +91,9 @@ export default {
 .v-tab {
   text-transform: none;
 }
+
 .custom-tabs {
-  border-bottom: 1px solid #dee2e6;
+  border-bottom: 1px solid var(--primary-color);
 }
 
 .custom-tab {
@@ -103,7 +112,7 @@ export default {
 }
 
 .selected-tab {
-  border-color: #dee2e6;
+  border-color: var(--primary-color);
   border-bottom: 1px solid #dee2e6;
 }
 </style>
