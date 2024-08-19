@@ -7,8 +7,8 @@ import FinancasView from "@/views/FinancasView.vue";
 import PagamentosView from "@/views/PagamentosView.vue";
 import FlatsView from "@/views/FlatsView.vue";
 import ReservasView from "@/views/ReservasView.vue";
-import HistoricoReservasView from "@/views/HistoricoReservasView.vue";
-import ReceitasDespesasView from "@/views/ReceitasDespesasView.vue";
+import DespesasView from "@/views/DespesasView.vue";
+import ReceitasView from "@/views/ReceitasView.vue";
 import BalancoView from "@/views/BalancoView.vue";
 import LembretesView from "@/views/LembretesView.vue";
 import RelatoriosView from "@/views/RelatoriosView.vue";
@@ -61,9 +61,15 @@ const router = new Router({
       meta: { requiresAuth: true },
     },
     {
-      path: "/financas/receitas-despesas",
-      name: "receitas-despesas",
-      component: ReceitasDespesasView,
+      path: "/financas/receitas",
+      name: "receitas",
+      component: ReceitasView,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: "/financas/despesas",
+      name: "receitas",
+      component: DespesasView,
       meta: { requiresAuth: true },
     },
     {

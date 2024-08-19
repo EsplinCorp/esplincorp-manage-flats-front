@@ -40,23 +40,15 @@
           </v-list-item-icon>
           <v-list-item-title v-if="drawer">Reservas</v-list-item-title>
         </v-list-item>
-        <v-list-group prepend-icon="mdi-currency-usd" no-action>
-          <template v-slot:activator>
-            <v-list-item-title v-if="drawer">Finanças</v-list-item-title>
-            <v-list-item-icon v-else>
-              <v-icon>mdi-currency-usd</v-icon>
-            </v-list-item-icon>
-          </template>
-          <v-list-item link to="/financas/receitas-despesas">
-            <v-list-item-title>Receitas e Despesas</v-list-item-title>
-          </v-list-item>
-          <v-list-item link to="/financas/pagamento-funcionarios">
-            <v-list-item-title>Pagamentos</v-list-item-title>
-          </v-list-item>
-          <v-list-item link to="/financas/balanco">
-            <v-list-item-title>Balanço</v-list-item-title>
-          </v-list-item>
-        </v-list-group>
+        <v-list-item
+          :class="{ 'selected-item': isSelected('/financas') }"
+          @click="navigateTo('/financas')"
+        >
+          <v-list-item-icon>
+            <v-icon>mdi-currency-usd</v-icon>
+          </v-list-item-icon>
+          <v-list-item-title v-if="drawer">Finanças</v-list-item-title>
+        </v-list-item>
         <v-list-item link to="/relatorios">
           <v-list-item-icon>
             <v-icon>mdi-file-document</v-icon>
@@ -77,23 +69,23 @@
       <router-view />
     </v-main>
 
-    <!-- Rodapé -->
+    <!-- Rodapé
     <AppFooter
       :isMenuExpanded="drawer"
       v-if="shouldShowNavBar"
       class="footer"
-    />
+    /> -->
   </v-app>
 </template>
 
 <script>
 import { mapActions } from "vuex";
-import AppFooter from "@/components/common/AppFooter.vue"; // Import the AppFooter component
+// import AppFooter from "@/components/common/AppFooter.vue"; // Import the AppFooter component
 import "./styles/global.css";
 
 export default {
   components: {
-    AppFooter,
+    // AppFooter,
   },
   data() {
     return {

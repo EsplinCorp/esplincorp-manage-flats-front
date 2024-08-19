@@ -1,27 +1,53 @@
 <template>
   <v-container>
     <div class="mt-5"></div>
-
     <v-row align="center">
       <v-col cols="12" sm="auto" class="d-flex align-items-center">
         <v-icon color="primary" class="mt-2" size="35">mdi-currency-usd</v-icon>
-        <h2 class="ml-1 mt-3 font-weight-normal primary--text">Finanças</h2>
+        <h2 class="ml-2 mt-3 font-weight-normal primary--text">Finanças</h2>
       </v-col>
     </v-row>
-    <v-divider
-      class="my-3"
-      :style="{ backgroundColor: 'tertiary' }"
-    ></v-divider>
+
+    <div class="mt-10"></div>
+
+    <!-- Vuetify Tabs Component -->
+    <v-tabs v-model="tab" class="custom-tabs">
+      <v-tab class="custom-tab" :class="{ 'selected-tab': tab === 0 }">
+        <v-icon left>mdi-trending-up</v-icon> Receitas
+      </v-tab>
+      <v-tab class="custom-tab" :class="{ 'selected-tab': tab === 1 }">
+        <v-icon left>mdi-trending-down</v-icon> Despesas
+      </v-tab>
+      <v-tab class="custom-tab" :class="{ 'selected-tab': tab === 2 }">
+        <v-icon left>mdi-scale-balance</v-icon> Balanço
+      </v-tab>
+    </v-tabs>
+
+    <v-tabs-items background-color="#dee2e6" v-model="tab">
+      <v-tab-item>
+        <Receitas />
+      </v-tab-item>
+      <v-tab-item>
+        <Despesas />
+      </v-tab-item>
+      <v-tab-item>
+        <Balanco />
+      </v-tab-item>
+    </v-tabs-items>
   </v-container>
 </template>
 
 <script>
 import { mapActions, mapState } from "vuex";
+import Receitas from "@/views/ReceitasView.vue";
+import Despesas from "@/views/DespesasView.vue";
+import Balanco from "@/views/BalancoView.vue";
 
 export default {
   data() {
     return {
       isDesktop: window.innerWidth > 600,
+      tab: 0, // Set the default tab index (0 for the first tab)
     };
   },
   computed: {
@@ -32,7 +58,7 @@ export default {
   created() {
     window.addEventListener("resize", this.checkWidth);
   },
-  destroyed() {
+  beforeDestroy() {
     window.removeEventListener("resize", this.checkWidth);
   },
   methods: {
@@ -51,11 +77,40 @@ export default {
       this.isDesktop = window.innerWidth > 600;
     },
   },
+  components: {
+    Receitas,
+    Despesas,
+    Balanco,
+  },
 };
 </script>
 
 <style scoped>
-.font-weight-normal {
-  font-weight: normal;
+.v-tab {
+  text-transform: none;
+}
+
+.custom-tabs {
+  border-bottom: 1px solid var(--primary-color);
+}
+
+.custom-tab {
+  border: 1px solid transparent;
+  border-top-left-radius: 0.25rem;
+  border-top-right-radius: 0.25rem;
+  margin-bottom: -1px;
+  padding: 0.5rem 1rem;
+  transition:
+    border-color 0.15s ease-in-out,
+    background-color 0.15s ease-in-out;
+}
+
+.custom-tab:hover {
+  border-color: #e9ecef #e9ecef #dee2e6;
+}
+
+.selected-tab {
+  border-color: var(--primary-color);
+  border-bottom: 1px solid #dee2e6;
 }
 </style>
