@@ -35,7 +35,7 @@ export default {
   height: 50px;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
   position: relative;
 }
 
@@ -49,7 +49,12 @@ export default {
   background-color: #006ee6 !important;
 }
 
+.v-footer {
+  transition: margin-left 0.3s ease; /* Adicionar transição suave */
+  margin-left: 56px;
+}
+
 .footer-expanded {
-  margin-right: 256px;
+  margin-left: 220px;
 }
 </style>

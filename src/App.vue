@@ -1,66 +1,177 @@
 <template>
   <v-app :dark="darkTheme">
-    <!-- Barra de Navegação Superior -->
-    <v-app-bar v-if="shouldShowNavBar" app>
-      <v-app-bar-nav-icon @click="toggleDrawer"></v-app-bar-nav-icon>
-      <v-spacer></v-spacer>
-      <v-btn icon @click="toggleDarkTheme">
-        <v-icon>{{
-          darkTheme ? "mdi-white-balance-sunny" : "mdi-weather-night"
-        }}</v-icon>
-      </v-btn>
-      <v-btn icon @click="performLogout">
-        <v-icon>mdi-logout</v-icon>
-      </v-btn>
-    </v-app-bar>
 
     <!-- Menu Lateral -->
     <v-navigation-drawer
       v-if="shouldShowNavBar"
       v-model="drawer"
+      :mini-variant="!drawer"
       app
+      permanent
       class="my-drawer"
-    >
-      <v-list>
-        <v-list-item
-          :class="{ 'selected-item': isSelected('/') }"
-          @click="navigateTo('/')"
-        >
-          <v-list-item-icon>
-            <v-icon>mdi-chart-bar</v-icon>
-          </v-list-item-icon>
-          <v-list-item-title v-if="drawer">Dashboard</v-list-item-title>
-        </v-list-item>
-        <v-list-item
-          :class="{ 'selected-item': isSelected('/reservas') }"
-          @click="navigateTo('/reservas')"
-        >
-          <v-list-item-icon>
-            <v-icon>mdi-calendar-check</v-icon>
-          </v-list-item-icon>
-          <v-list-item-title v-if="drawer">Reservas</v-list-item-title>
-        </v-list-item>
-        <v-list-item
-          :class="{ 'selected-item': isSelected('/financas') }"
-          @click="navigateTo('/financas')"
-        >
-          <v-list-item-icon>
-            <v-icon>mdi-currency-usd</v-icon>
-          </v-list-item-icon>
-          <v-list-item-title v-if="drawer">Finanças</v-list-item-title>
-        </v-list-item>
-        <v-list-item link to="/relatorios">
-          <v-list-item-icon>
-            <v-icon>mdi-file-document</v-icon>
-          </v-list-item-icon>
-          <v-list-item-title v-if="drawer">Relatórios</v-list-item-title>
-        </v-list-item>
-        <v-list-item link to="/lembretes">
-          <v-list-item-icon>
-            <v-icon>mdi-bell</v-icon>
-          </v-list-item-icon>
-          <v-list-item-title v-if="drawer">Lembretes</v-list-item-title>
-        </v-list-item>
+      width="220"
+      >
+        <v-list class="d-flex flex-column fill-height compact-menu">
+        <!-- Itens principais do menu -->
+        <div class="flex-grow-1">
+          <v-list-item
+            :class="{ 'selected-item': isSelected('/') }"
+            @click="navigateTo('/')"
+          >
+            <v-tooltip v-if="!drawer" bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-list-item-icon v-bind="attrs" v-on="on">
+                  <v-icon>mdi-chart-bar</v-icon>
+                </v-list-item-icon>
+              </template>
+              <span>Dashboard</span>
+            </v-tooltip>
+            <v-list-item-icon v-else>
+              <v-icon>mdi-chart-bar</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title>Dashboard</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+          <v-list-item
+            :class="{ 'selected-item': isSelected('/reservas') }"
+            @click="navigateTo('/reservas')"
+          >
+            <v-tooltip v-if="!drawer" bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-list-item-icon v-bind="attrs" v-on="on">
+                  <v-icon>mdi-calendar-check-outline</v-icon>
+                </v-list-item-icon>
+              </template>
+              <span>Reservas</span>
+            </v-tooltip>
+            <v-list-item-icon v-else>
+              <v-icon>mdi-calendar-check-outline</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title>Reservas</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+          <v-list-item
+            :class="{ 'selected-item': isSelected('/financas') }"
+            @click="navigateTo('/financas')"
+          >
+            <v-tooltip v-if="!drawer" bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-list-item-icon v-bind="attrs" v-on="on">
+                  <v-icon>mdi-currency-usd</v-icon>
+                </v-list-item-icon>
+              </template>
+              <span>Finanças</span>
+            </v-tooltip>
+            <v-list-item-icon v-else>
+              <v-icon>mdi-currency-usd</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title>Finanças</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+          <v-list-item
+            :class="{ 'selected-item': isSelected('/relatorios') }"
+            @click="navigateTo('/relatorios')"
+          >
+            <v-tooltip v-if="!drawer" bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-list-item-icon v-bind="attrs" v-on="on">
+                  <v-icon>mdi-file-document-outline</v-icon>
+                </v-list-item-icon>
+              </template>
+              <span>Relatórios</span>
+            </v-tooltip>
+            <v-list-item-icon v-else>
+              <v-icon>mdi-file-document-outline</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title>Relatórios</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+          <v-list-item
+            :class="{ 'selected-item': isSelected('/lembretes') }"
+            @click="navigateTo('/lembretes')"
+          >
+            <v-tooltip v-if="!drawer" bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-list-item-icon v-bind="attrs" v-on="on">
+                  <v-icon>mdi-bell-outline</v-icon>
+                </v-list-item-icon>
+              </template>
+              <span>Lembretes</span>
+            </v-tooltip>
+            <v-list-item-icon v-else>
+              <v-icon>mdi-bell-outline</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title>Lembretes</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </div>
+
+        <!-- Botões no final do menu lateral -->
+        <div class="mt-auto">
+          <v-divider></v-divider>
+          <v-list-item @click="toggleDrawer" class="menu-bottom-item">
+            <v-tooltip v-if="!drawer" bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-list-item-icon v-bind="attrs" v-on="on">
+                  <v-icon>mdi-menu-close</v-icon>
+                </v-list-item-icon>
+              </template>
+              <span>Expandir Menu</span>
+            </v-tooltip>
+            <v-tooltip v-else bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-list-item-icon v-bind="attrs" v-on="on">
+                  <v-icon>mdi-menu-open</v-icon>
+                </v-list-item-icon>
+              </template>
+              <span>Recolher Menu</span>
+            </v-tooltip>
+            <v-list-item-content>
+              <v-list-item-title>{{ drawer ? "Recolher Menu" : "Expandir Menu" }}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+          <v-list-item @click="toggleDarkTheme" class="menu-bottom-item">
+            <v-tooltip v-if="!drawer" bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-list-item-icon v-bind="attrs" v-on="on">
+                  <v-icon>{{
+                    darkTheme ? "mdi-white-balance-sunny" : "mdi-weather-night"
+                  }}</v-icon>
+                </v-list-item-icon>
+              </template>
+              <span>{{ darkTheme ? "Ativar Modo Claro" : "Ativar Modo Escuro" }}</span>
+            </v-tooltip>
+            <v-list-item-icon v-else>
+              <v-icon>{{
+                darkTheme ? "mdi-white-balance-sunny" : "mdi-weather-night"
+              }}</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title>{{ darkTheme ? "Ativar Modo Claro" : "Ativar Modo Escuro" }}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+          <v-list-item @click="performLogout" class="menu-bottom-item">
+            <v-tooltip v-if="!drawer" bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-list-item-icon v-bind="attrs" v-on="on">
+                  <v-icon>mdi-logout</v-icon>
+                </v-list-item-icon>
+              </template>
+              <span>Sair</span>
+            </v-tooltip>
+            <v-list-item-icon v-else>
+              <v-icon>mdi-logout</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title>Sair</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </div>
       </v-list>
     </v-navigation-drawer>
 
@@ -69,23 +180,22 @@
       <router-view />
     </v-main>
 
-    <!-- Rodapé
     <AppFooter
       :isMenuExpanded="drawer"
       v-if="shouldShowNavBar"
       class="footer"
-    /> -->
+    />
   </v-app>
 </template>
 
 <script>
 import { mapActions } from "vuex";
-// import AppFooter from "@/components/common/AppFooter.vue"; // Import the AppFooter component
+import AppFooter from "@/components/common/AppFooter.vue";
 import "./styles/global.css";
 
 export default {
   components: {
-    // AppFooter,
+    AppFooter,
   },
   data() {
     return {
@@ -170,5 +280,44 @@ export default {
   bottom: 0;
   width: 100%;
   transition: margin-left 0.3s;
+}
+
+.menu-item {
+  margin-bottom: 16px;
+}
+
+.fill-height {
+  height: 100%;
+}
+
+.compact-menu .v-list-item__icon {
+  margin-right: 14px;
+}
+
+.my-drawer {
+  background-color: #f8f9fa;
+  border-right: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.theme--dark .my-drawer {
+  background-color: #2d3748;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.selected-item {
+  background-color: rgba(66, 153, 225, 0.1);
+  border-left: 3.5px solid var(--primary-color);
+}
+
+.v-list {
+  padding-top: 0 !important;
+}
+
+.v-navigation-drawer .v-list {
+  padding: 0;
+}
+
+.flex-grow-1 .v-list-item:first-child {
+  margin-top: 0;
 }
 </style>
