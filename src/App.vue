@@ -5,7 +5,7 @@
     <v-navigation-drawer
       v-if="shouldShowNavBar"
       v-model="drawer"
-      :mini-variant="!drawer"
+      :mini-variant="drawer"
       app
       permanent
       class="my-drawer"
@@ -18,7 +18,7 @@
             :class="{ 'selected-item': isSelected('/') }"
             @click="navigateTo('/')"
           >
-            <v-tooltip v-if="!drawer" bottom>
+            <v-tooltip v-if="drawer" bottom>
               <template v-slot:activator="{ on, attrs }">
                 <v-list-item-icon v-bind="attrs" v-on="on">
                   <v-icon>mdi-chart-bar</v-icon>
@@ -37,16 +37,16 @@
             :class="{ 'selected-item': isSelected('/reservas') }"
             @click="navigateTo('/reservas')"
           >
-            <v-tooltip v-if="!drawer" bottom>
+            <v-tooltip v-if="drawer" bottom>
               <template v-slot:activator="{ on, attrs }">
                 <v-list-item-icon v-bind="attrs" v-on="on">
-                  <v-icon>mdi-calendar-check-outline</v-icon>
+                  <v-icon>mdi-calendar-outline</v-icon>
                 </v-list-item-icon>
               </template>
               <span>Reservas</span>
             </v-tooltip>
             <v-list-item-icon v-else>
-              <v-icon>mdi-calendar-check-outline</v-icon>
+              <v-icon>mdi-calendar-outline</v-icon>
             </v-list-item-icon>
             <v-list-item-content>
               <v-list-item-title>Reservas</v-list-item-title>
@@ -56,7 +56,7 @@
             :class="{ 'selected-item': isSelected('/financas') }"
             @click="navigateTo('/financas')"
           >
-            <v-tooltip v-if="!drawer" bottom>
+            <v-tooltip v-if="drawer" bottom>
               <template v-slot:activator="{ on, attrs }">
                 <v-list-item-icon v-bind="attrs" v-on="on">
                   <v-icon>mdi-currency-usd</v-icon>
@@ -75,7 +75,7 @@
             :class="{ 'selected-item': isSelected('/relatorios') }"
             @click="navigateTo('/relatorios')"
           >
-            <v-tooltip v-if="!drawer" bottom>
+            <v-tooltip v-if="drawer" bottom>
               <template v-slot:activator="{ on, attrs }">
                 <v-list-item-icon v-bind="attrs" v-on="on">
                   <v-icon>mdi-file-document-outline</v-icon>
@@ -94,7 +94,7 @@
             :class="{ 'selected-item': isSelected('/lembretes') }"
             @click="navigateTo('/lembretes')"
           >
-            <v-tooltip v-if="!drawer" bottom>
+            <v-tooltip v-if="drawer" bottom>
               <template v-slot:activator="{ on, attrs }">
                 <v-list-item-icon v-bind="attrs" v-on="on">
                   <v-icon>mdi-bell-outline</v-icon>
@@ -115,7 +115,7 @@
         <div class="mt-auto">
           <v-divider></v-divider>
           <v-list-item @click="toggleDrawer" class="menu-bottom-item">
-            <v-tooltip v-if="!drawer" bottom>
+            <v-tooltip v-if="drawer" bottom>
               <template v-slot:activator="{ on, attrs }">
                 <v-list-item-icon v-bind="attrs" v-on="on">
                   <v-icon>mdi-menu-close</v-icon>
@@ -132,11 +132,11 @@
               <span>Recolher Menu</span>
             </v-tooltip>
             <v-list-item-content>
-              <v-list-item-title>{{ drawer ? "Recolher Menu" : "Expandir Menu" }}</v-list-item-title>
+              <v-list-item-title>{{ drawer ? "Expandir Menu" : "Recolher Menu" }}</v-list-item-title>
             </v-list-item-content>
           </v-list-item>
           <v-list-item @click="toggleDarkTheme" class="menu-bottom-item">
-            <v-tooltip v-if="!drawer" bottom>
+            <v-tooltip v-if="drawer" bottom>
               <template v-slot:activator="{ on, attrs }">
                 <v-list-item-icon v-bind="attrs" v-on="on">
                   <v-icon>{{
@@ -156,7 +156,7 @@
             </v-list-item-content>
           </v-list-item>
           <v-list-item @click="performLogout" class="menu-bottom-item">
-            <v-tooltip v-if="!drawer" bottom>
+            <v-tooltip v-if="drawer" bottom>
               <template v-slot:activator="{ on, attrs }">
                 <v-list-item-icon v-bind="attrs" v-on="on">
                   <v-icon>mdi-logout</v-icon>
@@ -180,22 +180,22 @@
       <router-view />
     </v-main>
 
-    <AppFooter
+    <!-- <AppFooter
       :isMenuExpanded="drawer"
       v-if="shouldShowNavBar"
       class="footer"
-    />
+    /> -->
   </v-app>
 </template>
 
 <script>
 import { mapActions } from "vuex";
-import AppFooter from "@/components/common/AppFooter.vue";
+// import AppFooter from "@/components/common/AppFooter.vue";
 import "./styles/global.css";
 
 export default {
   components: {
-    AppFooter,
+    // AppFooter,
   },
   data() {
     return {
@@ -213,6 +213,7 @@ export default {
   },
   created() {
     this.$vuetify.theme.dark = this.darkTheme;
+    this.updateCssVariables();
   },
   computed: {
     currentYear() {
@@ -231,10 +232,25 @@ export default {
     darkTheme(newVal) {
       this.$vuetify.theme.dark = newVal;
       localStorage.setItem("darkTheme", JSON.stringify(newVal));
+      this.updateCssVariables();
     },
   },
   methods: {
     ...mapActions(["loginUser", "logoutUser"]),
+
+    updateCssVariables() {
+      // Define CSS variables based on Vuetify theme
+      const primaryColor = this.darkTheme 
+        ? this.$vuetify.theme.themes.dark.primary 
+        : this.$vuetify.theme.themes.light.primary;
+      
+      const secondaryColor = this.darkTheme 
+        ? this.$vuetify.theme.themes.dark.secondary 
+        : this.$vuetify.theme.themes.light.secondary;
+        
+      document.documentElement.style.setProperty('--primary-color', primaryColor);
+      document.documentElement.style.setProperty('--secondary-color', secondaryColor);
+    },
 
     toggleDrawer() {
       this.drawer = !this.drawer;
@@ -274,6 +290,22 @@ export default {
 };
 </script>
 
+<style>
+/* Definições globais que devem aplicar-se a toda a aplicação */
+:root {
+  --primary-color: #3b82f6;
+  --secondary-color: #616161;
+}
+
+.font-weight-normal {
+  font-weight: normal !important;
+}
+
+.primary--text {
+  color: var(--primary-color) !important;
+}
+</style>
+
 <style scoped>
 .footer {
   position: fixed;
@@ -300,13 +332,14 @@ export default {
 }
 
 .theme--dark .my-drawer {
-  background-color: #2d3748;
+  background-color: #000000;
+  /* background-color: #2d3748; */
   border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .selected-item {
   background-color: rgba(66, 153, 225, 0.1);
-  border-left: 3.5px solid var(--primary-color);
+  border-left: 3px solid var(--primary-color);
 }
 
 .v-list {

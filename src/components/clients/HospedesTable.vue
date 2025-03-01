@@ -180,25 +180,49 @@ export default {
     },
 
     formatDateToBrazilian(dateString) {
+      if (!dateString) return '';
+      
+      // Simples conversão de formato sem manipulação de data
       const [year, month, day] = dateString.split("-");
       return `${day}/${month}/${year}`;
     },
+    
+    formatDateToISO(dateString) {
+      if (!dateString) return '';
+      
+      // Se já estiver no formato ISO (YYYY-MM-DD)
+      if (dateString.includes('-') && dateString.split('-').length === 3) {
+        return dateString;
+      }
+      
+      // Converter de formato brasileiro (DD/MM/YYYY) para ISO
+      if (dateString.includes('/')) {
+        const [day, month, year] = dateString.split('/');
+        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+      }
+      
+      return dateString;
+    },
+    
     async salvarHospede() {
       if (this.$refs.form.validate()) {
         try {
+          // Criar cópia para não modificar o objeto original
+          const hospedeCopy = { ...this.hospede };
+          
           // Formatar as datas para o formato esperado pelo backend
-          this.hospede.dataEntrada = this.formatDateToBrazilian(
-            this.hospede.dataEntrada,
+          hospedeCopy.dataEntrada = this.formatDateToBrazilian(
+            hospedeCopy.dataEntrada,
           );
-          this.hospede.dataSaida = this.formatDateToBrazilian(
-            this.hospede.dataSaida,
+          hospedeCopy.dataSaida = this.formatDateToBrazilian(
+            hospedeCopy.dataSaida,
           );
 
           if (this.editMode) {
             await axios
               .post(
-                `http://localhost:8080/api/hospedes/${this.hospede.id}/atualizar`,
-                this.hospede,
+                `http://localhost:8080/api/hospedes/${hospedeCopy.id}/atualizar`,
+                hospedeCopy,
                 {
                   headers: {
                     Authorization: `Bearer ${localStorage.getItem("userToken")}`,
@@ -214,7 +238,7 @@ export default {
             await axios
               .post(
                 "http://localhost:8080/api/hospedes/registrar",
-                this.hospede,
+                hospedeCopy,
                 {
                   headers: {
                     Authorization: `Bearer ${localStorage.getItem("userToken")}`,
@@ -264,6 +288,15 @@ export default {
       this.dialog = true;
       if (edit && this.hospedeParaEditar) {
         this.hospede = { ...this.hospedeParaEditar };
+        
+        // Converter datas para o formato ISO necessário para os inputs type="date"
+        if (this.hospede.dataEntrada && this.hospede.dataEntrada.includes('/')) {
+          this.hospede.dataEntrada = this.formatDateToISO(this.hospede.dataEntrada);
+        }
+        
+        if (this.hospede.dataSaida && this.hospede.dataSaida.includes('/')) {
+          this.hospede.dataSaida = this.formatDateToISO(this.hospede.dataSaida);
+        }
       } else {
         this.hospede = this.getDefaultHospede();
       }
@@ -288,6 +321,15 @@ export default {
       if (newValue) {
         this.hospede = { ...newValue };
         this.editMode = true;
+        
+        // Converter datas para o formato ISO necessário para os inputs type="date"
+        if (this.hospede.dataEntrada && this.hospede.dataEntrada.includes('/')) {
+          this.hospede.dataEntrada = this.formatDateToISO(this.hospede.dataEntrada);
+        }
+        
+        if (this.hospede.dataSaida && this.hospede.dataSaida.includes('/')) {
+          this.hospede.dataSaida = this.formatDateToISO(this.hospede.dataSaida);
+        }
       } else {
         this.editMode = false;
         this.resetHospedeForm();
@@ -300,6 +342,15 @@ export default {
     if (this.hospedeParaEditar) {
       this.hospede = { ...this.hospedeParaEditar };
       this.editMode = true;
+      
+      // Converter datas para o formato ISO necessário para os inputs type="date"
+      if (this.hospede.dataEntrada && this.hospede.dataEntrada.includes('/')) {
+        this.hospede.dataEntrada = this.formatDateToISO(this.hospede.dataEntrada);
+      }
+      
+      if (this.hospede.dataSaida && this.hospede.dataSaida.includes('/')) {
+        this.hospede.dataSaida = this.formatDateToISO(this.hospede.dataSaida);
+      }
     }
   },
 };

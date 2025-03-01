@@ -33,16 +33,12 @@
   background-color: var(--secondary-color) !important;
 }
 
-.action-button {
-  border-radius: 5px;
-  text-transform: none;
-}
-
+.action-button,
 .edit-button,
 .delete-button {
-  border-radius: 5px;
+  border-radius: 5px !important;;
   color: #ffffff !important;
-  text-transform: none;
+  text-transform: none !important;
   margin: 5px;
 }
 
