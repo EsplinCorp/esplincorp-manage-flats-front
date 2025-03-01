@@ -3,8 +3,7 @@
     <div class="mt-5"></div>
     <v-row align="center">
       <v-col cols="12" sm="auto" class="d-flex align-items-center">
-        <v-icon color="primary" class="mt-2" size="35">mdi-calendar</v-icon>
-        <h2 class="ml-2 mt-3 font-weight-normal primary--text">Reservas</h2>
+        <h2 class="ml-2 mt-3 font-weight-normal">Reservas</h2>
       </v-col>
     </v-row>
 
@@ -13,13 +12,16 @@
     <!-- Vuetify Tabs Component -->
     <v-tabs v-model="tab" class="custom-tabs">
       <v-tab class="custom-tab" :class="{ 'selected-tab': tab === 0 }">
-        <v-icon left>mdi-account-group</v-icon> Hóspedes
+        <span v-html="octicons.people.toSVG({ class: 'octicon', style: tab === 0 ? 'fill: var(--primary-color);' : '' })"></span>
+        <span class="tab-text">Hóspedes</span>
       </v-tab>
       <v-tab class="custom-tab" :class="{ 'selected-tab': tab === 1 }">
-        <v-icon left>mdi-home</v-icon> Flats
+        <span v-html="octicons.home.toSVG({ class: 'octicon', style: tab === 1 ? 'fill: var(--primary-color);' : '' })"></span>
+        <span class="tab-text">Flats</span>
       </v-tab>
       <v-tab class="custom-tab" :class="{ 'selected-tab': tab === 2 }">
-        <v-icon left>mdi-calendar-check</v-icon> Reservas Concluídas
+        <span v-html="octicons['check-circle'].toSVG({ class: 'octicon', style: tab === 2 ? 'fill: var(--primary-color);' : '' })"></span>
+        <span class="tab-text">Hospedagens Concluídas</span>
       </v-tab>
     </v-tabs>
 
@@ -39,6 +41,7 @@
 
 <script>
 import { mapActions, mapState } from "vuex";
+import * as octicons from "@primer/octicons";
 import Hospedes from "@/views/HospedesView.vue";
 import Flats from "@/views/FlatsView.vue";
 import HistoricoReservas from "@/views/HistoricoReservasView.vue";
@@ -46,6 +49,7 @@ import HistoricoReservas from "@/views/HistoricoReservasView.vue";
 export default {
   data() {
     return {
+      octicons,
       isDesktop: window.innerWidth > 600,
       tab: 0, // Set the default tab index (0 for the first tab)
     };
@@ -112,5 +116,9 @@ export default {
 .selected-tab {
   border-color: var(--primary-color);
   border-bottom: 1px solid #dee2e6;
+}
+
+.tab-text {
+  margin-left: 8px;
 }
 </style>

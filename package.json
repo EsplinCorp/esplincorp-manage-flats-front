@@ -12,6 +12,7 @@
   "dependencies": {
     "@coreui/coreui": "^2.1.16",
     "@coreui/vue": "^2.1.2",
+    "@primer/octicons": "^19.15.0",
     "@sweetalert2/theme-dark": "^5.0.17",
     "axios": "^1.6.0",
     "core-js": "^3.8.3",

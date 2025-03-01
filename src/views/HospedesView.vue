@@ -114,7 +114,7 @@
                       v-on="on"
                       @click="editarHospede(item)"
                     >
-                      <v-icon>mdi-pencil-outline</v-icon>
+                      <span v-html="octicons['pencil'].toSVG({ class: 'octicon', style: 'fill: var(--primary-color);'})"></span>
                     </v-btn>
                   </template>
                   <span>Editar Hóspede</span>
@@ -129,7 +129,7 @@
                       v-on="on"
                       @click="confirmDeleteHospede(item)"
                     >
-                      <v-icon>mdi-delete-outline</v-icon>
+                    <span v-html="octicons['trash'].toSVG({ class: 'octicon', style: 'fill: var(--primary-color);'})"></span>
                     </v-btn>
                   </template>
                   <span>Excluir Hóspede</span>
@@ -149,6 +149,7 @@ import { mapActions, mapState } from "vuex";
 import Swal from "sweetalert2";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import * as octicons from "@primer/octicons";
 
 export default {
   components: {
@@ -175,6 +176,7 @@ export default {
         { text: "Total", value: "valorTotal" },
         { text: "Ações", value: "actions", sortable: false },
       ],
+      octicons,
     };
   },
   computed: {
@@ -432,4 +434,5 @@ export default {
 .text-left {
   text-align: left;
 }
+
 </style>
