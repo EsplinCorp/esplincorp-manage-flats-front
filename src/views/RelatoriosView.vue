@@ -4,10 +4,7 @@
 
     <v-row align="center">
       <v-col cols="12" sm="auto" class="d-flex align-items-center">
-        <v-icon color="primary" class="mt-2" size="35"
-          >mdi-file-document</v-icon
-        >
-        <h2 class="ml-2 mt-3 font-weight-normal primary--text">Relatórios</h2>
+        <h2 class="ml-2 mt-3 font-weight-normal">Relatórios</h2>
       </v-col>
     </v-row>
   </v-container>

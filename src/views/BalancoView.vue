@@ -1,15 +1,6 @@
 <template>
   <v-container>
     <div class="mt-5"></div>
-
-    <v-row align="center">
-      <v-col cols="12" sm="auto" class="d-flex align-items-center">
-        <v-icon color="primary" class="mt-2" size="40"
-          >mdi-scale-balance</v-icon
-        >
-        <h2 class="ml-2 mt-3 font-weight-normal primary--text">Balanço</h2>
-      </v-col>
-    </v-row>
   </v-container>
 </template>
 

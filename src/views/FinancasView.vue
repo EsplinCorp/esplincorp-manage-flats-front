@@ -3,8 +3,7 @@
     <div class="mt-5"></div>
     <v-row align="center">
       <v-col cols="12" sm="auto" class="d-flex align-items-center">
-        <v-icon color="primary" class="mt-2" size="35">mdi-currency-usd</v-icon>
-        <h2 class="ml-2 mt-3 font-weight-normal primary--text">Finanças</h2>
+        <h2 class="ml-2 mt-3 font-weight-normal">Finanças</h2>
       </v-col>
     </v-row>
 
@@ -13,13 +12,16 @@
     <!-- Vuetify Tabs Component -->
     <v-tabs v-model="tab" class="custom-tabs">
       <v-tab class="custom-tab" :class="{ 'selected-tab': tab === 0 }">
-        <v-icon left>mdi-trending-up</v-icon> Receitas
+        <span v-html="octicons['arrow-up-right'].toSVG({ class: 'octicon', style: tab === 0 ? 'fill: var(--primary-color);' : '' })"></span>
+        <span class="tab-text">Receitas</span>
       </v-tab>
       <v-tab class="custom-tab" :class="{ 'selected-tab': tab === 1 }">
-        <v-icon left>mdi-trending-down</v-icon> Despesas
+        <span v-html="octicons['arrow-down-right'].toSVG({ class: 'octicon', style: tab === 1 ? 'fill: var(--primary-color);' : '' })"></span>
+        <span class="tab-text">Despesas</span>
       </v-tab>
       <v-tab class="custom-tab" :class="{ 'selected-tab': tab === 2 }">
-        <v-icon left>mdi-scale-balance</v-icon> Balanço
+        <span v-html="octicons['law'].toSVG({ class: 'octicon', style: tab === 2 ? 'fill: var(--primary-color);' : '' })"></span>
+        <span class="tab-text">Balanço</span>
       </v-tab>
     </v-tabs>
 
@@ -42,12 +44,14 @@ import { mapActions, mapState } from "vuex";
 import Receitas from "@/views/ReceitasView.vue";
 import Despesas from "@/views/DespesasView.vue";
 import Balanco from "@/views/BalancoView.vue";
+import * as octicons from "@primer/octicons";
 
 export default {
   data() {
     return {
       isDesktop: window.innerWidth > 600,
       tab: 0, // Set the default tab index (0 for the first tab)
+      octicons,
     };
   },
   computed: {
@@ -112,5 +116,9 @@ export default {
 .selected-tab {
   border-color: var(--primary-color);
   border-bottom: 1px solid #dee2e6;
+}
+
+.tab-text {
+  margin-left: 8px;
 }
 </style>

@@ -4,8 +4,7 @@
 
     <v-row align="center">
       <v-col cols="12" sm="auto" class="d-flex align-items-center">
-        <v-icon color="primary" class="mt-2" size="35">mdi-bell</v-icon>
-        <h2 class="ml-2 mt-3 font-weight-normal primary--text">Lembretes</h2>
+        <h2 class="ml-2 mt-3 font-weight-normal">Lembretes</h2>
       </v-col>
     </v-row>
   </v-container>

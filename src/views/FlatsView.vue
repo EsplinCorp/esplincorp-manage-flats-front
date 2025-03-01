@@ -38,9 +38,7 @@
             <v-list dense>
               <v-list-item>
                 <v-list-item-icon>
-                  <v-icon :color="flat.status === 'Ocupado' ? 'red' : 'green'"
-                    >mdi-label</v-icon
-                  >
+                  <span v-html="octicons.tag.toSVG({ class: 'octicon', style: flat.status === 'Ocupado' ? 'fill: red;' : 'fill: green;' })"></span>
                 </v-list-item-icon>
                 <v-list-item-content>
                   <v-list-item-title class="font-weight-bold"
@@ -56,7 +54,7 @@
               </v-list-item>
               <v-list-item>
                 <v-list-item-icon>
-                  <v-icon>mdi-map-marker</v-icon>
+                  <span v-html="octicons.location.toSVG({ class: 'octicon' })"></span>
                 </v-list-item-icon>
                 <v-list-item-content>
                   <v-list-item-title class="font-weight-bold"
@@ -69,7 +67,7 @@
               </v-list-item>
               <v-list-item>
                 <v-list-item-icon>
-                  <v-icon>mdi-account-group</v-icon>
+                  <span v-html="octicons.people.toSVG({ class: 'octicon' })"></span>
                 </v-list-item-icon>
                 <v-list-item-content>
                   <v-list-item-title class="font-weight-bold"
@@ -85,7 +83,7 @@
               </v-list-item>
               <v-list-item>
                 <v-list-item-icon>
-                  <v-icon>mdi-currency-usd</v-icon>
+                  <span v-html="octicons['database'].toSVG({ class: 'octicon' })"></span>
                 </v-list-item-icon>
                 <v-list-item-content>
                   <v-list-item-title class="font-weight-bold"
@@ -134,13 +132,13 @@
           Disponibilidade do Flat
           <v-spacer></v-spacer>
           <v-btn icon @click="availabilityDialog = false">
-            <v-icon>mdi-close</v-icon>
+            <span v-html="octicons.x.toSVG({ class: 'octicon' })"></span>
           </v-btn>
         </v-card-title>
         <v-card-text>
           <div class="calendar-header">
             <v-btn icon @click="prevMonth">
-              <v-icon>mdi-chevron-left</v-icon>
+              <span v-html="octicons['chevron-left'].toSVG({ class: 'octicon' })"></span>
             </v-btn>
             <v-menu
               v-model="monthMenu"
@@ -153,7 +151,7 @@
               <template v-slot:activator="{ on, attrs }">
                 <v-btn v-bind="attrs" v-on="on" class="calendar-month-selector">
                   {{ formatDate(currentMonth, "MMMM yyyy") }}
-                  <v-icon right>mdi-chevron-down</v-icon>
+                  <span v-html="octicons['chevron-down'].toSVG({ class: 'octicon' })"></span>
                 </v-btn>
               </template>
               <v-list>
@@ -167,7 +165,7 @@
               </v-list>
             </v-menu>
             <v-btn icon @click="nextMonth">
-              <v-icon>mdi-chevron-right</v-icon>
+              <span v-html="octicons['chevron-right'].toSVG({ class: 'octicon' })"></span>
             </v-btn>
           </div>
           <v-calendar
@@ -203,6 +201,7 @@ import Swal from "sweetalert2";
 import { addMonths, subMonths, format, setMonth, startOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import NewFlatDialog from "@/components/clients/NewFlatDialog.vue";
+import * as octicons from "@primer/octicons";
 
 export default {
   components: {
@@ -233,6 +232,7 @@ export default {
       ],
       selectedFlat: null,
       isEditing: false,
+      octicons,
     };
   },
   created() {
@@ -411,5 +411,11 @@ export default {
 .center-actions {
   display: flex;
   justify-content: right;
+}
+.octicon {
+  fill: currentColor;
+}
+.selected-icon {
+  fill: var(--primary-color);
 }
 </style>

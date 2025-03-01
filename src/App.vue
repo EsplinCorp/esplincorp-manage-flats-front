@@ -21,13 +21,13 @@
             <v-tooltip v-if="drawer" bottom>
               <template v-slot:activator="{ on, attrs }">
                 <v-list-item-icon v-bind="attrs" v-on="on">
-                  <v-icon>mdi-chart-bar</v-icon>
+                  <span v-html="octicons.graph.toSVG({ class: 'octicon' })"></span>
                 </v-list-item-icon>
               </template>
               <span>Dashboard</span>
             </v-tooltip>
             <v-list-item-icon v-else>
-              <v-icon>mdi-chart-bar</v-icon>
+              <span v-html="octicons.home.toSVG({ class: 'octicon' })"></span>
             </v-list-item-icon>
             <v-list-item-content>
               <v-list-item-title>Dashboard</v-list-item-title>
@@ -40,13 +40,13 @@
             <v-tooltip v-if="drawer" bottom>
               <template v-slot:activator="{ on, attrs }">
                 <v-list-item-icon v-bind="attrs" v-on="on">
-                  <v-icon>mdi-calendar-outline</v-icon>
+                  <span v-html="octicons.calendar.toSVG({ class: 'octicon' })"></span>
                 </v-list-item-icon>
               </template>
               <span>Reservas</span>
             </v-tooltip>
             <v-list-item-icon v-else>
-              <v-icon>mdi-calendar-outline</v-icon>
+              <span v-html="octicons.calendar.toSVG({ class: 'octicon' })"></span>
             </v-list-item-icon>
             <v-list-item-content>
               <v-list-item-title>Reservas</v-list-item-title>
@@ -59,13 +59,13 @@
             <v-tooltip v-if="drawer" bottom>
               <template v-slot:activator="{ on, attrs }">
                 <v-list-item-icon v-bind="attrs" v-on="on">
-                  <v-icon>mdi-currency-usd</v-icon>
+                  <span v-html="octicons.database.toSVG({ class: 'octicon' })"></span>
                 </v-list-item-icon>
               </template>
               <span>Finanças</span>
             </v-tooltip>
             <v-list-item-icon v-else>
-              <v-icon>mdi-currency-usd</v-icon>
+              <span v-html="octicons.database.toSVG({ class: 'octicon' })"></span>
             </v-list-item-icon>
             <v-list-item-content>
               <v-list-item-title>Finanças</v-list-item-title>
@@ -78,13 +78,13 @@
             <v-tooltip v-if="drawer" bottom>
               <template v-slot:activator="{ on, attrs }">
                 <v-list-item-icon v-bind="attrs" v-on="on">
-                  <v-icon>mdi-file-document-outline</v-icon>
+                  <span v-html="octicons.file.toSVG({ class: 'octicon' })"></span>
                 </v-list-item-icon>
               </template>
               <span>Relatórios</span>
             </v-tooltip>
             <v-list-item-icon v-else>
-              <v-icon>mdi-file-document-outline</v-icon>
+              <span v-html="octicons.file.toSVG({ class: 'octicon' })"></span>
             </v-list-item-icon>
             <v-list-item-content>
               <v-list-item-title>Relatórios</v-list-item-title>
@@ -97,13 +97,13 @@
             <v-tooltip v-if="drawer" bottom>
               <template v-slot:activator="{ on, attrs }">
                 <v-list-item-icon v-bind="attrs" v-on="on">
-                  <v-icon>mdi-bell-outline</v-icon>
+                  <span v-html="octicons.bell.toSVG({ class: 'octicon' })"></span>
                 </v-list-item-icon>
               </template>
               <span>Lembretes</span>
             </v-tooltip>
             <v-list-item-icon v-else>
-              <v-icon>mdi-bell-outline</v-icon>
+              <span v-html="octicons.bell.toSVG({ class: 'octicon' })"></span>
             </v-list-item-icon>
             <v-list-item-content>
               <v-list-item-title>Lembretes</v-list-item-title>
@@ -118,7 +118,7 @@
             <v-tooltip v-if="drawer" bottom>
               <template v-slot:activator="{ on, attrs }">
                 <v-list-item-icon v-bind="attrs" v-on="on">
-                  <v-icon>mdi-menu-close</v-icon>
+                  <span v-html="octicons['sidebar-collapse'].toSVG({ class: 'octicon' })"></span>
                 </v-list-item-icon>
               </template>
               <span>Expandir Menu</span>
@@ -126,7 +126,7 @@
             <v-tooltip v-else bottom>
               <template v-slot:activator="{ on, attrs }">
                 <v-list-item-icon v-bind="attrs" v-on="on">
-                  <v-icon>mdi-menu-open</v-icon>
+                  <span v-html="octicons['sidebar-expand'].toSVG({ class: 'octicon' })"></span>
                 </v-list-item-icon>
               </template>
               <span>Recolher Menu</span>
@@ -139,17 +139,13 @@
             <v-tooltip v-if="drawer" bottom>
               <template v-slot:activator="{ on, attrs }">
                 <v-list-item-icon v-bind="attrs" v-on="on">
-                  <v-icon>{{
-                    darkTheme ? "mdi-white-balance-sunny" : "mdi-weather-night"
-                  }}</v-icon>
+                  <span v-html="darkTheme ? octicons.sun.toSVG({ class: 'octicon' }) : octicons.moon.toSVG({ class: 'octicon' })"></span>
                 </v-list-item-icon>
               </template>
               <span>{{ darkTheme ? "Ativar Modo Claro" : "Ativar Modo Escuro" }}</span>
             </v-tooltip>
             <v-list-item-icon v-else>
-              <v-icon>{{
-                darkTheme ? "mdi-white-balance-sunny" : "mdi-weather-night"
-              }}</v-icon>
+              <span v-html="darkTheme ? octicons.sun.toSVG({ class: 'octicon' }) : octicons.moon.toSVG({ class: 'octicon' })"></span>
             </v-list-item-icon>
             <v-list-item-content>
               <v-list-item-title>{{ darkTheme ? "Ativar Modo Claro" : "Ativar Modo Escuro" }}</v-list-item-title>
@@ -159,13 +155,13 @@
             <v-tooltip v-if="drawer" bottom>
               <template v-slot:activator="{ on, attrs }">
                 <v-list-item-icon v-bind="attrs" v-on="on">
-                  <v-icon>mdi-logout</v-icon>
+                  <span v-html="octicons['sign-out'].toSVG({ class: 'octicon' })"></span>
                 </v-list-item-icon>
               </template>
               <span>Sair</span>
             </v-tooltip>
             <v-list-item-icon v-else>
-              <v-icon>mdi-logout</v-icon>
+              <span v-html="octicons['sign-out'].toSVG({ class: 'octicon' })"></span>
             </v-list-item-icon>
             <v-list-item-content>
               <v-list-item-title>Sair</v-list-item-title>
@@ -179,26 +175,19 @@
     <v-main>
       <router-view />
     </v-main>
-
-    <!-- <AppFooter
-      :isMenuExpanded="drawer"
-      v-if="shouldShowNavBar"
-      class="footer"
-    /> -->
   </v-app>
 </template>
 
 <script>
 import { mapActions } from "vuex";
-// import AppFooter from "@/components/common/AppFooter.vue";
+import * as octicons from "@primer/octicons";
 import "./styles/global.css";
 
 export default {
-  components: {
-    // AppFooter,
-  },
+  components: {},
   data() {
     return {
+      octicons,
       drawer: false,
       darkTheme: JSON.parse(localStorage.getItem("darkTheme")) || false,
       dialog: false,
@@ -214,6 +203,9 @@ export default {
   created() {
     this.$vuetify.theme.dark = this.darkTheme;
     this.updateCssVariables();
+    
+    // Log dos nomes dos ícones disponíveis para referência
+    console.log("Octicons disponíveis:", Object.keys(this.octicons));
   },
   computed: {
     currentYear() {
@@ -304,6 +296,18 @@ export default {
 .primary--text {
   color: var(--primary-color) !important;
 }
+
+/* Estilo para os octicons */
+.octicon {
+  fill: currentColor;
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+}
+
+.theme--dark .octicon {
+  fill: #fff;
+}
 </style>
 
 <style scoped>
@@ -324,6 +328,9 @@ export default {
 
 .compact-menu .v-list-item__icon {
   margin-right: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .my-drawer {
@@ -333,7 +340,6 @@ export default {
 
 .theme--dark .my-drawer {
   background-color: #000000;
-  /* background-color: #2d3748; */
   border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
 

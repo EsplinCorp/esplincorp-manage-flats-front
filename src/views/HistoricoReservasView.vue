@@ -75,6 +75,11 @@
         >
           <template v-slot:item="{ item }">
             <tr>
+              <td>
+                <v-chip :color="getStatus(item).color" dark class="small-chip">
+                  {{ getStatus(item).text }}
+                </v-chip>
+              </td>
               <td>{{ item.nome }}</td>
               <td class="d-none d-md-table-cell">{{ item.cpf }}</td>
               <td class="d-none d-md-table-cell">{{ item.email }}</td>
@@ -118,6 +123,7 @@ export default {
       menuCheckOut: false,
       loading: false,
       headers: [
+        { text: "Status", value: "status", sortable: false },
         { text: "Nome", value: "nome" },
         { text: "CPF/CNPJ", value: "cpf" },
         { text: "Email", value: "email" },
@@ -190,7 +196,7 @@ export default {
       } else if (checkInDate > today) {
         return { text: "Reserva Confirmada", color: "indigo" };
       }
-      return { text: "Hospedagem Concluída", color: "grey-darken-2" };
+      return { text: "Hospedagem Concluída", color: "grey-darken" };
     },
     openNewHospedeDialog() {
       this.$refs.hospedesTable.openDialog();
