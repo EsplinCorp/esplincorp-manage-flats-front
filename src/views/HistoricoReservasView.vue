@@ -186,11 +186,11 @@ export default {
       const checkOutDate = new Date(item.dataSaida).toISOString().split("T")[0];
 
       if (checkInDate <= today && checkOutDate >= today) {
-        return { text: "Hospedado", color: "green" };
+        return { text: "Hospedado", color: "teal" };
       } else if (checkInDate > today) {
-        return { text: "Reserva Confirmada", color: "orange" };
+        return { text: "Reserva Confirmada", color: "indigo" };
       }
-      return { text: "Hospedagem Concluída", color: "grey" };
+      return { text: "Hospedagem Concluída", color: "grey-darken-2" };
     },
     openNewHospedeDialog() {
       this.$refs.hospedesTable.openDialog();

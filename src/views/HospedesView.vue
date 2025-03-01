@@ -182,50 +182,137 @@ export default {
     filteredHospedes() {
       const today = new Date().toISOString().split("T")[0];
       const normalizedSearch = this.search.toLowerCase();
-      const checkInDate = this.checkInDate
-        ? new Date(this.checkInDate.split("/").reverse().join("-"))
-            .toISOString()
-            .split("T")[0]
-        : null;
-      const checkOutDate = this.checkOutDate
-        ? new Date(this.checkOutDate.split("/").reverse().join("-"))
-            .toISOString()
-            .split("T")[0]
-        : null;
+      
+      // Processamento melhorado das datas para evitar problemas de fuso horário
+      const checkInDate = this.checkInDate ? this.normalizeDate(this.checkInDate) : null;
+      const checkOutDate = this.checkOutDate ? this.normalizeDate(this.checkOutDate) : null;
 
       return this.hospedes.filter((hospede) => {
-        const hospedeCheckIn = new Date(hospede.dataEntrada)
-          .toISOString()
-          .split("T")[0];
-        const hospedeCheckOut = new Date(hospede.dataSaida)
-          .toISOString()
-          .split("T")[0];
+        // Normaliza as datas do hóspede para comparação correta
+        const hospedeCheckIn = this.normalizeHospedeDate(hospede.dataEntrada);
+        const hospedeCheckOut = this.normalizeHospedeDate(hospede.dataSaida);
 
         // Verifica se o hóspede já foi hospedado
-        const wasHosted = hospedeCheckOut > today;
+        const wasHosted = !hospedeCheckOut || hospedeCheckOut > today;
 
-        // Verifica se as datas de check-in e check-out estão dentro do intervalo definido
-        const dateInRange =
-          (!checkInDate || hospedeCheckIn >= checkInDate) &&
-          (!checkOutDate || hospedeCheckOut <= checkOutDate);
+        // Lógica de filtro de datas melhorada
+        let dateInRange = true;
+        
+        if (checkInDate && hospedeCheckIn) {
+          // Comparar apenas as datas sem o componente de tempo
+          dateInRange = dateInRange && (hospedeCheckIn >= checkInDate);
+        }
+        
+        if (checkOutDate && hospedeCheckOut && dateInRange) {
+          // Comparar apenas as datas sem o componente de tempo
+          dateInRange = dateInRange && (hospedeCheckOut <= checkOutDate);
+        }
 
         // Verifica se a pesquisa corresponde a qualquer valor do hóspede
         const matchesSearch = Object.values(hospede).some((value) =>
-          String(value).toLowerCase().includes(normalizedSearch),
+          value !== null && String(value).toLowerCase().includes(normalizedSearch)
         );
 
         return wasHosted && dateInRange && matchesSearch;
       });
     },
   },
+  filters: {
+    formatDate(value) {
+      if (!value) return "";
+      
+      try {
+        // Se a data já estiver no formato brasileiro, retorne como está
+        if (typeof value === 'string' && value.includes('/')) {
+          return value;
+        }
+        
+        // Se a data estiver no formato ISO
+        if (typeof value === 'string' && value.includes('-')) {
+          // Extrair componentes da data
+          const [year, month, day] = value.split('-');
+          // Horário meio-dia para evitar problemas de fuso horário
+          const date = new Date(year, month - 1, parseInt(day), 12, 0, 0);
+          return format(date, "dd/MM/yyyy", { locale: ptBR });
+        }
+        
+        // Para objetos Date
+        const date = new Date(value);
+        date.setHours(12, 0, 0, 0); // Meio-dia para evitar problemas de fuso horário
+        return format(date, "dd/MM/yyyy", { locale: ptBR });
+      } catch (error) {
+        console.error("Erro ao formatar data:", error);
+        return "";
+      }
+    }
+  },
   methods: {
     ...mapActions(["fetchHospedes", "deleteHospede"]),
-    formatDate(value) {
-      if (value) {
-        return format(new Date(value), "dd/MM/yyyy", { locale: ptBR });
+    
+    // Método para normalizar datas para comparação adequada
+    normalizeDate(dateString) {
+      if (!dateString) return null;
+      
+      // Retornar a parte da data em formato YYYY-MM-DD
+      if (dateString.includes('-')) {
+        return dateString.split('T')[0];
       }
-      return "";
+      
+      // Converter formato brasileiro para ISO
+      if (dateString.includes('/')) {
+        const [day, month, year] = dateString.split('/');
+        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+      }
+      
+      return dateString;
     },
+    
+    // Normaliza a data do hóspede para comparação
+    normalizeHospedeDate(dateString) {
+      if (!dateString) return null;
+      
+      // Se a data estiver no formato brasileiro (DD/MM/YYYY)
+      if (dateString.includes('/')) {
+        const [day, month, year] = dateString.split('/');
+        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+      }
+      
+      // Se a data estiver no formato ISO com timestamp
+      if (dateString.includes('T')) {
+        return dateString.split('T')[0];
+      }
+      
+      return dateString;
+    },
+    
+    formatDate(value) {
+      if (!value) return "";
+      
+      try {
+        // Se a data já estiver no formato brasileiro, retorne como está
+        if (typeof value === 'string' && value.includes('/')) {
+          return value;
+        }
+        
+        // Se a data estiver no formato ISO
+        if (typeof value === 'string' && value.includes('-')) {
+          // Extrair componentes da data
+          const [year, month, day] = value.split('-');
+          // Horário meio-dia para evitar problemas de fuso horário
+          const date = new Date(year, month - 1, parseInt(day), 12, 0, 0);
+          return format(date, "dd/MM/yyyy", { locale: ptBR });
+        }
+        
+        // Para objetos Date
+        const date = new Date(value);
+        date.setHours(12, 0, 0, 0); // Meio-dia para evitar problemas de fuso horário
+        return format(date, "dd/MM/yyyy", { locale: ptBR });
+      } catch (error) {
+        console.error("Erro ao formatar data:", error);
+        return "";
+      }
+    },
+    
     filterGuests() {
       // Filtrando hóspedes com base no status
       this.filteredGuests = this.guests.filter((guest) =>
@@ -234,33 +321,45 @@ export default {
     },
     getStatus(item) {
       const today = new Date().toISOString().split("T")[0];
-      const checkInDate = new Date(item.dataEntrada)
-        .toISOString()
-        .split("T")[0];
-      const checkOutDate = new Date(item.dataSaida).toISOString().split("T")[0];
+      let checkInDate, checkOutDate;
+      
+      // Processar data de check-in
+      checkInDate = this.normalizeHospedeDate(item.dataEntrada) || today;
+      
+      // Processar data de check-out
+      checkOutDate = this.normalizeHospedeDate(item.dataSaida) || today;
 
       if (checkInDate <= today && checkOutDate >= today) {
-        return { text: "Hospedado", color: "green" };
+        return { text: "Hospedado", color: "teal" };
       } else if (checkInDate > today) {
-        return { text: "Reserva Confirmada", color: "orange" };
+        return { text: "Reserva Confirmada", color: "indigo" };
       }
-      return { text: "Não Hospedado", color: "grey" };
+      return { text: "Não Hospedado", color: "grey-draken-2" };
     },
+    
     openNewHospedeDialog() {
       this.$refs.hospedesTable.openDialog();
     },
+    
     editarHospede(hospede) {
       this.$refs.hospedesTable.openDialog(true);
       this.$nextTick(() => {
-        const dataEntrada = this.formatDate(hospede.dataEntrada);
-        const dataSaida = this.formatDate(hospede.dataSaida);
-        this.$refs.hospedesTable.hospede = {
-          ...hospede,
-          dataEntrada,
-          dataSaida,
-        };
+        // Cria uma cópia do hóspede para manipulação segura
+        const hospedeCopy = { ...hospede };
+        
+        // Formatar datas para o formato ISO para os inputs do tipo date
+        if (hospedeCopy.dataEntrada) {
+          hospedeCopy.dataEntrada = this.normalizeHospedeDate(hospedeCopy.dataEntrada);
+        }
+        
+        if (hospedeCopy.dataSaida) {
+          hospedeCopy.dataSaida = this.normalizeHospedeDate(hospedeCopy.dataSaida);
+        }
+        
+        this.$refs.hospedesTable.hospede = hospedeCopy;
       });
     },
+    
     confirmDeleteHospede(hospede) {
       Swal.fire({
         title: "Tem certeza?",
@@ -277,6 +376,7 @@ export default {
         }
       });
     },
+    
     deletarHospede(hospede) {
       this.deleteHospede(hospede.id)
         .then(() => {
@@ -319,15 +419,15 @@ export default {
 
 <style scoped>
 .small-chip {
-  font-size: 0.75rem;
+  font-size: 0.80rem;
   height: auto;
   padding: 0.25rem;
-  border-radius: 6px;
+  border-radius: 7px;
 }
 .small-text .v-data-table-header th,
 .small-text .v-data-table__wrapper td {
   font-size: 0.875rem;
-  padding: 8px 16px;
+  padding: 5px 5px;
 }
 .text-left {
   text-align: left;
