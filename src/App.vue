@@ -27,7 +27,7 @@
               <span>Dashboard</span>
             </v-tooltip>
             <v-list-item-icon v-else>
-              <span v-html="octicons.home.toSVG({ class: 'octicon' })"></span>
+              <span v-html="octicons.graph.toSVG({ class: 'octicon' })"></span>
             </v-list-item-icon>
             <v-list-item-content>
               <v-list-item-title>Dashboard</v-list-item-title>
