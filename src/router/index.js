@@ -11,7 +11,6 @@ import DespesasView from "@/views/DespesasView.vue";
 import ReceitasView from "@/views/ReceitasView.vue";
 import BalancoView from "@/views/BalancoView.vue";
 import LembretesView from "@/views/LembretesView.vue";
-import RelatoriosView from "@/views/RelatoriosView.vue";
 import LoginUser from "@/views/LoginUser.vue";
 
 Vue.use(Router);
@@ -82,12 +81,6 @@ const router = new Router({
       path: "/financas/pagamento-funcionarios",
       name: "pagamentos",
       component: PagamentosView,
-      meta: { requiresAuth: true },
-    },
-    {
-      path: "/relatorios",
-      name: "Relatorios",
-      component: RelatoriosView,
       meta: { requiresAuth: true },
     },
     {
