@@ -12,15 +12,36 @@
     <!-- Vuetify Tabs Component -->
     <v-tabs v-model="tab" class="custom-tabs">
       <v-tab class="custom-tab" :class="{ 'selected-tab': tab === 0 }">
-        <span v-html="octicons.people.toSVG({ class: 'octicon', style: tab === 0 ? 'fill: var(--primary-color);' : '' })"></span>
+        <span
+          v-html="
+            octicons.people.toSVG({
+              class: 'octicon',
+              style: tab === 0 ? 'fill: var(--primary-color);' : '',
+            })
+          "
+        ></span>
         <span class="tab-text">Hóspedes</span>
       </v-tab>
       <v-tab class="custom-tab" :class="{ 'selected-tab': tab === 1 }">
-        <span v-html="octicons.home.toSVG({ class: 'octicon', style: tab === 1 ? 'fill: var(--primary-color);' : '' })"></span>
+        <span
+          v-html="
+            octicons.home.toSVG({
+              class: 'octicon',
+              style: tab === 1 ? 'fill: var(--primary-color);' : '',
+            })
+          "
+        ></span>
         <span class="tab-text">Flats</span>
       </v-tab>
       <v-tab class="custom-tab" :class="{ 'selected-tab': tab === 2 }">
-        <span v-html="octicons['check-circle'].toSVG({ class: 'octicon', style: tab === 2 ? 'fill: var(--primary-color);' : '' })"></span>
+        <span
+          v-html="
+            octicons['check-circle'].toSVG({
+              class: 'octicon',
+              style: tab === 2 ? 'fill: var(--primary-color);' : '',
+            })
+          "
+        ></span>
         <span class="tab-text">Hospedagens Concluídas</span>
       </v-tab>
     </v-tabs>

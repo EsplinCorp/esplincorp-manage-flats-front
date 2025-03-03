@@ -1,7 +1,7 @@
 <!-- eslint-disable -->
 
 <template>
-  <v-container>
+  <v-container class="container-color">
     <div class="mt-5">
       <!-- Filtros -->
       <v-row>
@@ -61,17 +61,23 @@
             clearable
           ></v-select>
         </v-col>
-        <v-col cols="12" md="3">
-          <v-btn
-            color="primary"
-            @click="gerarBalanco"
-            rounded
-            elevation="2"
-            class="action-button mt-3"
-          >
-            <v-icon left>mdi-refresh</v-icon>
-            Gerar Balanço
-          </v-btn>
+        <v-col cols="12" md="auto" class="d-flex align-center justify-end">
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn
+                icon
+                v-bind="attrs"
+                v-on="on"
+                @click="gerarBalanco"
+                color="primary"
+              >
+                <span
+                  v-html="octicons['filter'].toSVG({ class: 'octicon' })"
+                ></span>
+              </v-btn>
+            </template>
+            <span>Aplicar Filtro</span>
+          </v-tooltip>
         </v-col>
       </v-row>
 
@@ -228,6 +234,13 @@
                   {{ item.categoria }}
                 </v-chip>
               </template>
+
+              <!-- Sem dados -->
+              <template #no-data>
+                <v-alert type="info" text class="mt-3">
+                  Nenhum balanço encontrado
+                </v-alert>
+              </template>
             </v-data-table>
           </v-card>
         </v-col>
@@ -242,6 +255,7 @@ import { format, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import axios from "axios";
 import Chart from "chart.js/auto";
+import * as octicons from "@primer/octicons";
 
 export default {
   data() {
@@ -267,6 +281,7 @@ export default {
         { text: "Categoria", value: "categoria" },
         { text: "Valor", value: "valor" },
       ],
+      octicons,
       categoriaCoresReceitas: {
         Aluguel: "teal",
         "Taxa de Limpeza": "indigo",

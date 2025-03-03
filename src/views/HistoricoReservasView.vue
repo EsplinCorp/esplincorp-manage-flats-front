@@ -8,11 +8,17 @@
           <v-col cols="12" md="3">
             <v-text-field
               v-model="search"
-              append-icon="mdi-magnify"
+              :append-icon="null"
               label="Pesquisar hóspedes"
               single-line
               hide-details
-            ></v-text-field>
+            >
+              <template v-slot:append>
+                <span
+                  v-html="octicons.search.toSVG({ class: 'octicon' })"
+                ></span>
+              </template>
+            </v-text-field>
           </v-col>
 
           <v-col cols="12" md="3" class="mb-7">
@@ -62,6 +68,46 @@
               ></v-date-picker>
             </v-menu>
           </v-col>
+          <v-col cols="12" md="2" class="mb-7">
+            <v-select
+              v-model="flatFilter"
+              :items="flats"
+              item-text="nome"
+              item-value="id"
+              label="Filtrar por Flat"
+              clearable
+            >
+              <template v-slot:no-data>
+                <v-alert type="info" text class="mt-3">
+                  Nenhum flat encontrado
+                </v-alert>
+              </template>
+            </v-select>
+          </v-col>
+          <v-col
+            cols="12"
+            md="auto"
+            class="d-flex align-center justify-end mb-7"
+          >
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  icon
+                  v-bind="attrs"
+                  v-on="on"
+                  @click="limparFiltros"
+                  color="primary"
+                >
+                  <span
+                    v-html="
+                      octicons['filter-remove'].toSVG({ class: 'octicon' })
+                    "
+                  ></span>
+                </v-btn>
+              </template>
+              <span>Limpar Filtro</span>
+            </v-tooltip>
+          </v-col>
         </v-row>
 
         <v-data-table
@@ -109,6 +155,8 @@ import { mapActions, mapState } from "vuex";
 import Swal from "sweetalert2";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import axios from "axios";
+import * as octicons from "@primer/octicons";
 
 export default {
   components: {
@@ -119,6 +167,14 @@ export default {
       search: "",
       checkInDate: "",
       checkOutDate: "",
+      flatFilter: null,
+      statusFilter: null,
+      statusOptions: [
+        "Hospedado",
+        "Reserva Confirmada",
+        "Hospedagem Concluída",
+      ],
+      flats: [],
       menuCheckIn: false,
       menuCheckOut: false,
       loading: false,
@@ -133,6 +189,7 @@ export default {
         { text: "Local", value: "localHospedagem" },
         { text: "Total", value: "valorTotal" },
       ],
+      octicons,
     };
   },
   computed: {
@@ -167,12 +224,29 @@ export default {
           (!checkInDate || hospedeCheckIn >= checkInDate) &&
           (!checkOutDate || hospedeCheckOut <= checkOutDate);
 
+        // Verifica se o flat corresponde ao filtro
+        const matchesFlat = this.flatFilter
+          ? hospede.flatId === this.flatFilter
+          : true;
+
+        // Verifica o status do hóspede
+        const status = this.getStatus(hospede).text;
+        const matchesStatus = this.statusFilter
+          ? status === this.statusFilter
+          : true;
+
         // Verifica se a pesquisa corresponde a qualquer valor do hóspede
         const matchesSearch = Object.values(hospede).some((value) =>
           String(value).toLowerCase().includes(normalizedSearch),
         );
 
-        return wasHosted && dateInRange && matchesSearch;
+        return (
+          wasHosted &&
+          dateInRange &&
+          matchesSearch &&
+          matchesFlat &&
+          matchesStatus
+        );
       });
     },
   },
@@ -238,9 +312,50 @@ export default {
         );
       });
     },
+    limparFiltros() {
+      this.search = "";
+      this.checkInDate = "";
+      this.checkOutDate = "";
+      this.flatFilter = null;
+      this.statusFilter = null;
+    },
+    carregarFlats() {
+      this.loading = true;
+
+      // Implementação com axios para buscar os flats do banco
+      axios
+        .get("http://localhost:8080/api/flats/listar", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+        })
+        .then((response) => {
+          this.flats = response.data;
+          if (this.flats.length === 0) {
+            Swal.fire({
+              icon: "info",
+              title: "Nenhum flat encontrado",
+              text: "Cadastre flats para utilizar esta funcionalidade.",
+            });
+          }
+        })
+        .catch((error) => {
+          console.error("Erro ao carregar flats:", error);
+          // Dados de exemplo para desenvolvimento
+          this.flats = [
+            { id: 1, nome: "Flat 101" },
+            { id: 2, nome: "Flat 202" },
+            { id: 3, nome: "Flat 303" },
+          ];
+        })
+        .finally(() => {
+          this.loading = false;
+        });
+    },
   },
-  mounted() {
+  created() {
     this.fetchHospedes();
+    this.carregarFlats();
   },
 };
 </script>
