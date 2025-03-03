@@ -1,7 +1,7 @@
 <!-- eslint-disable -->
 
 <template>
-  <v-container>
+  <v-container class="container-color">
     <div class="mt-7">
       <h2 class="ml-2 mt-3 font-weight-normal">Dashboard</h2>
 

@@ -1,7 +1,7 @@
 <!-- eslint-disable vue/valid-v-slot -->
 
 <template>
-  <v-container>
+  <v-container class="container-color">
     <div class="mt-5">
       <v-row align="center">
         <v-col cols="12">
@@ -11,7 +11,11 @@
             @click="openNewDespesa"
             rounded
             elevation="2"
+            z
           >
+            <span
+              v-html="octicons.plus.toSVG({ class: 'octicon mr-2' })"
+            ></span>
             Nova Despesa
           </v-btn>
         </v-col>
@@ -22,11 +26,15 @@
         <v-col cols="12" md="2">
           <v-text-field
             v-model="search"
-            append-icon="mdi-magnify"
+            :append-icon="null"
             label="Pesquisar despesas"
             single-line
             hide-details
-          ></v-text-field>
+          >
+            <template v-slot:append>
+              <span v-html="octicons.search.toSVG({ class: 'octicon' })"></span>
+            </template>
+          </v-text-field>
         </v-col>
         <v-col cols="12" md="2">
           <v-menu
@@ -92,17 +100,23 @@
             clearable
           ></v-select>
         </v-col>
-        <v-col cols="12" md="2">
-          <v-btn
-            color="primary"
-            @click="limparFiltros"
-            rounded
-            elevation="2"
-            class="limpar-filtros-btn"
-          >
-            <v-icon left>mdi-filter-remove</v-icon>
-            Limpar Filtros
-          </v-btn>
+        <v-col cols="12" md="auto" class="d-flex align-center justify-end mb-2">
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn
+                icon
+                v-bind="attrs"
+                v-on="on"
+                @click="limparFiltros"
+                color="primary"
+              >
+                <span
+                  v-html="octicons['filter-remove'].toSVG({ class: 'octicon' })"
+                ></span>
+              </v-btn>
+            </template>
+            <span>Limpar Filtro</span>
+          </v-tooltip>
         </v-col>
       </v-row>
 
@@ -179,6 +193,13 @@
             <span>Excluir Despesa</span>
           </v-tooltip>
         </template>
+
+        <!-- Sem dados -->
+        <template #no-data>
+          <v-alert type="info" text class="mt-3">
+            Nenhuma despesa encontrada
+          </v-alert>
+        </template>
       </v-data-table>
 
       <!-- Modal de Nova Despesa -->
@@ -189,7 +210,7 @@
               {{ editMode ? "Editar Despesa" : "Nova Despesa" }}
             </div>
             <v-btn icon @click="closeDialog">
-              <v-icon>mdi-close</v-icon>
+              <span v-html="octicons.x.toSVG({ class: 'octicon' })"></span>
             </v-btn>
           </v-card-title>
           <v-card-text>
@@ -235,7 +256,6 @@
               >
                 <template v-slot:activator="{ on, attrs }">
                   <v-text-field
-                    v-model="despesa.data"
                     :value="formatDate(despesa.data)"
                     label="Data"
                     readonly
@@ -259,9 +279,12 @@
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="primary" @click="salvarDespesa">
-              {{ editMode ? "Salvar" : "Adicionar" }}
+            <v-btn class="action-button" color="primary" @click="salvarDespesa">
+              {{ editMode ? "Atualizar" : "Gravar" }}
             </v-btn>
+            <v-btn class="delete-button" text @click="closeDialog"
+              >Cancelar</v-btn
+            >
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -433,12 +456,13 @@ export default {
     confirmarExcluirDespesa(despesa) {
       Swal.fire({
         title: "Tem certeza?",
-        text: "Você não poderá reverter isso!",
+        html: `Deseja excluir a despesa <b>${despesa.descricao}</b>?`,
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#3085d6",
         cancelButtonColor: "#d33",
-        confirmButtonText: "Sim, excluir!",
+        confirmButtonText: "Sim, excluir",
+        cancelButtonText: "Cancelar",
       }).then((result) => {
         if (result.isConfirmed) {
           this.excluirDespesa(despesa);
@@ -448,7 +472,13 @@ export default {
     excluirDespesa(despesa) {
       // Mock para simulação
       this.despesas = this.despesas.filter((d) => d.id !== despesa.id);
-      Swal.fire("Excluído!", "A despesa foi excluída.", "success");
+      Swal.fire({
+        title: "Excluído!",
+        text: "A despesa foi excluída com sucesso.",
+        icon: "success",
+        showConfirmButton: false,
+        timer: 1200,
+      });
 
       // Implementação real:
       /*

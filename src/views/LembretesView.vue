@@ -18,6 +18,7 @@
           rounded
           elevation="2"
         >
+          <span v-html="octicons.plus.toSVG({ class: 'octicon mr-2' })"></span>
           Novo Lembrete
         </v-btn>
       </v-col>
@@ -27,11 +28,15 @@
       <v-col cols="12" md="3" class="mb-4">
         <v-text-field
           v-model="search"
-          append-icon="mdi-magnify"
+          :append-icon="null"
           label="Pesquisar lembretes"
           single-line
           hide-details
-        ></v-text-field>
+        >
+          <template v-slot:append>
+            <span v-html="octicons.search.toSVG({ class: 'octicon' })"></span>
+          </template>
+        </v-text-field>
       </v-col>
       <v-col cols="12" md="3" class="mb-4">
         <v-select
@@ -45,6 +50,32 @@
         ></v-select>
       </v-col>
       <v-col cols="12" md="3" class="mb-4">
+        <v-select
+          v-model="statusFilter"
+          :items="statusOptions"
+          label="Filtrar por Status"
+          clearable
+        ></v-select>
+      </v-col>
+      <v-col cols="12" md="auto" class="d-flex align-center justify-end mb-4">
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              icon
+              v-bind="attrs"
+              v-on="on"
+              @click="limparFiltros"
+              color="primary"
+            >
+              <span
+                v-html="octicons['filter-remove'].toSVG({ class: 'octicon' })"
+              ></span>
+            </v-btn>
+          </template>
+          <span>Limpar Filtro</span>
+        </v-tooltip>
+      </v-col>
+      <v-col cols="12" md="2" class="mb-4">
         <v-menu
           v-model="dateMenu"
           :close-on-content-click="false"
@@ -180,7 +211,7 @@
             {{ isEditing ? "Editar Lembrete" : "Novo Lembrete" }}
           </div>
           <v-btn icon @click="closeDialog">
-            <v-icon>mdi-close</v-icon>
+            <span v-html="octicons.x.toSVG({ class: 'octicon' })"></span>
           </v-btn>
         </v-card-title>
         <v-card-text>
@@ -298,10 +329,10 @@ export default {
         { text: "Flat", value: "flatNome" },
         { text: "Ações", value: "actions", sortable: false, align: "center" },
       ],
-      statusFilter: undefined,
+      statusFilter: null,
       priorityFilter: [],
       dateFilter: "",
-      statusOptions: ["Pendente", "Em andamento", "Cancelado"],
+      statusOptions: ["Pendente", "Em andamento", "Concluído", "Atrasado"],
       priorityOptions: ["Baixa", "Média", "Alta", "Urgente"],
     };
   },
@@ -311,23 +342,23 @@ export default {
     }),
 
     filteredLembretes() {
-      return this.lembretes.filter((item) => {
-        // Filtragem por texto de busca
-        const matchesSearch =
-          this.search === "" ||
-          Object.values(item).some((val) =>
-            String(val).toLowerCase().includes(this.search.toLowerCase()),
-          );
+      return this.lembretes.filter((lembrete) => {
+        // Filtro de pesquisa
+        const matchesSearch = lembrete.titulo
+          .toLowerCase()
+          .includes(this.search.toLowerCase());
 
-        // Filtragem por prioridade
+        // Filtro de prioridade
         const matchesPriority =
           this.priorityFilter.length === 0 ||
-          this.priorityFilter.includes(item.prioridade);
+          this.priorityFilter.includes(lembrete.prioridade);
 
-        // Excluir lembretes concluídos
-        const isNotConcluido = item.status !== "Concluído";
+        // Filtro de status
+        const matchesStatus = this.statusFilter
+          ? lembrete.status === this.statusFilter
+          : true;
 
-        return matchesSearch && matchesPriority && isNotConcluido;
+        return matchesSearch && matchesPriority && matchesStatus;
       });
     },
   },
@@ -426,7 +457,7 @@ export default {
           },
         ];
         this.loading = false;
-      }, 1000);
+      });
 
       // Implementação real:
       /*
@@ -696,6 +727,13 @@ export default {
         Urgente: "red",
       };
       return colors[priority] || "primary";
+    },
+
+    limparFiltros() {
+      this.search = "";
+      this.priorityFilter = [];
+      this.statusFilter = null;
+      this.dateFilter = null;
     },
   },
 };

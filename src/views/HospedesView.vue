@@ -9,6 +9,7 @@
           rounded
           elevation="2"
         >
+          <span v-html="octicons.plus.toSVG({ class: 'octicon mr-2' })"></span>
           Novo Hóspede
         </v-btn>
         <hospedes-table ref="hospedesTable"></hospedes-table>
@@ -17,11 +18,17 @@
           <v-col cols="12" md="3" class="mb-7">
             <v-text-field
               v-model="search"
-              append-icon="mdi-magnify"
+              :append-icon="null"
               label="Pesquisar hóspedes"
               single-line
               hide-details
-            ></v-text-field>
+            >
+              <template v-slot:append>
+                <span
+                  v-html="octicons.search.toSVG({ class: 'octicon' })"
+                ></span>
+              </template>
+            </v-text-field>
           </v-col>
 
           <v-col cols="12" md="3" class="mb-7">
@@ -71,6 +78,40 @@
               ></v-date-picker>
             </v-menu>
           </v-col>
+          <v-col cols="12" md="2" class="mb-7">
+            <v-select
+              v-model="flatFilter"
+              :items="flats"
+              item-text="nome"
+              item-value="id"
+              label="Filtrar por Flat"
+              clearable
+            ></v-select>
+          </v-col>
+          <v-col
+            cols="12"
+            md="auto"
+            class="d-flex align-center justify-end mb-7"
+          >
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  icon
+                  v-bind="attrs"
+                  v-on="on"
+                  @click="limparFiltros"
+                  color="primary"
+                >
+                  <span
+                    v-html="
+                      octicons['filter-remove'].toSVG({ class: 'octicon' })
+                    "
+                  ></span>
+                </v-btn>
+              </template>
+              <span>Limpar Filtro</span>
+            </v-tooltip>
+          </v-col>
         </v-row>
 
         <v-data-table
@@ -114,7 +155,14 @@
                       v-on="on"
                       @click="editarHospede(item)"
                     >
-                      <span v-html="octicons['pencil'].toSVG({ class: 'octicon', style: 'fill: var(--primary-color);'})"></span>
+                      <span
+                        v-html="
+                          octicons['pencil'].toSVG({
+                            class: 'octicon',
+                            style: 'fill: var(--primary-color);',
+                          })
+                        "
+                      ></span>
                     </v-btn>
                   </template>
                   <span>Editar Hóspede</span>
@@ -129,13 +177,27 @@
                       v-on="on"
                       @click="confirmDeleteHospede(item)"
                     >
-                    <span v-html="octicons['trash'].toSVG({ class: 'octicon', style: 'fill: var(--primary-color);'})"></span>
+                      <span
+                        v-html="
+                          octicons['trash'].toSVG({
+                            class: 'octicon',
+                            style: 'fill: var(--primary-color);',
+                          })
+                        "
+                      ></span>
                     </v-btn>
                   </template>
                   <span>Excluir Hóspede</span>
                 </v-tooltip>
               </td>
             </tr>
+          </template>
+
+          <!-- Sem dados -->
+          <template #no-data>
+            <v-alert type="info" text class="mt-3">
+              Nenhum hóspede encontrado
+            </v-alert>
           </template>
         </v-data-table>
       </v-container>
@@ -150,6 +212,7 @@ import Swal from "sweetalert2";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import * as octicons from "@primer/octicons";
+import axios from "axios";
 
 export default {
   components: {
@@ -158,7 +221,14 @@ export default {
   data() {
     return {
       search: "",
-      statusFilter: ["Hospedado", "Reservado"],
+      flats: [],
+      flatFilter: null,
+      statusFilter: null,
+      statusOptions: [
+        "Hospedado",
+        "Reserva Confirmada",
+        "Hospedagem Concluída",
+      ],
       checkInDate: "",
       checkOutDate: "",
       menuCheckIn: false,
@@ -184,10 +254,14 @@ export default {
     filteredHospedes() {
       const today = new Date().toISOString().split("T")[0];
       const normalizedSearch = this.search.toLowerCase();
-      
+
       // Processamento melhorado das datas para evitar problemas de fuso horário
-      const checkInDate = this.checkInDate ? this.normalizeDate(this.checkInDate) : null;
-      const checkOutDate = this.checkOutDate ? this.normalizeDate(this.checkOutDate) : null;
+      const checkInDate = this.checkInDate
+        ? this.normalizeDate(this.checkInDate)
+        : null;
+      const checkOutDate = this.checkOutDate
+        ? this.normalizeDate(this.checkOutDate)
+        : null;
 
       return this.hospedes.filter((hospede) => {
         // Normaliza as datas do hóspede para comparação correta
@@ -199,45 +273,62 @@ export default {
 
         // Lógica de filtro de datas melhorada
         let dateInRange = true;
-        
+
         if (checkInDate && hospedeCheckIn) {
           // Comparar apenas as datas sem o componente de tempo
-          dateInRange = dateInRange && (hospedeCheckIn >= checkInDate);
+          dateInRange = dateInRange && hospedeCheckIn >= checkInDate;
         }
-        
+
         if (checkOutDate && hospedeCheckOut && dateInRange) {
           // Comparar apenas as datas sem o componente de tempo
-          dateInRange = dateInRange && (hospedeCheckOut <= checkOutDate);
+          dateInRange = dateInRange && hospedeCheckOut <= checkOutDate;
         }
+
+        // Verifica o status do hóspede
+        const status = this.getStatus(hospede).text;
+        const matchesStatus = this.statusFilter
+          ? status === this.statusFilter
+          : true;
+
+        // Verifica se o flat corresponde ao filtro
+        const matchesFlat = this.flatFilter
+          ? hospede.flatId === this.flatFilter
+          : true;
 
         // Verifica se a pesquisa corresponde a qualquer valor do hóspede
         const matchesSearch = Object.values(hospede).some((value) =>
-          value !== null && String(value).toLowerCase().includes(normalizedSearch)
+          String(value).toLowerCase().includes(normalizedSearch),
         );
 
-        return wasHosted && dateInRange && matchesSearch;
+        return (
+          wasHosted &&
+          dateInRange &&
+          matchesSearch &&
+          matchesStatus &&
+          matchesFlat
+        );
       });
     },
   },
   filters: {
     formatDate(value) {
       if (!value) return "";
-      
+
       try {
         // Se a data já estiver no formato brasileiro, retorne como está
-        if (typeof value === 'string' && value.includes('/')) {
+        if (typeof value === "string" && value.includes("/")) {
           return value;
         }
-        
+
         // Se a data estiver no formato ISO
-        if (typeof value === 'string' && value.includes('-')) {
+        if (typeof value === "string" && value.includes("-")) {
           // Extrair componentes da data
-          const [year, month, day] = value.split('-');
+          const [year, month, day] = value.split("-");
           // Horário meio-dia para evitar problemas de fuso horário
           const date = new Date(year, month - 1, parseInt(day), 12, 0, 0);
           return format(date, "dd/MM/yyyy", { locale: ptBR });
         }
-        
+
         // Para objetos Date
         const date = new Date(value);
         date.setHours(12, 0, 0, 0); // Meio-dia para evitar problemas de fuso horário
@@ -246,65 +337,65 @@ export default {
         console.error("Erro ao formatar data:", error);
         return "";
       }
-    }
+    },
   },
   methods: {
     ...mapActions(["fetchHospedes", "deleteHospede"]),
-    
+
     // Método para normalizar datas para comparação adequada
     normalizeDate(dateString) {
       if (!dateString) return null;
-      
+
       // Retornar a parte da data em formato YYYY-MM-DD
-      if (dateString.includes('-')) {
-        return dateString.split('T')[0];
+      if (dateString.includes("-")) {
+        return dateString.split("T")[0];
       }
-      
+
       // Converter formato brasileiro para ISO
-      if (dateString.includes('/')) {
-        const [day, month, year] = dateString.split('/');
-        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+      if (dateString.includes("/")) {
+        const [day, month, year] = dateString.split("/");
+        return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
       }
-      
+
       return dateString;
     },
-    
+
     // Normaliza a data do hóspede para comparação
     normalizeHospedeDate(dateString) {
       if (!dateString) return null;
-      
+
       // Se a data estiver no formato brasileiro (DD/MM/YYYY)
-      if (dateString.includes('/')) {
-        const [day, month, year] = dateString.split('/');
-        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+      if (dateString.includes("/")) {
+        const [day, month, year] = dateString.split("/");
+        return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
       }
-      
+
       // Se a data estiver no formato ISO com timestamp
-      if (dateString.includes('T')) {
-        return dateString.split('T')[0];
+      if (dateString.includes("T")) {
+        return dateString.split("T")[0];
       }
-      
+
       return dateString;
     },
-    
+
     formatDate(value) {
       if (!value) return "";
-      
+
       try {
         // Se a data já estiver no formato brasileiro, retorne como está
-        if (typeof value === 'string' && value.includes('/')) {
+        if (typeof value === "string" && value.includes("/")) {
           return value;
         }
-        
+
         // Se a data estiver no formato ISO
-        if (typeof value === 'string' && value.includes('-')) {
+        if (typeof value === "string" && value.includes("-")) {
           // Extrair componentes da data
-          const [year, month, day] = value.split('-');
+          const [year, month, day] = value.split("-");
           // Horário meio-dia para evitar problemas de fuso horário
           const date = new Date(year, month - 1, parseInt(day), 12, 0, 0);
           return format(date, "dd/MM/yyyy", { locale: ptBR });
         }
-        
+
         // Para objetos Date
         const date = new Date(value);
         date.setHours(12, 0, 0, 0); // Meio-dia para evitar problemas de fuso horário
@@ -314,7 +405,7 @@ export default {
         return "";
       }
     },
-    
+
     filterGuests() {
       // Filtrando hóspedes com base no status
       this.filteredGuests = this.guests.filter((guest) =>
@@ -324,10 +415,10 @@ export default {
     getStatus(item) {
       const today = new Date().toISOString().split("T")[0];
       let checkInDate, checkOutDate;
-      
+
       // Processar data de check-in
       checkInDate = this.normalizeHospedeDate(item.dataEntrada) || today;
-      
+
       // Processar data de check-out
       checkOutDate = this.normalizeHospedeDate(item.dataSaida) || today;
 
@@ -338,34 +429,38 @@ export default {
       }
       return { text: "Não Hospedado", color: "grey-draken-2" };
     },
-    
+
     openNewHospedeDialog() {
       this.$refs.hospedesTable.openDialog();
     },
-    
+
     editarHospede(hospede) {
       this.$refs.hospedesTable.openDialog(true);
       this.$nextTick(() => {
         // Cria uma cópia do hóspede para manipulação segura
         const hospedeCopy = { ...hospede };
-        
+
         // Formatar datas para o formato ISO para os inputs do tipo date
         if (hospedeCopy.dataEntrada) {
-          hospedeCopy.dataEntrada = this.normalizeHospedeDate(hospedeCopy.dataEntrada);
+          hospedeCopy.dataEntrada = this.normalizeHospedeDate(
+            hospedeCopy.dataEntrada,
+          );
         }
-        
+
         if (hospedeCopy.dataSaida) {
-          hospedeCopy.dataSaida = this.normalizeHospedeDate(hospedeCopy.dataSaida);
+          hospedeCopy.dataSaida = this.normalizeHospedeDate(
+            hospedeCopy.dataSaida,
+          );
         }
-        
+
         this.$refs.hospedesTable.hospede = hospedeCopy;
       });
     },
-    
+
     confirmDeleteHospede(hospede) {
       Swal.fire({
         title: "Tem certeza?",
-        text: `Deseja excluir o hóspede ${hospede.nome}?`,
+        html: `Deseja excluir o hóspede <b>${hospede.nome}</b>?`,
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#primary",
@@ -378,7 +473,7 @@ export default {
         }
       });
     },
-    
+
     deletarHospede(hospede) {
       this.deleteHospede(hospede.id)
         .then(() => {
@@ -412,16 +507,59 @@ export default {
           this.loading = false;
         });
     },
+
+    limparFiltros() {
+      this.search = "";
+      this.checkInDate = "";
+      this.checkOutDate = "";
+      this.statusFilter = null;
+      this.flatFilter = null;
+    },
+
+    carregarFlats() {
+      this.loading = true;
+
+      // Implementação com axios para buscar os flats do banco
+      axios
+        .get("http://localhost:8080/api/flats/listar", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+        })
+        .then((response) => {
+          this.flats = response.data;
+          if (this.flats.length === 0) {
+            Swal.fire({
+              icon: "info",
+              title: "Nenhum flat encontrado",
+              text: "Cadastre flats para utilizar esta funcionalidade.",
+            });
+          }
+        })
+        .catch((error) => {
+          console.error("Erro ao carregar flats:", error);
+          // Dados de exemplo para desenvolvimento
+          this.flats = [
+            { id: 1, nome: "Flat 101" },
+            { id: 2, nome: "Flat 202" },
+            { id: 3, nome: "Flat 303" },
+          ];
+        })
+        .finally(() => {
+          this.loading = false;
+        });
+    },
   },
   created() {
     this.fetchHospedes();
+    this.carregarFlats();
   },
 };
 </script>
 
 <style scoped>
 .small-chip {
-  font-size: 0.80rem;
+  font-size: 0.8rem;
   height: auto;
   padding: 0.25rem;
   border-radius: 7px;
@@ -434,5 +572,4 @@ export default {
 .text-left {
   text-align: left;
 }
-
 </style>

@@ -13,22 +13,35 @@
           <v-form ref="form">
             <v-text-field
               label="Usuário"
-              prepend-icon="mdi-account"
               type="text"
               v-model="username"
               :rules="usernameRules"
               @input="clearErrorMessage"
               required
-            ></v-text-field>
+              :prepend-icon="null"
+            >
+              <template v-slot:prepend>
+                <span
+                  v-html="octicons.person.toSVG({ class: 'octicon mr-2' })"
+                ></span>
+              </template>
+            </v-text-field>
+
             <v-text-field
               label="Senha"
-              prepend-icon="mdi-lock"
               type="password"
               v-model="password"
               :rules="passwordRules"
               @input="clearErrorMessage"
               required
-            ></v-text-field>
+              :prepend-icon="null"
+            >
+              <template v-slot:prepend>
+                <span
+                  v-html="octicons.lock.toSVG({ class: 'octicon mr-2' })"
+                ></span>
+              </template>
+            </v-text-field>
 
             <div class="mt-5">
               <v-btn @click="validateAndLogin" color="primary" block
@@ -52,6 +65,7 @@
 
 <script>
 import api from "@/services/api/api.js";
+import * as octicons from "@primer/octicons";
 
 export default {
   data() {
@@ -62,6 +76,9 @@ export default {
       valid: false,
       usernameRules: [(v) => !!v || "Usuário é obrigatório"],
       passwordRules: [(v) => !!v || "Senha é obrigatória"],
+      octicons,
+      email: "",
+      emailRules: [(v) => !!v || "E-mail é obrigatório"],
     };
   },
 

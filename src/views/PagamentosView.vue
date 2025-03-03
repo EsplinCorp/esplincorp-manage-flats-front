@@ -4,7 +4,15 @@
 
     <v-row align="center">
       <v-col cols="12" sm="auto" class="d-flex align-items-center">
-        <v-icon color="primary" class="mt-2" size="40">mdi-account-cash</v-icon>
+        <span
+          v-html="
+            octicons.credit_card.toSVG({
+              class: 'octicon mt-2',
+              width: 40,
+              height: 40,
+            })
+          "
+        ></span>
         <h2 class="ml-2 mt-3 font-weight-normal primary--text">
           Pagamentos de Funcionários
         </h2>
@@ -15,11 +23,13 @@
 
 <script>
 import { mapActions, mapState } from "vuex";
+import * as octicons from "@primer/octicons";
 
 export default {
   data() {
     return {
       isDesktop: window.innerWidth > 600,
+      octicons,
     };
   },
   computed: {

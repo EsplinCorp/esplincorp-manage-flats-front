@@ -7,6 +7,7 @@
       rounded
       elevation="2"
     >
+      <span v-html="octicons.plus.toSVG({ class: 'octicon mr-2' })"></span>
       Novo Flat
     </v-btn>
 
@@ -14,13 +15,27 @@
       <v-col cols="12" md="3" class="mb-3">
         <v-text-field
           v-model="search"
-          append-icon="mdi-magnify"
+          :append-icon="null"
           label="Pesquisar flats"
           single-line
           hide-details
-        ></v-text-field>
+        >
+          <template v-slot:append>
+            <span v-html="octicons.search.toSVG({ class: 'octicon' })"></span>
+          </template>
+        </v-text-field>
       </v-col>
     </v-row>
+
+    <v-alert
+      v-if="flats.length === 0 && !loading"
+      type="info"
+      text
+      class="mt-3 mb-3"
+    >
+      Nenhum flat encontrado
+    </v-alert>
+
     <v-row>
       <v-col v-for="flat in filteredFlats" :key="flat.id" cols="12" md="4">
         <v-card
@@ -38,7 +53,17 @@
             <v-list dense>
               <v-list-item>
                 <v-list-item-icon>
-                  <span v-html="octicons.tag.toSVG({ class: 'octicon', style: flat.status === 'Ocupado' ? 'fill: red;' : 'fill: green;' })"></span>
+                  <span
+                    v-html="
+                      octicons.tag.toSVG({
+                        class: 'octicon',
+                        style:
+                          flat.status === 'Ocupado'
+                            ? 'fill: red;'
+                            : 'fill: green;',
+                      })
+                    "
+                  ></span>
                 </v-list-item-icon>
                 <v-list-item-content>
                   <v-list-item-title class="font-weight-bold"
@@ -54,7 +79,9 @@
               </v-list-item>
               <v-list-item>
                 <v-list-item-icon>
-                  <span v-html="octicons.location.toSVG({ class: 'octicon' })"></span>
+                  <span
+                    v-html="octicons.location.toSVG({ class: 'octicon' })"
+                  ></span>
                 </v-list-item-icon>
                 <v-list-item-content>
                   <v-list-item-title class="font-weight-bold"
@@ -67,7 +94,9 @@
               </v-list-item>
               <v-list-item>
                 <v-list-item-icon>
-                  <span v-html="octicons.people.toSVG({ class: 'octicon' })"></span>
+                  <span
+                    v-html="octicons.people.toSVG({ class: 'octicon' })"
+                  ></span>
                 </v-list-item-icon>
                 <v-list-item-content>
                   <v-list-item-title class="font-weight-bold"
@@ -83,7 +112,9 @@
               </v-list-item>
               <v-list-item>
                 <v-list-item-icon>
-                  <span v-html="octicons['database'].toSVG({ class: 'octicon' })"></span>
+                  <span
+                    v-html="octicons['database'].toSVG({ class: 'octicon' })"
+                  ></span>
                 </v-list-item-icon>
                 <v-list-item-content>
                   <v-list-item-title class="font-weight-bold"
@@ -138,7 +169,9 @@
         <v-card-text>
           <div class="calendar-header">
             <v-btn icon @click="prevMonth">
-              <span v-html="octicons['chevron-left'].toSVG({ class: 'octicon' })"></span>
+              <span
+                v-html="octicons['chevron-left'].toSVG({ class: 'octicon' })"
+              ></span>
             </v-btn>
             <v-menu
               v-model="monthMenu"
@@ -151,7 +184,11 @@
               <template v-slot:activator="{ on, attrs }">
                 <v-btn v-bind="attrs" v-on="on" class="calendar-month-selector">
                   {{ formatDate(currentMonth, "MMMM yyyy") }}
-                  <span v-html="octicons['chevron-down'].toSVG({ class: 'octicon' })"></span>
+                  <span
+                    v-html="
+                      octicons['chevron-down'].toSVG({ class: 'octicon' })
+                    "
+                  ></span>
                 </v-btn>
               </template>
               <v-list>
@@ -165,7 +202,9 @@
               </v-list>
             </v-menu>
             <v-btn icon @click="nextMonth">
-              <span v-html="octicons['chevron-right'].toSVG({ class: 'octicon' })"></span>
+              <span
+                v-html="octicons['chevron-right'].toSVG({ class: 'octicon' })"
+              ></span>
             </v-btn>
           </div>
           <v-calendar
@@ -211,6 +250,7 @@ export default {
     return {
       search: "",
       flats: [],
+      loading: false,
       availabilityDialog: false,
       events: [],
       type: "month",
@@ -285,6 +325,7 @@ export default {
       });
     },
     fetchFlats() {
+      this.loading = true;
       axios
         .get("http://localhost:8080/api/flats/listar", {
           headers: {
@@ -311,13 +352,25 @@ export default {
                 flat.status = isOccupied ? "Ocupado" : "Disponível";
               });
               this.flats = flats;
+
+              if (flats.length === 0) {
+                Swal.fire({
+                  icon: "info",
+                  title: "Nenhum flat encontrado",
+                  text: "Cadastre flats para utilizar esta funcionalidade.",
+                });
+              }
             })
             .catch((error) => {
               console.error("Erro ao buscar hóspedes:", error);
+            })
+            .finally(() => {
+              this.loading = false;
             });
         })
         .catch((error) => {
           console.error("Erro ao buscar flats:", error);
+          this.loading = false;
         });
     },
     checkAvailability(flatId) {
