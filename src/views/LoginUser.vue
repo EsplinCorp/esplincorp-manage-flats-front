@@ -66,6 +66,7 @@
 <script>
 import api from "@/services/api/api.js";
 import * as octicons from "@primer/octicons";
+import { mapActions } from "vuex";
 
 export default {
   data() {
@@ -83,18 +84,33 @@ export default {
   },
 
   methods: {
+    ...mapActions(["loginUser"]),
+
     validateAndLogin() {
       if (this.$refs.form.validate()) {
-        this.loginUser();
+        this.handleLogin();
       }
     },
-    loginUser() {
+
+    handleLogin() {
       const credentials = { username: this.username, password: this.password };
       api
         .post("/api/authenticate", credentials)
         .then((response) => {
           const token = response.data.token;
+          const userData = response.data.user || {
+            nome: this.username,
+            email: this.email || `${this.username}@example.com`,
+          };
+
+          // Armazenar token e dados do usuário
           localStorage.setItem("userToken", token);
+          localStorage.setItem("userInfo", JSON.stringify(userData));
+
+          // Atualizar o estado do Vuex
+          this.$store.commit("SET_TOKEN", token);
+          this.$store.commit("SET_USER", userData);
+
           this.$router.push("/"); // Redirecionar para a página inicial após o login
         })
         .catch((error) => {
@@ -105,6 +121,7 @@ export default {
           });
         });
     },
+
     clearErrorMessage() {
       this.errorMessage = "";
     },
