@@ -270,7 +270,7 @@ export default {
       } else if (checkInDate > today) {
         return { text: "Reserva Confirmada", color: "indigo" };
       }
-      return { text: "Hospedagem Concluída", color: "grey-darken" };
+      return { text: "Hospedagem Concluída", color: "green" };
     },
     openNewHospedeDialog() {
       this.$refs.hospedesTable.openDialog();

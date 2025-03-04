@@ -105,7 +105,7 @@
           :color="getStatusColor(item.status)"
           dark
           small
-          class="small-chip"
+          class="small-chip github-chip"
         >
           {{ item.status }}
         </v-chip>
@@ -117,7 +117,7 @@
           :color="getPriorityColor(item.prioridade)"
           dark
           small
-          class="small-chip"
+          class="small-chip github-chip"
         >
           {{ item.prioridade }}
         </v-chip>
@@ -125,7 +125,7 @@
 
       <!-- Ações -->
       <template #[`item.actions`]="{ item }">
-        <v-tooltip bottom>
+        <v-tooltip :key="item.id + '-' + item.status" bottom>
           <template #activator="{ on, attrs }">
             <v-btn
               class="mr-2"
@@ -615,6 +615,11 @@ export default {
       const index = this.lembretes.findIndex((l) => l.id === lembrete.id);
       if (index !== -1) {
         this.lembretes.splice(index, 1, lembreteAtualizado);
+
+        // Remover e adicionar novamente o tooltip
+        this.$nextTick(() => {
+          this.$refs.tooltip[index].$forceUpdate();
+        });
 
         Swal.fire({
           title: "Concluído!",

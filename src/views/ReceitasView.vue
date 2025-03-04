@@ -144,7 +144,7 @@
             :color="getCategoriaColor(item.categoria)"
             dark
             small
-            class="categoria-chip"
+            class="categoria-chip github-chip"
           >
             {{ item.categoria }}
           </v-chip>
@@ -665,5 +665,9 @@ export default {
   height: auto;
   padding: 0.25rem;
   border-radius: 7px;
+}
+.github-chip {
+  background-color: var(--github-chip-background-color);
+  color: var(--github-chip-text-color);
 }
 </style>

@@ -285,7 +285,12 @@
                 />
               </v-col>
               <v-col cols="12" v-if="userProfileImage || previewImage">
-                <v-btn color="error" block @click="removeProfileImage">
+                <v-btn
+                  class="action-button"
+                  color="error"
+                  block
+                  @click="removeProfileImage"
+                >
                   Remover foto
                 </v-btn>
               </v-col>

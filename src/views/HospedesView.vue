@@ -126,7 +126,11 @@
           <template v-slot:item="{ item }">
             <tr>
               <td>
-                <v-chip :color="getStatus(item).color" dark class="small-chip">
+                <v-chip
+                  :color="getStatus(item).color"
+                  dark
+                  class="small-chip github-chip"
+                >
                   {{ getStatus(item).text }}
                 </v-chip>
               </td>

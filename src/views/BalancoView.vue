@@ -85,10 +85,7 @@
       <v-row class="mt-5">
         <v-col cols="12" md="4">
           <v-card class="resumo-card receitas-card" elevation="3">
-            <v-card-title class="white--text">
-              <v-icon large left color="white">mdi-cash-plus</v-icon>
-              Receitas
-            </v-card-title>
+            <v-card-title class="white--text"> Receitas </v-card-title>
             <v-card-text class="text-center">
               <div class="text-h4 mt-2">
                 {{ formatCurrency(totalReceitas) }}
@@ -101,10 +98,7 @@
         </v-col>
         <v-col cols="12" md="4">
           <v-card class="resumo-card despesas-card" elevation="3">
-            <v-card-title class="white--text">
-              <v-icon large left color="white">mdi-cash-minus</v-icon>
-              Despesas
-            </v-card-title>
+            <v-card-title class="white--text"> Despesas </v-card-title>
             <v-card-text class="text-center">
               <div class="text-h4 mt-2">
                 {{ formatCurrency(totalDespesas) }}
@@ -117,10 +111,7 @@
         </v-col>
         <v-col cols="12" md="4">
           <v-card class="resumo-card saldo-card" elevation="3">
-            <v-card-title class="white--text">
-              <v-icon large left color="white">mdi-scale-balance</v-icon>
-              Saldo
-            </v-card-title>
+            <v-card-title class="white--text"> Saldo </v-card-title>
             <v-card-text class="text-center">
               <div class="text-h4 mt-2" :class="saldoClass">
                 {{ formatCurrency(saldo) }}
@@ -135,10 +126,7 @@
       <v-row class="mt-5">
         <v-col cols="12" md="6">
           <v-card elevation="3">
-            <v-card-title>
-              <v-icon left>mdi-chart-pie</v-icon>
-              Receitas por Categoria
-            </v-card-title>
+            <v-card-title> Receitas por Categoria </v-card-title>
             <v-card-text>
               <div class="chart-container">
                 <canvas ref="receitasChart"></canvas>
@@ -148,10 +136,7 @@
         </v-col>
         <v-col cols="12" md="6">
           <v-card elevation="3">
-            <v-card-title>
-              <v-icon left>mdi-chart-pie</v-icon>
-              Despesas por Categoria
-            </v-card-title>
+            <v-card-title> Despesas por Categoria </v-card-title>
             <v-card-text>
               <div class="chart-container">
                 <canvas ref="despesasChart"></canvas>
@@ -164,10 +149,7 @@
       <v-row class="mt-5">
         <v-col cols="12">
           <v-card elevation="3">
-            <v-card-title>
-              <v-icon left>mdi-chart-line</v-icon>
-              Evolução Financeira
-            </v-card-title>
+            <v-card-title> Evolução Financeira </v-card-title>
             <v-card-text>
               <div class="chart-container">
                 <canvas ref="evolucaoChart"></canvas>
@@ -182,7 +164,6 @@
         <v-col cols="12">
           <v-card elevation="3">
             <v-card-title>
-              <v-icon left>mdi-format-list-bulleted</v-icon>
               Últimas Transações
               <v-spacer></v-spacer>
               <v-text-field

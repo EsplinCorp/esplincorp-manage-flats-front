@@ -9,16 +9,18 @@
       <v-row class="mt-5">
         <v-col cols="12" md="4">
           <v-card class="resumo-card receitas-card" elevation="3">
-            <v-card-title class="white--text">
-              <v-icon large left color="white">mdi-cash-plus</v-icon>
-              Receitas do Mês
-            </v-card-title>
+            <v-card-title class="white--text"> Receitas do Mês </v-card-title>
             <v-card-text class="text-center">
               <div class="text-h4 mt-2">
                 {{ formatCurrency(totalReceitasMes) }}
               </div>
               <div class="text-subtitle-1 mt-2">
-                <v-chip small color="green" text-color="white" class="mr-1">
+                <v-chip
+                  small
+                  color="green"
+                  text-color="white"
+                  class="mr-1 github-chip"
+                >
                   <v-icon small left>mdi-arrow-up</v-icon>
                   {{ percentualReceitasMes }}%
                 </v-chip>
@@ -29,16 +31,18 @@
         </v-col>
         <v-col cols="12" md="4">
           <v-card class="resumo-card despesas-card" elevation="3">
-            <v-card-title class="white--text">
-              <v-icon large left color="white">mdi-cash-minus</v-icon>
-              Despesas do Mês
-            </v-card-title>
+            <v-card-title class="white--text"> Despesas do Mês </v-card-title>
             <v-card-text class="text-center">
               <div class="text-h4 mt-2">
                 {{ formatCurrency(totalDespesasMes) }}
               </div>
               <div class="text-subtitle-1 mt-2">
-                <v-chip small color="red" text-color="white" class="mr-1">
+                <v-chip
+                  small
+                  color="red"
+                  text-color="white"
+                  class="mr-1 github-chip"
+                >
                   <v-icon small left>mdi-arrow-up</v-icon>
                   {{ percentualDespesasMes }}%
                 </v-chip>
@@ -49,10 +53,7 @@
         </v-col>
         <v-col cols="12" md="4">
           <v-card class="resumo-card saldo-card" elevation="3">
-            <v-card-title class="white--text">
-              <v-icon large left color="white">mdi-scale-balance</v-icon>
-              Saldo do Mês
-            </v-card-title>
+            <v-card-title class="white--text"> Saldo do Mês </v-card-title>
             <v-card-text class="text-center">
               <div class="text-h4 mt-2" :class="saldoClass">
                 {{ formatCurrency(saldoMes) }}
@@ -80,10 +81,7 @@
       <v-row class="mt-5">
         <v-col cols="12" md="6">
           <v-card elevation="3">
-            <v-card-title>
-              <v-icon left>mdi-home-city</v-icon>
-              Taxa de Ocupação
-            </v-card-title>
+            <v-card-title> Taxa de Ocupação </v-card-title>
             <v-card-text>
               <div class="d-flex justify-space-between align-center mb-2">
                 <div>Ocupação Atual</div>
@@ -125,10 +123,7 @@
         </v-col>
         <v-col cols="12" md="6">
           <v-card elevation="3">
-            <v-card-title>
-              <v-icon left>mdi-chart-line</v-icon>
-              Indicadores de Desempenho
-            </v-card-title>
+            <v-card-title> Indicadores de Desempenho </v-card-title>
             <v-card-text>
               <v-list dense>
                 <v-list-item>
@@ -194,10 +189,7 @@
       <v-row class="mt-5">
         <v-col cols="12" md="8">
           <v-card elevation="3">
-            <v-card-title>
-              <v-icon left>mdi-chart-timeline-variant</v-icon>
-              Evolução Financeira (Últimos 6 meses)
-            </v-card-title>
+            <v-card-title> Evolução Financeira (Últimos 6 meses) </v-card-title>
             <v-card-text>
               <div class="chart-container">
                 <canvas ref="evolucaoChart"></canvas>
@@ -207,10 +199,7 @@
         </v-col>
         <v-col cols="12" md="4">
           <v-card elevation="3">
-            <v-card-title>
-              <v-icon left>mdi-calendar-clock</v-icon>
-              Próximas Reservas
-            </v-card-title>
+            <v-card-title> Próximas Reservas </v-card-title>
             <v-card-text class="pa-0">
               <v-list dense>
                 <v-list-item
@@ -259,10 +248,7 @@
       <v-row class="mt-5">
         <v-col cols="12">
           <v-card elevation="3">
-            <v-card-title>
-              <v-icon left>mdi-bell-ring</v-icon>
-              Alertas e Notificações
-            </v-card-title>
+            <v-card-title> Alertas e Notificações </v-card-title>
             <v-card-text class="pa-0">
               <v-list>
                 <v-list-item v-for="(alerta, index) in alertas" :key="index">
@@ -307,13 +293,7 @@ export default {
       flats: [],
       receitas: [],
       despesas: [],
-      flatsStatus: [
-        { id: 1, nome: "Flat 101", ocupado: true },
-        { id: 2, nome: "Flat 202", ocupado: false },
-        { id: 3, nome: "Flat 303", ocupado: true },
-        { id: 4, nome: "Flat 404", ocupado: false },
-        { id: 5, nome: "Flat 505", ocupado: false },
-      ],
+      flatsStatus: [],
       proximasReservas: [
         {
           hospede: "João Silva",
@@ -570,9 +550,80 @@ export default {
         },
       });
     },
+    async fetchTaxaOcupacao() {
+      try {
+        const response = await axios.get(
+          "http://localhost:8080/api/flats/listar",
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+            },
+          },
+        );
+        const flats = response.data;
+        console.log("Flats recebidos:", flats); // Log para verificar os dados recebidos
+        const totalFlats = flats.length;
+        const ocupados = flats.filter(
+          (flat) => flat.status === "Ocupado",
+        ).length;
+        console.log("Total de flats:", totalFlats, "Ocupados:", ocupados); // Log para verificar o cálculo
+        this.taxaOcupacao = totalFlats > 0 ? (ocupados / totalFlats) * 100 : 0;
+        console.log("Taxa de Ocupação calculada:", this.taxaOcupacao); // Log para verificar a taxa calculada
+      } catch (error) {
+        console.error("Erro ao buscar taxa de ocupação:", error);
+      }
+    },
+    async fetchFlatsStatus() {
+      try {
+        const response = await axios.get(
+          "http://localhost:8080/api/flats/listar",
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+            },
+          },
+        );
+        this.flatsStatus = response.data.map((flat) => ({
+          id: flat.id,
+          nome: flat.nome,
+          ocupado: flat.status === "Ocupado",
+        }));
+        console.log("Status dos flats atualizado:", this.flatsStatus); // Log para verificar o status atualizado
+      } catch (error) {
+        console.error("Erro ao buscar status dos flats:", error);
+      }
+    },
+    async updateFlatsStatus() {
+      await this.fetchFlatsStatus();
+      this.fetchTaxaOcupacao();
+    },
+    async fetchProximasReservas() {
+      try {
+        const response = await axios.get(
+          "http://localhost:8080/api/reservas/proximas",
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+            },
+          },
+        );
+        this.proximasReservas = response.data.map((reserva) => ({
+          hospede: reserva.hospedeNome,
+          flat: reserva.flatNome,
+          dataInicio: reserva.dataInicio,
+          dataFim: reserva.dataFim,
+          status: reserva.status,
+        }));
+        console.log("Próximas Reservas atualizadas:", this.proximasReservas); // Log para verificar as reservas
+      } catch (error) {
+        console.error("Erro ao buscar próximas reservas:", error);
+      }
+    },
   },
   created() {
     this.carregarDados();
+    this.updateFlatsStatus();
+    this.fetchProximasReservas();
   },
   beforeDestroy() {
     // Destruir gráficos ao sair da página
