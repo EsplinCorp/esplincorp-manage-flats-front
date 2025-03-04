@@ -10,6 +10,15 @@ Vue.filter("formatDate", formatDate);
 
 Vue.config.productionTip = false;
 
+// Verificar se há um token de usuário no localStorage e carregar os dados do usuário
+const userToken = localStorage.getItem("userToken");
+const userInfo = localStorage.getItem("userInfo");
+
+if (userToken && userInfo) {
+  store.commit("SET_TOKEN", userToken);
+  store.commit("SET_USER", JSON.parse(userInfo));
+}
+
 new Vue({
   router,
   store,
