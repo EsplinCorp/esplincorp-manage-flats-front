@@ -2,7 +2,7 @@
 
 <template>
   <v-container class="container-color">
-    <div class="mt-5">
+    <div class="mt-4">
       <v-row align="center">
         <v-col cols="12">
           <v-btn
@@ -21,21 +21,22 @@
       </v-row>
 
       <!-- Filtros -->
-      <v-row>
-        <v-col cols="12" md="2">
+      <v-row class="mb-7 mt-7">
+        <v-col cols="12" md="3" class="py-0">
           <v-text-field
             v-model="search"
             :append-icon="null"
             label="Pesquisar receitas"
             single-line
             hide-details
+            dense
           >
             <template v-slot:append>
               <span v-html="octicons.search.toSVG({ class: 'octicon' })"></span>
             </template>
           </v-text-field>
         </v-col>
-        <v-col cols="12" md="2">
+        <v-col cols="12" md="2" class="py-0">
           <v-menu
             v-model="menuDataInicio"
             :close-on-content-click="false"
@@ -50,6 +51,8 @@
                 readonly
                 v-bind="attrs"
                 v-on="on"
+                dense
+                hide-details
               ></v-text-field>
             </template>
             <v-date-picker
@@ -58,7 +61,7 @@
             ></v-date-picker>
           </v-menu>
         </v-col>
-        <v-col cols="12" md="2">
+        <v-col cols="12" md="2" class="py-0">
           <v-menu
             v-model="menuDataFim"
             :close-on-content-click="false"
@@ -73,6 +76,8 @@
                 readonly
                 v-bind="attrs"
                 v-on="on"
+                dense
+                hide-details
               ></v-text-field>
             </template>
             <v-date-picker
@@ -81,7 +86,7 @@
             ></v-date-picker>
           </v-menu>
         </v-col>
-        <v-col cols="12" md="2">
+        <v-col cols="12" md="2" class="py-0">
           <v-select
             v-model="flatFilter"
             :items="flats"
@@ -89,21 +94,26 @@
             item-value="id"
             label="Filtrar por Flat"
             clearable
+            dense
+            hide-details
           ></v-select>
         </v-col>
-        <v-col cols="12" md="2">
+        <v-col cols="12" md="2" class="py-0">
           <v-select
             v-model="categoriaFilter"
             :items="categorias"
             label="Filtrar por Categoria"
             clearable
+            dense
+            hide-details
           ></v-select>
         </v-col>
-        <v-col cols="12" md="auto" class="d-flex align-center justify-end mb-2">
+        <v-col cols="12" md="auto" class="d-flex align-center py-0">
           <v-tooltip bottom>
             <template v-slot:activator="{ on, attrs }">
               <v-btn
                 icon
+                small
                 v-bind="attrs"
                 v-on="on"
                 @click="limparFiltros"

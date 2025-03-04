@@ -1,7 +1,7 @@
 <template>
   <v-container class="container-color">
     <v-btn
-      class="action-button mb-7 mt-5"
+      class="action-button mb-7 mt-4"
       color="primary"
       @click="openNewFlatDialog"
       rounded
@@ -11,14 +11,15 @@
       Novo Flat
     </v-btn>
 
-    <v-row>
-      <v-col cols="12" md="3" class="mb-3">
+    <v-row class="mb-3 mt-3">
+      <v-col cols="12" md="3" class="py-0">
         <v-text-field
           v-model="search"
           :append-icon="null"
           label="Pesquisar flats"
           single-line
           hide-details
+          dense
         >
           <template v-slot:append>
             <span v-html="octicons.search.toSVG({ class: 'octicon' })"></span>

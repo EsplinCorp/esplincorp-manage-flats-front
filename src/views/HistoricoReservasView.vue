@@ -4,14 +4,15 @@
       <v-container class="container-color">
         <hospedes-table ref="hospedesTable"></hospedes-table>
 
-        <v-row>
-          <v-col cols="12" md="3">
+        <v-row class="mb-7 mt-3">
+          <v-col cols="12" md="3" class="py-0">
             <v-text-field
               v-model="search"
               :append-icon="null"
               label="Pesquisar hóspedes"
               single-line
               hide-details
+              dense
             >
               <template v-slot:append>
                 <span
@@ -21,7 +22,7 @@
             </v-text-field>
           </v-col>
 
-          <v-col cols="12" md="3" class="mb-7">
+          <v-col cols="12" md="3" class="py-0">
             <v-menu
               v-model="menuCheckIn"
               :close-on-content-click="false"
@@ -36,6 +37,8 @@
                   readonly
                   v-bind="attrs"
                   v-on="on"
+                  dense
+                  hide-details
                 ></v-text-field>
               </template>
               <v-date-picker
@@ -45,7 +48,7 @@
             </v-menu>
           </v-col>
 
-          <v-col cols="12" md="3" class="mb-7">
+          <v-col cols="12" md="3" class="py-0">
             <v-menu
               v-model="menuCheckOut"
               :close-on-content-click="false"
@@ -60,6 +63,8 @@
                   readonly
                   v-bind="attrs"
                   v-on="on"
+                  dense
+                  hide-details
                 ></v-text-field>
               </template>
               <v-date-picker
@@ -68,7 +73,7 @@
               ></v-date-picker>
             </v-menu>
           </v-col>
-          <v-col cols="12" md="2" class="mb-7">
+          <v-col cols="12" md="2" class="py-0">
             <v-select
               v-model="flatFilter"
               :items="flats"
@@ -76,6 +81,8 @@
               item-value="id"
               label="Filtrar por Flat"
               clearable
+              dense
+              hide-details
             >
               <template v-slot:no-data>
                 <v-alert type="info" text class="mt-3">
@@ -84,15 +91,12 @@
               </template>
             </v-select>
           </v-col>
-          <v-col
-            cols="12"
-            md="auto"
-            class="d-flex align-center justify-end mb-7"
-          >
+          <v-col cols="12" md="auto" class="d-flex align-center py-0">
             <v-tooltip bottom>
               <template v-slot:activator="{ on, attrs }">
                 <v-btn
                   icon
+                  small
                   v-bind="attrs"
                   v-on="on"
                   @click="limparFiltros"

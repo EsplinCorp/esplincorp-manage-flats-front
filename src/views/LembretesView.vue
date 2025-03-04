@@ -24,21 +24,22 @@
       </v-col>
     </v-row>
     <!-- Filtros -->
-    <v-row>
-      <v-col cols="12" md="3" class="mb-4">
+    <v-row class="mb-7">
+      <v-col cols="12" md="3" class="py-0">
         <v-text-field
           v-model="search"
           :append-icon="null"
           label="Pesquisar lembretes"
           single-line
           hide-details
+          dense
         >
           <template v-slot:append>
             <span v-html="octicons.search.toSVG({ class: 'octicon' })"></span>
           </template>
         </v-text-field>
       </v-col>
-      <v-col cols="12" md="3" class="mb-4">
+      <v-col cols="12" md="3" class="py-0">
         <v-select
           v-model="priorityFilter"
           :items="priorityOptions"
@@ -47,21 +48,26 @@
           chips
           small-chips
           deletable-chips
+          dense
+          hide-details
         ></v-select>
       </v-col>
-      <v-col cols="12" md="3" class="mb-4">
+      <v-col cols="12" md="3" class="py-0">
         <v-select
           v-model="statusFilter"
           :items="statusOptions"
           label="Filtrar por Status"
           clearable
+          dense
+          hide-details
         ></v-select>
       </v-col>
-      <v-col cols="12" md="auto" class="d-flex align-center justify-end mb-4">
+      <v-col cols="12" md="auto" class="d-flex align-center py-0">
         <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
             <v-btn
               icon
+              small
               v-bind="attrs"
               v-on="on"
               @click="limparFiltros"
@@ -74,16 +80,6 @@
           </template>
           <span>Limpar Filtro</span>
         </v-tooltip>
-      </v-col>
-      <v-col cols="12" md="2" class="mb-4">
-        <v-menu
-          v-model="dateMenu"
-          :close-on-content-click="false"
-          transition="scale-transition"
-          offset-y
-          min-width="290px"
-        >
-        </v-menu>
       </v-col>
     </v-row>
 

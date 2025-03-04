@@ -2,7 +2,7 @@
 
 <template>
   <v-container class="container-color">
-    <div class="mt-5">
+    <div class="mt-5 mb-3 mt-5">
       <!-- Filtros -->
       <v-row>
         <v-col cols="12" md="3">
@@ -82,7 +82,7 @@
       </v-row>
 
       <!-- Cards de Resumo -->
-      <v-row class="mt-5">
+      <v-row class="mt-1">
         <v-col cols="12" md="4">
           <v-card class="resumo-card receitas-card" elevation="3">
             <v-card-title class="white--text"> Receitas </v-card-title>
