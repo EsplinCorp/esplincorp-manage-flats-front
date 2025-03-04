@@ -470,82 +470,107 @@ export default {
       });
     },
     excluirDespesa(despesa) {
-      // Mock para simulação
-      this.despesas = this.despesas.filter((d) => d.id !== despesa.id);
-      Swal.fire({
-        title: "Excluído!",
-        text: "A despesa foi excluída com sucesso.",
-        icon: "success",
-        showConfirmButton: false,
-        timer: 1200,
-      });
+      const token = localStorage.getItem("userToken");
+      if (!token) {
+        this.$router.push("/login");
+        return;
+      }
 
-      // Implementação real:
-      /*
-      axios.delete(`/api/despesas/${despesa.id}`)
-        .then(() => {
-          this.fetchDespesas();
-          Swal.fire("Excluído!", "A despesa foi excluída.", "success");
+      const headers = {
+        Authorization: `Bearer ${token}`,
+      };
+
+      axios
+        .delete(`http://localhost:8080/api/transacoes/excluir/${despesa.id}`, {
+          headers,
         })
-        .catch(error => {
+        .then(() => {
+          this.carregarDados();
+          Swal.fire({
+            title: "Excluído!",
+            text: "A despesa foi excluída com sucesso.",
+            icon: "success",
+            showConfirmButton: false,
+            timer: 1500,
+          });
+        })
+        .catch((error) => {
           console.error("Erro ao excluir despesa:", error);
-          Swal.fire("Erro!", "Não foi possível excluir a despesa.", "error");
+          if (error.response?.status === 401) {
+            localStorage.removeItem("userToken");
+            this.$router.push("/login");
+            return;
+          }
+          Swal.fire({
+            title: "Erro!",
+            text: "Não foi possível excluir a despesa.",
+            icon: "error",
+            showConfirmButton: false,
+            timer: 1500,
+          });
         });
-      */
     },
-    salvarDespesa() {
+    async salvarDespesa() {
       if (this.$refs.form.validate()) {
         const isNew = !this.despesa.id;
 
-        // Mock para simulação
-        if (isNew) {
-          this.despesa.id =
-            Math.max(...this.despesas.map((d) => d.id || 0), 0) + 1;
-
-          // Adicionar o nome do flat para exibição na tabela
-          const flat = this.flats.find((f) => f.id === this.despesa.flatId);
-          this.despesa.flatNome = flat ? flat.nome : "Flat não encontrado";
-
-          this.despesas.push({ ...this.despesa });
-        } else {
-          const index = this.despesas.findIndex(
-            (d) => d.id === this.despesa.id,
-          );
-          if (index !== -1) {
-            // Atualizar o nome do flat
-            const flat = this.flats.find((f) => f.id === this.despesa.flatId);
-            this.despesa.flatNome = flat ? flat.nome : "Flat não encontrado";
-
-            this.despesas.splice(index, 1, { ...this.despesa });
+        try {
+          const token = localStorage.getItem("userToken");
+          if (!token) {
+            this.$router.push("/login");
+            return;
           }
-        }
 
-        this.despesaDialog = false;
-        Swal.fire(
-          "Sucesso!",
-          isNew
-            ? "Despesa criada com sucesso!"
-            : "Despesa atualizada com sucesso!",
-          "success",
-        );
+          const headers = {
+            Authorization: `Bearer ${token}`,
+          };
 
-        // Implementação real:
-        /*
-        const request = isNew
-          ? axios.post("/api/despesas", this.despesa)
-          : axios.put(`/api/despesas/${this.despesa.id}`, this.despesa);
+          const transacao = {
+            id: this.despesa.id,
+            descricao: this.despesa.descricao.trim(),
+            flatId: this.despesa.flatId,
+            data: new Date(this.despesa.data).toISOString(),
+            tipo: "DESPESA",
+            valor: parseFloat(
+              this.despesa.valor.toString().replace(/[^\d.-]/g, ""),
+            ),
+            categoria: this.despesa.categoria || "Outros",
+            observacoes: this.despesa.observacoes?.trim() || "",
+          };
 
-        request
-          .then(() => {
-            this.fetchDespesas();
-            this.despesaDialog = false;
-            Swal.fire("Sucesso!", isNew ? "Despesa criada com sucesso!" : "Despesa atualizada com sucesso!", "success");
-          })
-          .catch(error => {
-            console.error("Erro ao salvar despesa:", error);
-            Swal.fire("Erro!", "Não foi possível salvar a despesa.", "error");
+          const url = isNew
+            ? "http://localhost:8080/api/transacoes/registrar"
+            : `http://localhost:8080/api/transacoes/${this.despesa.id}`;
+
+          const method = isNew ? "post" : "put";
+          await axios[method](url, transacao, { headers });
+          await this.carregarDados();
+          this.despesaDialog = false;
+
+          Swal.fire({
+            title: "Sucesso!",
+            text: isNew
+              ? "Despesa criada com sucesso!"
+              : "Despesa atualizada com sucesso!",
+            icon: "success",
+            showConfirmButton: false,
+            timer: 1500,
           });
-        */
+        } catch (error) {
+          console.error("Erro ao salvar despesa:", error);
+          if (error.response?.status === 401) {
+            localStorage.removeItem("userToken");
+            this.$router.push("/login");
+            return;
+          }
+          Swal.fire({
+            title: "Erro!",
+            text: "Não foi possível salvar a despesa.",
+            icon: "error",
+            showConfirmButton: false,
+            timer: 1500,
+          });
+        }
       }
     },
     limparFiltros() {
@@ -563,69 +588,105 @@ export default {
     getCategoriaColor(categoria) {
       return this.categoriaCores[categoria] || "grey";
     },
+    verificarAutenticacao() {
+      const token = localStorage.getItem("userToken");
+      console.log("=== VERIFICAÇÃO DE AUTENTICAÇÃO ===");
+
+      if (!token) {
+        console.error("Token não encontrado no localStorage");
+        this.$router.push("/login");
+        return false;
+      }
+
+      // Verifica se o token está no formato correto (Bearer token)
+      if (
+        !token.match(/^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$/)
+      ) {
+        console.error("Token em formato inválido");
+        localStorage.removeItem("userToken");
+        this.$router.push("/login");
+        return false;
+      }
+
+      console.log("Token válido encontrado");
+      this.carregarDados();
+      return true;
+    },
     async carregarDados() {
+      console.log("=== INÍCIO DO CARREGAMENTO DE DADOS ===");
       this.loading = true;
+
       try {
-        // Carregar flats do banco
-        await axios
-          .get("http://localhost:8080/api/flats/listar", {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-            },
-          })
-          .then((response) => {
-            this.flats = response.data;
-          })
-          .catch((error) => {
-            console.error("Erro ao buscar flats:", error);
-            // Usar dados mock em caso de erro
-            this.flats = [
-              { id: 1, nome: "Flat 101" },
-              { id: 2, nome: "Flat 202" },
-              { id: 3, nome: "Flat 303" },
-            ];
+        const token = localStorage.getItem("userToken");
+        if (!token) {
+          console.error("Token não encontrado no localStorage");
+          this.$router.push("/login");
+          return;
+        }
+
+        const headers = {
+          Authorization: `Bearer ${token}`,
+        };
+
+        console.log(
+          "Iniciando carregamento com token:",
+          token.substring(0, 20) + "...",
+        );
+
+        // Carregar flats e transações
+        const [flatsResponse, transacoesResponse] = await Promise.all([
+          axios.get("http://localhost:8080/api/flats/listar", { headers }),
+          axios.get("http://localhost:8080/api/transacoes/flat/all", {
+            headers,
+          }),
+        ]);
+
+        this.flats = flatsResponse.data;
+        console.log("Flats carregados:", this.flats.length);
+
+        // Filtrar e processar despesas
+        this.despesas = transacoesResponse.data
+          .filter((transacao) => transacao.tipo === "DESPESA")
+          .map((transacao) => {
+            const flatEncontrado = this.flats.find(
+              (f) => f.id === transacao.flatId,
+            );
+            return {
+              id: transacao._id || transacao.id,
+              descricao: transacao.descricao,
+              flatId: transacao.flatId,
+              flatNome: flatEncontrado
+                ? flatEncontrado.nome
+                : "Flat não encontrado",
+              categoria: transacao.categoria || "Outros",
+              valor: parseFloat(transacao.valor || 0),
+              data: transacao.data,
+              observacoes: transacao.observacoes || "",
+            };
           });
 
-        // Carregar despesas (mock por enquanto)
-        this.despesas = [
-          {
-            id: 1,
-            descricao: "Manutenção do ar-condicionado",
-            flatId: 1,
-            flatNome: "Flat 101",
-            categoria: "Manutenção",
-            valor: 350,
-            data: "2025-03-05",
-            observacoes: "Troca de filtro e limpeza geral",
-          },
-          {
-            id: 2,
-            descricao: "Conta de energia",
-            flatId: 2,
-            flatNome: "Flat 202",
-            categoria: "Energia",
-            valor: 180,
-            data: "2025-03-10",
-            observacoes: "",
-          },
-          {
-            id: 3,
-            descricao: "Limpeza pós-hospedagem",
-            flatId: 1,
-            flatNome: "Flat 101",
-            categoria: "Limpeza",
-            valor: 120,
-            data: "2025-03-15",
-            observacoes: "Limpeza completa após check-out",
-          },
-        ];
+        console.log("Total de despesas processadas:", this.despesas.length);
+      } catch (error) {
+        console.error("ERRO GERAL:", error);
+        if (error.response?.status === 401) {
+          localStorage.removeItem("userToken");
+          this.$router.push("/login");
+          return;
+        }
+        Swal.fire({
+          title: "Erro!",
+          text: "Não foi possível carregar os dados. Por favor, tente novamente.",
+          icon: "error",
+          showConfirmButton: false,
+          timer: 1500,
+        });
       } finally {
         this.loading = false;
       }
     },
   },
   created() {
-    this.carregarDados();
+    this.verificarAutenticacao();
   },
 };
 </script>
@@ -653,9 +714,9 @@ export default {
   height: auto;
   padding: 0.25rem;
   border-radius: 7px;
+  color: white !important;
 }
 .github-chip {
   background-color: var(--github-chip-background-color);
-  color: var(--github-chip-text-color);
 }
 </style>

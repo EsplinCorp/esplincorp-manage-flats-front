@@ -4,7 +4,6 @@ import DashboardView from "@/views/DashboardView.vue";
 import HospedesView from "@/views/HospedesView.vue";
 import NotFoundComponents from "@/views/NotFoundComponents.vue";
 import FinancasView from "@/views/FinancasView.vue";
-import PagamentosView from "@/views/PagamentosView.vue";
 import FlatsView from "@/views/FlatsView.vue";
 import ReservasView from "@/views/ReservasView.vue";
 import DespesasView from "@/views/DespesasView.vue";
@@ -75,12 +74,6 @@ const router = new Router({
       path: "/financas/balanco",
       name: "balanco",
       component: BalancoView,
-      meta: { requiresAuth: true },
-    },
-    {
-      path: "/financas/pagamento-funcionarios",
-      name: "pagamentos",
-      component: PagamentosView,
       meta: { requiresAuth: true },
     },
     {

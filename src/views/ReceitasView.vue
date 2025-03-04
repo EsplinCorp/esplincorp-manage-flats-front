@@ -481,10 +481,11 @@ export default {
         title: "Tem certeza?",
         html: `Deseja excluir a receita <b>${receita.descricao}</b>?`,
         icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#primary",
-        cancelButtonColor: "#secondary",
+        showConfirmButton: true,
+        confirmButtonColor: "#3085d6",
         confirmButtonText: "Sim, excluir",
+        showCancelButton: true,
+        cancelButtonColor: "#d33",
         cancelButtonText: "Cancelar",
       }).then((result) => {
         if (result.isConfirmed) {
@@ -501,11 +502,23 @@ export default {
         })
         .then(() => {
           this.carregarDados();
-          Swal.fire("Excluído!", "A receita foi excluída.", "success");
+          Swal.fire({
+            title: "Excluído!",
+            text: "A receita foi excluída com sucesso.",
+            icon: "success",
+            showConfirmButton: false,
+            timer: 1500,
+          });
         })
         .catch((error) => {
           console.error("Erro ao excluir receita:", error);
-          Swal.fire("Erro!", "Não foi possível excluir a receita.", "error");
+          Swal.fire({
+            title: "Erro!",
+            text: "Não foi possível excluir a receita.",
+            icon: "error",
+            showConfirmButton: false,
+            timer: 1500,
+          });
         });
     },
     async salvarReceita() {
@@ -542,24 +555,29 @@ export default {
           const url = isNew
             ? "http://localhost:8080/api/transacoes/registrar"
             : `http://localhost:8080/api/transacoes/atualizar/${this.receita.id}`;
-          
+
           const method = isNew ? "post" : "put";
-          
+
           const response = await axios[method](url, transacao, { headers });
 
-          console.log(`Receita ${isNew ? "criada" : "atualizada"} com sucesso:`, response.data);
-          
+          console.log(
+            `Receita ${isNew ? "criada" : "atualizada"} com sucesso:`,
+            response.data,
+          );
+
           // Recarregar dados para atualizar a tabela
           await this.carregarDados();
-          
+
           this.receitaDialog = false;
-          Swal.fire(
-            "Sucesso!",
-            isNew
+          Swal.fire({
+            title: "Sucesso!",
+            text: isNew
               ? "Receita criada com sucesso!"
               : "Receita atualizada com sucesso!",
-            "success",
-          );
+            icon: "success",
+            showConfirmButton: false,
+            timer: 1500,
+          });
         } catch (error) {
           if (error.response?.status === 401) {
             console.error("Sessão expirada");
@@ -568,7 +586,13 @@ export default {
             return;
           }
           console.error("Erro ao salvar receita:", error);
-          Swal.fire("Erro!", "Não foi possível salvar a receita.", "error");
+          Swal.fire({
+            title: "Erro!",
+            text: "Não foi possível salvar a receita.",
+            icon: "error",
+            showConfirmButton: false,
+            timer: 1500,
+          });
         }
       }
     },
@@ -647,7 +671,7 @@ export default {
 
           // Filtrar apenas as transações do tipo RECEITA
           const receitasFiltradas = responseTransacoes.data.filter(
-            (transacao) => transacao.tipo === "RECEITA"
+            (transacao) => transacao.tipo === "RECEITA",
           );
 
           console.log("RECEITAS FILTRADAS:", receitasFiltradas);
@@ -655,7 +679,7 @@ export default {
           // Mapear as receitas para o formato da tabela
           this.receitas = receitasFiltradas.map((transacao) => {
             const flatEncontrado = this.flats.find(
-              (f) => f.id === transacao.flatId
+              (f) => f.id === transacao.flatId,
             );
 
             // Garantir que valores sejam do tipo correto
@@ -749,9 +773,5 @@ export default {
   height: auto;
   padding: 0.25rem;
   border-radius: 7px;
-}
-.github-chip {
-  background-color: var(--github-chip-background-color);
-  color: var(--github-chip-text-color);
 }
 </style>
