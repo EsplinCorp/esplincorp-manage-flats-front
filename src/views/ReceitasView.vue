@@ -364,7 +364,24 @@ export default {
   computed: {
     ...mapState(["isDarkMode"]),
     filteredReceitas() {
-      return this.receitas.filter((receita) => {
+      console.log("=== INÍCIO DO FILTRO DE RECEITAS ===");
+      console.log("Total de receitas antes do filtro:", this.receitas.length);
+      console.log("Estado dos filtros:", {
+        busca: this.search,
+        flat: this.flatFilter,
+        categoria: this.categoriaFilter,
+        dataInicio: this.dataInicio,
+        dataFim: this.dataFim,
+      });
+
+      const filtered = this.receitas.filter((receita) => {
+        console.log(`\nAnalisando receita:`, {
+          id: receita.id,
+          descricao: receita.descricao,
+          flat: receita.flatNome,
+          categoria: receita.categoria,
+        });
+
         const matchesSearch = receita.descricao
           .toLowerCase()
           .includes(this.search.toLowerCase());
@@ -378,10 +395,22 @@ export default {
           (!this.dataInicio ||
             new Date(receita.data) >= new Date(this.dataInicio)) &&
           (!this.dataFim || new Date(receita.data) <= new Date(this.dataFim));
+
+        console.log("Resultados do filtro:", {
+          matchesSearch,
+          matchesFlat,
+          matchesCategoria,
+          matchesDateRange,
+        });
+
         return (
           matchesSearch && matchesFlat && matchesCategoria && matchesDateRange
         );
       });
+
+      console.log(`\n=== RESULTADO DO FILTRO ===`);
+      console.log("Total de receitas após filtro:", filtered.length);
+      return filtered;
     },
   },
   methods: {
@@ -464,80 +493,83 @@ export default {
       });
     },
     excluirReceita(receita) {
-      // Mock para simulação
-      this.receitas = this.receitas.filter((r) => r.id !== receita.id);
-      Swal.fire({
-        title: "Excluído!",
-        text: "A receita foi excluída com sucesso.",
-        icon: "success",
-        showConfirmButton: false,
-        timer: 1200,
-      });
-
-      // Implementação real:
-      /*
-      axios.delete(`/api/receitas/${receita.id}`)
+      axios
+        .delete(`http://localhost:8080/api/transacoes/excluir/${receita.id}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+        })
         .then(() => {
-          this.fetchReceitas();
+          this.carregarDados();
           Swal.fire("Excluído!", "A receita foi excluída.", "success");
         })
-        .catch(error => {
+        .catch((error) => {
           console.error("Erro ao excluir receita:", error);
           Swal.fire("Erro!", "Não foi possível excluir a receita.", "error");
         });
-      */
     },
-    salvarReceita() {
+    async salvarReceita() {
       if (this.$refs.form.validate()) {
         const isNew = !this.receita.id;
 
-        // Associar o nome do flat à receita
-        const flatSelecionado = this.flats.find(
-          (flat) => flat.id === this.receita.flatId,
-        );
-        if (flatSelecionado) {
-          this.receita.flatNome = flatSelecionado.nome;
-        }
-
-        // Mock para simulação
-        if (isNew) {
-          this.receita.id = Math.max(...this.receitas.map((r) => r.id), 0) + 1;
-          this.receitas.push({ ...this.receita });
-        } else {
-          const index = this.receitas.findIndex(
-            (r) => r.id === this.receita.id,
-          );
-          if (index !== -1) {
-            this.receitas.splice(index, 1, { ...this.receita });
+        try {
+          const token = localStorage.getItem("userToken");
+          if (!token) {
+            console.error("Token não encontrado");
+            this.$router.push("/login");
+            return;
           }
+
+          const headers = {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          };
+
+          // Preparar dados da transação
+          const transacao = {
+            id: this.receita.id, // Incluir ID se for uma edição
+            descricao: this.receita.descricao,
+            flatId: this.receita.flatId,
+            data: this.receita.data,
+            tipo: "RECEITA",
+            valor: parseFloat(this.receita.valor),
+            categoria: this.receita.categoria,
+          };
+
+          console.log("Enviando dados da transação:", transacao);
+
+          // Usar endpoint correto baseado se é uma nova receita ou edição
+          const url = isNew
+            ? "http://localhost:8080/api/transacoes/registrar"
+            : `http://localhost:8080/api/transacoes/atualizar/${this.receita.id}`;
+          
+          const method = isNew ? "post" : "put";
+          
+          const response = await axios[method](url, transacao, { headers });
+
+          console.log(`Receita ${isNew ? "criada" : "atualizada"} com sucesso:`, response.data);
+          
+          // Recarregar dados para atualizar a tabela
+          await this.carregarDados();
+          
+          this.receitaDialog = false;
+          Swal.fire(
+            "Sucesso!",
+            isNew
+              ? "Receita criada com sucesso!"
+              : "Receita atualizada com sucesso!",
+            "success",
+          );
+        } catch (error) {
+          if (error.response?.status === 401) {
+            console.error("Sessão expirada");
+            localStorage.removeItem("userToken");
+            this.$router.push("/login");
+            return;
+          }
+          console.error("Erro ao salvar receita:", error);
+          Swal.fire("Erro!", "Não foi possível salvar a receita.", "error");
         }
-
-        this.receitaDialog = false;
-        Swal.fire(
-          "Sucesso!",
-          isNew
-            ? "Receita criada com sucesso!"
-            : "Receita atualizada com sucesso!",
-          "success",
-        );
-
-        // Implementação real:
-        /*
-        const request = isNew
-          ? axios.post("/api/receitas", this.receita)
-          : axios.put(`/api/receitas/${this.receita.id}`, this.receita);
-
-        request
-          .then(() => {
-            this.fetchReceitas();
-            this.receitaDialog = false;
-            Swal.fire("Sucesso!", isNew ? "Receita criada com sucesso!" : "Receita atualizada com sucesso!", "success");
-          })
-          .catch(error => {
-            console.error("Erro ao salvar receita:", error);
-            Swal.fire("Erro!", "Não foi possível salvar a receita.", "error");
-          });
-        */
       }
     },
     limparFiltros() {
@@ -556,88 +588,140 @@ export default {
       return this.categoriaCores[categoria] || "grey";
     },
     async carregarDados() {
+      console.log("=== INÍCIO DO CARREGAMENTO DE DADOS ===");
       this.loading = true;
       try {
+        const token = localStorage.getItem("userToken");
+        if (!token) {
+          console.error("Token não encontrado");
+          this.$router.push("/login");
+          return;
+        }
+
+        console.log("Token encontrado, iniciando requisições...");
+
+        const headers = {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        };
+
         // Carregar flats do banco
-        await axios
-          .get("http://localhost:8080/api/flats/listar", {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-            },
-          })
-          .then((response) => {
-            this.flats = response.data;
-          })
-          .catch((error) => {
-            console.error("Erro ao buscar flats:", error);
-            // Usar dados mock em caso de erro
-            this.flats = [
-              { id: 1, nome: "Flat 101" },
-              { id: 2, nome: "Flat 202" },
-              { id: 3, nome: "Flat 303" },
-            ];
-          });
+        try {
+          console.log("Buscando flats...");
+          const responseFlats = await axios.get(
+            "http://localhost:8080/api/flats/listar",
+            { headers },
+          );
+          this.flats = responseFlats.data;
+          console.log("Flats carregados:", this.flats);
+        } catch (error) {
+          console.error("ERRO ao buscar flats:", error);
+          if (error.response?.status === 401) {
+            throw error;
+          }
+        }
 
         // Carregar hóspedes do banco
-        await axios
-          .get("http://localhost:8080/api/hospedes/listar", {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-            },
-          })
-          .then((response) => {
-            this.hospedes = response.data;
-          })
-          .catch((error) => {
-            console.error("Erro ao buscar hóspedes:", error);
-            // Usar dados mock em caso de erro
-            this.hospedes = [
-              { id: 1, nome: "João Silva" },
-              { id: 2, nome: "Maria Oliveira" },
-              { id: 3, nome: "Carlos Santos" },
-            ];
+        try {
+          const responseHospedes = await axios.get(
+            "http://localhost:8080/api/hospedes/listar",
+            { headers },
+          );
+          this.hospedes = responseHospedes.data;
+        } catch (error) {
+          if (error.response?.status === 401) {
+            throw error; // Será tratado no catch principal
+          }
+          console.error("Erro ao buscar hóspedes:", error);
+        }
+
+        // Carregar transações do tipo RECEITA
+        try {
+          console.log("=== INÍCIO DA BUSCA DE TRANSAÇÕES ===");
+          const responseTransacoes = await axios.get(
+            "http://localhost:8080/api/transacoes/flat/all",
+            { headers },
+          );
+
+          console.log("RESPOSTA DA API:", responseTransacoes.data);
+
+          // Filtrar apenas as transações do tipo RECEITA
+          const receitasFiltradas = responseTransacoes.data.filter(
+            (transacao) => transacao.tipo === "RECEITA"
+          );
+
+          console.log("RECEITAS FILTRADAS:", receitasFiltradas);
+
+          // Mapear as receitas para o formato da tabela
+          this.receitas = receitasFiltradas.map((transacao) => {
+            const flatEncontrado = this.flats.find(
+              (f) => f.id === transacao.flatId
+            );
+
+            // Garantir que valores sejam do tipo correto
+            return {
+              id: transacao.id,
+              descricao: transacao.descricao || "",
+              flatId: transacao.flatId,
+              flatNome: flatEncontrado
+                ? flatEncontrado.nome
+                : "Flat não encontrado",
+              categoria: transacao.categoria || "Outros", // Valor padrão caso esteja ausente
+              valor: parseFloat(transacao.valor || 0),
+              data: transacao.data,
+            };
           });
 
-        // Carregar receitas (mock por enquanto)
-        this.receitas = [
-          {
-            id: 1,
-            descricao: "Receita de aluguel",
-            flatId: 1,
-            flatNome: "Flat 101",
-            hospedeId: 1,
-            categoria: "Aluguel",
-            valor: 1500,
-            data: "2025-03-01",
-          },
-          {
-            id: 2,
-            descricao: "Taxa de limpeza",
-            flatId: 2,
-            flatNome: "Flat 202",
-            hospedeId: 2,
-            categoria: "Taxa de Limpeza",
-            valor: 500,
-            data: "2025-03-02",
-          },
-          {
-            id: 3,
-            descricao: "Caução devolvido",
-            flatId: 1,
-            flatNome: "Flat 101",
-            hospedeId: 3,
-            categoria: "Caução",
-            valor: 1000,
-            data: "2025-03-05",
-          },
-        ];
+          console.log("=== LISTA FINAL DE RECEITAS ===", this.receitas);
+        } catch (error) {
+          console.error("ERRO CRÍTICO ao buscar transações:", error);
+          if (error.response) {
+            console.error("Detalhes do erro:", {
+              status: error.response.status,
+              data: error.response.data,
+            });
+          }
+          if (error.response?.status === 401) {
+            throw error;
+          }
+          this.receitas = [];
+        }
+      } catch (error) {
+        console.error("ERRO GERAL:", error);
+        if (error.response?.status === 401) {
+          console.error("Sessão expirada - redirecionando para login");
+          localStorage.removeItem("userToken");
+          this.$router.push("/login");
+          return;
+        }
       } finally {
         this.loading = false;
+        console.log("=== FIM DO CARREGAMENTO DE DADOS ===");
       }
     },
   },
   created() {
     this.carregarDados();
+  },
+  watch: {
+    drawer() {
+      this.profileMenu = false; // Fecha o menu quando o drawer muda
+    },
+    darkTheme(newVal) {
+      this.$vuetify.theme.dark = newVal;
+      localStorage.setItem("darkTheme", JSON.stringify(newVal));
+      this.updateCssVariables();
+    },
+    receitas: {
+      handler(newVal) {
+        console.log("Receitas atualizadas:", newVal);
+        this.$nextTick(() => {
+          console.log("Forçando atualização da tabela");
+          this.$forceUpdate();
+        });
+      },
+      deep: true,
+    },
   },
 };
 </script>

@@ -143,6 +143,9 @@
               </td>
             </tr>
           </template>
+          <template #no-data>
+            <v-alert type="info" text> Nenhuma hospedagem encontrada </v-alert>
+          </template>
         </v-data-table>
       </v-container>
     </v-col>
