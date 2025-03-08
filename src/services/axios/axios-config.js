@@ -2,7 +2,7 @@ import axios from "axios";
 import router from "../../router/index.js";
 
 const api = axios.create({
-  baseURL: "http://localhost:8080",
+  baseURL: "https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com",
 });
 
 // Interceptador de requisições
