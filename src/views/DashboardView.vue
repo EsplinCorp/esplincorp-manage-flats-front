@@ -453,10 +453,6 @@ export default {
         await this.verificarOcupacaoPorHospedes();
         console.log("Verificação por hóspedes concluída");
 
-        // Verificação por reservas ativas
-        await this.atualizarReservasAtivas();
-        console.log("Verificação por reservas concluída");
-
         // Verificação por transações recentes
         await this.verificarFlatsPorTransacoes();
         console.log("Verificação por transações concluída");
@@ -534,10 +530,7 @@ export default {
         this.atualizarStatusFlats();
 
         // Tenta buscar de diferentes fontes para determinar ocupação
-        await Promise.all([
-          this.atualizarReservasAtivas(),
-          this.verificarFlatsPorTransacoes(),
-        ]);
+        await Promise.all([this.verificarFlatsPorTransacoes()]);
       } catch (error) {
         console.error("Erro ao buscar flats:", error);
         // Não usar dados mockados
@@ -641,79 +634,6 @@ export default {
         }
       } catch (error) {
         console.error("Erro ao verificar ocupação por hóspedes:", error);
-      }
-    },
-
-    async atualizarReservasAtivas() {
-      try {
-        console.log("Buscando reservas ativas para verificar ocupação...");
-
-        // Buscar reservas ativas
-        const response = await axios.get(
-          "https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/reservas/ativas",
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-            },
-            withCredentials: false,
-          },
-        );
-
-        if (response.data && Array.isArray(response.data)) {
-          const reservasAtivas = response.data;
-          console.log("Reservas ativas encontradas:", reservasAtivas);
-
-          // Mapear IDs dos flats com reservas ativas
-          const flatsOcupados = new Set();
-
-          // Registrar detalhes das reservas para debugging
-          reservasAtivas.forEach((reserva) => {
-            if (reserva.flatId) {
-              flatsOcupados.add(reserva.flatId);
-              const flatNome =
-                this.flats.find((f) => f.id === reserva.flatId)?.nome ||
-                `Flat ID ${reserva.flatId}`;
-              console.log(
-                `Reserva ativa para ${flatNome}: Hóspede: ${reserva.hospedeNome || reserva.nomeHospede || "Não informado"}, Período: ${reserva.dataInicio || reserva.dataEntrada} - ${reserva.dataFim || reserva.dataSaida}`,
-              );
-            }
-          });
-
-          console.log("IDs de flats ocupados por reservas:", [
-            ...flatsOcupados,
-          ]);
-
-          // Atualizar status dos flats com base nas reservas ativas
-          // Preservando status "Ocupado" existente
-          this.flats = this.flats.map((flat) => {
-            // Se o flat já está marcado como ocupado, mantém
-            if (flat.status === "Ocupado") {
-              return flat;
-            }
-
-            // Se tem reserva ativa, marca como ocupado
-            return {
-              ...flat,
-              status: flatsOcupados.has(flat.id) ? "Ocupado" : flat.status,
-              ocupado: flatsOcupados.has(flat.id) ? true : flat.ocupado,
-            };
-          });
-
-          // Registra quais flats estão agora ocupados após esta atualização
-          const flatsAgora = this.flats
-            .filter((flat) => flat.status === "Ocupado")
-            .map((flat) => flat.nome);
-
-          console.log(
-            "Flats ocupados após verificação de reservas:",
-            flatsAgora,
-          );
-
-          // Recalcular status após atualização
-          this.atualizarStatusFlats();
-        }
-      } catch (error) {
-        console.error("Erro ao buscar reservas ativas:", error);
       }
     },
     atualizarStatusFlats() {
@@ -1179,12 +1099,20 @@ export default {
               this.gerarDadosMockadosEvolucao();
             }
           } else {
-            console.warn("Dados de evolução financeira inválidos, usando mock");
+            console.warn("Dados de evolução financeira inválidos");
             this.gerarDadosMockadosEvolucao();
           }
         }
       } catch (error) {
         console.error("Erro ao buscar evolução financeira:", error);
+
+        // Tratamento específico para erro 404
+        if (error.response && error.response.status === 404) {
+          console.warn(
+            "Endpoint de evolução financeira não encontrado (404). O endpoint pode não estar implementado no backend.",
+          );
+        }
+
         this.gerarDadosMockadosEvolucao();
       }
     },
@@ -1344,6 +1272,13 @@ export default {
           "Erro ao buscar indicadores de desempenho da API:",
           error,
         );
+
+        // Tratamento específico para erro 404
+        if (error.response && error.response.status === 404) {
+          console.warn(
+            "Endpoint de indicadores de desempenho não encontrado (404). O endpoint pode não estar implementado no backend.",
+          );
+        }
       }
 
       // Calcular valores com base nos dados já carregados, se ainda não tiver valores válidos
