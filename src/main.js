@@ -5,6 +5,7 @@ import store from "./store";
 import vuetify from "./plugins/vuetify";
 import "./services/axios/axios-config";
 import { formatDate } from "./filters/dateFilter";
+import axios from "axios";
 
 Vue.filter("formatDate", formatDate);
 
@@ -18,6 +19,18 @@ if (userToken && userInfo) {
   store.commit("SET_TOKEN", userToken);
   store.commit("SET_USER", JSON.parse(userInfo));
 }
+
+// Configuração global do Axios
+axios.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.message === 'Network Error') {
+      console.error('Erro de rede ao acessar a API. Verifique se o servidor está rodando e acessível.');
+      // Você pode mostrar uma mensagem para o usuário aqui
+    }
+    return Promise.reject(error);
+  }
+);
 
 new Vue({
   router,

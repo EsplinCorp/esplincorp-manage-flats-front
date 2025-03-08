@@ -89,7 +89,7 @@
       :items="filteredLembretes"
       :loading="loading"
       class="elevation-1 small-text"
-      sort-by="dataVencimento"
+      sort-by="titulo"
       :items-per-page="10"
       :footer-props="{
         'items-per-page-options': [5, 10, 15, 20],
@@ -136,7 +136,11 @@
                 v-html="
                   octicons['check-circle'].toSVG({
                     class: 'octicon',
-                    style: `fill: ${item.status === 'Concluído' ? 'green' : 'var(--primary-color)'};`,
+                    style: `fill: ${
+                      item.status === 'Concluído'
+                        ? 'green'
+                        : 'var(--primary-color)'
+                    };`,
                   })
                 "
               ></span>
@@ -247,31 +251,6 @@
               :rules="[(v) => !!v || 'Categoria é obrigatória']"
             ></v-select>
 
-            <v-menu
-              v-model="menuData"
-              :close-on-content-click="false"
-              transition="scale-transition"
-              offset-y
-              min-width="290px"
-            >
-              <template #activator="{ on, attrs }">
-                <v-text-field
-                  v-model="lembrete.dataVencimento"
-                  label="Data de vencimento"
-                  readonly
-                  v-bind="attrs"
-                  v-on="on"
-                  :rules="[(v) => !!v || 'Data é obrigatória']"
-                  required
-                  :value="formatDate(lembrete.dataVencimento)"
-                ></v-text-field>
-              </template>
-              <v-date-picker
-                v-model="lembrete.dataVencimento"
-                @input="menuData = false"
-              ></v-date-picker>
-            </v-menu>
-
             <v-select
               v-model="lembrete.flatId"
               :items="flats"
@@ -300,7 +279,7 @@ import { mapActions, mapState } from "vuex";
 import * as octicons from "@primer/octicons";
 import axios from "axios";
 import Swal from "sweetalert2";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 export default {
@@ -315,14 +294,13 @@ export default {
       dialog: false,
       isEditing: false,
       valid: false,
-      menuData: false,
-      dateMenu: false,
       lembrete: this.getDefaultLembrete(),
       headers: [
         { text: "Prioridade", value: "prioridade" },
         { text: "Categoria", value: "categoria" },
         { text: "Título", value: "titulo", sortable: true },
         { text: "Flat", value: "flatNome" },
+        { text: "Status", value: "status" },
         { text: "Ações", value: "actions", sortable: false, align: "center" },
       ],
       statusFilter: null,
@@ -359,38 +337,37 @@ export default {
     },
   },
   filters: {
-    formatDate(value) {
-      if (!value) return "";
+    formatDate(dateString) {
+      if (!dateString) return "";
 
       try {
-        // Se a data já estiver no formato brasileiro, retorne como está
-        if (typeof value === "string" && value.includes("/")) {
-          return value;
+        if (typeof dateString === "string") {
+          // Se for uma string ISO
+          if (dateString.includes("T")) {
+            return format(new Date(dateString), "dd/MM/yyyy", { locale: ptBR });
+          }
+          // Se for uma string de data simples (YYYY-MM-DD)
+          else if (dateString.includes("-")) {
+            return format(parseISO(dateString), "dd/MM/yyyy", { locale: ptBR });
+          }
         }
 
-        // Se a data estiver no formato ISO
-        if (typeof value === "string" && value.includes("-")) {
-          // Extrair componentes da data
-          const [year, month, day] = value.split("-");
-          // Horário meio-dia para evitar problemas de fuso horário
-          const date = new Date(year, month - 1, parseInt(day), 12, 0, 0);
-          return format(date, "dd/MM/yyyy", { locale: ptBR });
+        // Se for um objeto Date
+        if (dateString instanceof Date) {
+          return format(dateString, "dd/MM/yyyy", { locale: ptBR });
         }
 
-        // Para objetos Date
-        const date = new Date(value);
-        date.setHours(12, 0, 0, 0); // Meio-dia para evitar problemas de fuso horário
-        return format(date, "dd/MM/yyyy", { locale: ptBR });
+        return dateString;
       } catch (error) {
         console.error("Erro ao formatar data:", error);
-        return "";
+        return dateString;
       }
     },
   },
   created() {
     window.addEventListener("resize", this.checkWidth);
-    this.fetchLembretes();
-    this.fetchFlats();
+    this.verificarAutenticacao();
+    this.setupAxiosInterceptors();
   },
   beforeDestroy() {
     window.removeEventListener("resize", this.checkWidth);
@@ -398,98 +375,158 @@ export default {
   methods: {
     ...mapActions(["logoutUser"]),
 
-    performLogout() {
-      this.logoutUser()
+    verificarAutenticacao() {
+      console.log("=== VERIFICAÇÃO DE AUTENTICAÇÃO ===");
+
+      const token = localStorage.getItem("userToken");
+
+      // Verificar se o token existe
+      if (!token) {
+        console.error("Token não encontrado no localStorage");
+        this.redirecionarParaLogin();
+        return false;
+      }
+
+      // Verificar se o token está no formato correto
+      if (
+        !token.match(/^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$/)
+      ) {
+        console.error("Token em formato inválido");
+        this.redirecionarParaLogin();
+        return false;
+      }
+
+      // Testar o token com uma requisição simples antes de carregar os dados
+      return this.testarToken()
         .then(() => {
-          this.$router.push("/login");
+          console.log("Token válido, iniciando carregamento de dados");
+          this.carregarDados();
+          return true;
         })
-        .catch((error) => {
-          console.error("Erro no logout:", error);
+        .catch(() => {
+          console.error("Token inválido ou expirado");
+          this.redirecionarParaLogin();
+          return false;
         });
     },
 
-    checkWidth() {
-      this.isDesktop = window.innerWidth > 600;
+    // Novo método para testar o token
+    testarToken() {
+      const token = localStorage.getItem("userToken");
+      const headers = {
+        Authorization: `Bearer ${token}`,
+      };
+
+      // Fazer uma requisição simples para validar o token
+      return axios.get("http://localhost:8080/api/auth/validar", { headers });
     },
 
-    fetchLembretes() {
+    carregarDados() {
       this.loading = true;
 
-      // Mock data para exemplo - em um cenário real, isso seria uma chamada API
-      setTimeout(() => {
-        this.lembretes = [
-          {
-            id: 1,
-            titulo: "Manutenção ar-condicionado",
-            descricao: "Agendar manutenção preventiva para o ar-condicionado",
-            prioridade: "Média",
-            categoria: "Manutenção",
-            status: "Pendente",
-            dataVencimento: "2024-05-15",
-            flatId: 1,
-            flatNome: "Flat Ipanema 201",
-          },
-          {
-            id: 2,
-            titulo: "Check-out hóspede Andrea",
-            descricao: "Preparar documentação para check-out",
-            prioridade: "Alta",
-            categoria: "Check-in/Check-out",
-            status: "Em andamento",
-            dataVencimento: "2024-05-10",
-            flatId: 2,
-            flatNome: "Flat Copacabana 305",
-          },
-          {
-            id: 3,
-            titulo: "Pagamento de contas",
-            descricao: "Efetuar pagamento das contas de energia",
-            prioridade: "Urgente",
-            categoria: "Pagamento",
-            status: "Pendente",
-            dataVencimento: "2024-05-08",
-            flatId: null,
-            flatNome: "Todos os flats",
-          },
-        ];
-        this.loading = false;
-      });
-
-      // Implementação real:
-      /*
-      axios.get("http://localhost:8080/api/lembretes/listar", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-        },
-      })
-      .then(response => {
-        this.lembretes = response.data;
-        this.loading = false;
-      })
-      .catch(error => {
-        console.error("Erro ao buscar lembretes:", error);
-        this.loading = false;
-        Swal.fire({
-          title: "Erro",
-          text: "Não foi possível carregar os lembretes",
-          icon: "error"
+      // Carregar flats primeiro
+      this.fetchFlats()
+        .then(() => {
+          return this.fetchLembretes();
+        })
+        .catch((error) => {
+          console.error("Erro ao carregar dados:", error);
+          if (error.response?.status === 401) {
+            this.redirecionarParaLogin();
+          } else {
+            Swal.fire({
+              title: "Erro",
+              text: "Não foi possível carregar os dados. Tente novamente mais tarde.",
+              icon: "error",
+            });
+          }
+        })
+        .finally(() => {
+          this.loading = false;
         });
-      });
-      */
     },
 
     fetchFlats() {
-      axios
-        .get("http://localhost:8080/api/flats/listar", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-          },
-        })
+      console.log("=== INÍCIO DO CARREGAMENTO DE FLATS ===");
+
+      const token = localStorage.getItem("userToken");
+      if (!token) {
+        return Promise.reject(new Error("Token não encontrado"));
+      }
+
+      const headers = {
+        Authorization: `Bearer ${token}`,
+      };
+
+      return axios
+        .get("http://localhost:8080/api/flats/listar", { headers })
         .then((response) => {
           this.flats = response.data;
+          console.log("Flats carregados com sucesso:", this.flats.length);
+          return this.flats;
         })
         .catch((error) => {
           console.error("Erro ao buscar flats:", error);
+          if (error.response?.status === 401) {
+            this.redirecionarParaLogin();
+          }
+          return Promise.reject(error);
+        });
+    },
+
+    fetchLembretes() {
+      console.log("=== INÍCIO DO CARREGAMENTO DE LEMBRETES ===");
+
+      const token = localStorage.getItem("userToken");
+      if (!token) {
+        return Promise.reject(new Error("Token não encontrado"));
+      }
+
+      const headers = {
+        Authorization: `Bearer ${token}`,
+      };
+
+      return axios
+        .get("http://localhost:8080/api/lembretes/listar", { headers })
+        .then((response) => {
+          console.log("Lembretes recebidos da API:", response.data);
+
+          // Verificar se a resposta é um array
+          if (!Array.isArray(response.data)) {
+            console.warn("Resposta da API não é um array:", response.data);
+            this.lembretes = [];
+            return [];
+          }
+
+          this.lembretes = response.data.map((lembrete) => {
+            // Processar cada lembrete para garantir formato correto
+            const flatEncontrado = this.flats.find(
+              (f) => f.id === lembrete.flatId,
+            );
+
+            return {
+              id: lembrete.id,
+              titulo: lembrete.titulo || "",
+              descricao: lembrete.descricao || "",
+              prioridade: lembrete.prioridade || "Média",
+              categoria: lembrete.categoria || "Outro",
+              status: lembrete.status || "Pendente",
+              flatId: lembrete.flatId,
+              flatNome: flatEncontrado
+                ? flatEncontrado.nome
+                : "Flat não encontrado",
+            };
+          });
+
+          console.log("Total de lembretes processados:", this.lembretes.length);
+          return this.lembretes;
+        })
+        .catch((error) => {
+          console.error("Erro ao buscar lembretes:", error);
+          if (error.response?.status === 401) {
+            this.redirecionarParaLogin();
+          }
+          return Promise.reject(error);
         });
     },
 
@@ -501,6 +538,7 @@ export default {
 
     editarLembrete(lembrete) {
       this.isEditing = true;
+      // Criar uma cópia do lembrete para edição
       this.lembrete = { ...lembrete };
       this.dialog = true;
     },
@@ -519,7 +557,6 @@ export default {
         prioridade: "Média",
         categoria: "Outro",
         status: "Pendente",
-        dataVencimento: new Date().toISOString().substr(0, 10),
         flatId: null,
         flatNome: "",
       };
@@ -530,128 +567,123 @@ export default {
         this.loading = true;
         const isNew = !this.lembrete.id;
 
-        // Atualizar o flatNome com base no flatId selecionado
-        const flatSelecionado = this.flats.find(
-          (flat) => flat.id === this.lembrete.flatId,
-        );
-        this.lembrete.flatNome = flatSelecionado ? flatSelecionado.nome : "";
+        // Preparar o objeto para envio
+        const lembreteDto = {
+          id: this.lembrete.id,
+          titulo: this.lembrete.titulo.trim(),
+          descricao: this.lembrete.descricao?.trim() || "",
+          prioridade: this.lembrete.prioridade,
+          categoria: this.lembrete.categoria,
+          status: this.lembrete.status || "Pendente",
+          flatId: this.lembrete.flatId,
+        };
 
-        // Mock para simulação - em um sistema real, isso seria uma chamada API
-        setTimeout(() => {
-          if (isNew) {
-            this.lembrete.id =
-              Math.max(...this.lembretes.map((l) => l.id), 0) + 1;
-            this.lembretes.push({ ...this.lembrete });
-          } else {
-            const index = this.lembretes.findIndex(
-              (l) => l.id === this.lembrete.id,
-            );
-            if (index !== -1) {
-              this.lembretes.splice(index, 1, { ...this.lembrete });
-            }
-          }
+        console.log("Enviando lembrete para API:", lembreteDto);
 
+        const token = localStorage.getItem("userToken");
+        if (!token) {
           this.loading = false;
-          this.closeDialog();
+          this.$router.push("/login");
+          return;
+        }
 
-          Swal.fire({
-            title: "Sucesso",
-            text: isNew
-              ? "Lembrete criado com sucesso!"
-              : "Lembrete atualizado com sucesso!",
-            icon: "success",
-            showConfirmButton: false,
-            timer: 1500,
-          });
-        }, 1000);
+        const headers = {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        };
 
-        // Implementação real:
-        /*
-        const url = isNew 
+        // Verificar endpoints corretos
+        const url = isNew
           ? "http://localhost:8080/api/lembretes/registrar"
-          : `http://localhost:8080/api/lembretes/${this.lembrete.id}/atualizar`;
-          
+          : `http://localhost:8080/api/lembretes/atualizar/${this.lembrete.id}`;
+
         const method = isNew ? "post" : "put";
-        
-        axios[method](url, this.lembrete, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-          },
-        })
-        .then(() => {
-          this.fetchLembretes();
-          this.closeDialog();
-          Swal.fire({
-            title: "Sucesso",
-            text: isNew ? "Lembrete criado com sucesso!" : "Lembrete atualizado com sucesso!",
-            icon: "success",
-            showConfirmButton: false,
-            timer: 1500
+
+        axios[method](url, lembreteDto, { headers })
+          .then((response) => {
+            console.log(
+              `Lembrete ${isNew ? "criado" : "atualizado"} com sucesso:`,
+              response.data,
+            );
+            this.fetchLembretes();
+            this.closeDialog();
+            Swal.fire({
+              title: "Sucesso",
+              text: isNew
+                ? "Lembrete criado com sucesso!"
+                : "Lembrete atualizado com sucesso!",
+              icon: "success",
+              showConfirmButton: false,
+              timer: 1500,
+            });
+          })
+          .catch((error) => {
+            console.error("Erro ao salvar lembrete:", error);
+
+            if (error.response?.status === 401) {
+              this.handleSessionExpired();
+            } else {
+              Swal.fire({
+                title: "Erro",
+                text: "Não foi possível salvar o lembrete",
+                icon: "error",
+              });
+            }
+          })
+          .finally(() => {
+            this.loading = false;
           });
-        })
-        .catch(error => {
-          console.error("Erro ao salvar lembrete:", error);
-          Swal.fire({
-            title: "Erro",
-            text: "Não foi possível salvar o lembrete",
-            icon: "error"
-          });
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-        */
       }
     },
 
     marcarConcluido(lembrete) {
-      const lembreteAtualizado = { ...lembrete, status: "Concluído" };
-
-      // Mock para simulação
-      const index = this.lembretes.findIndex((l) => l.id === lembrete.id);
-      if (index !== -1) {
-        this.lembretes.splice(index, 1, lembreteAtualizado);
-
-        // Remover e adicionar novamente o tooltip
-        this.$nextTick(() => {
-          this.$refs.tooltip[index].$forceUpdate();
-        });
-
-        Swal.fire({
-          title: "Concluído!",
-          text: "Lembrete marcado como concluído",
-          icon: "success",
-          showConfirmButton: false,
-          timer: 1500,
-        });
+      const token = localStorage.getItem("userToken");
+      if (!token) {
+        console.error("Token não encontrado");
+        this.$router.push("/login");
+        return;
       }
 
-      // Implementação real:
-      /*
-      axios.put(`http://localhost:8080/api/lembretes/${lembrete.id}/status`, { status: "Concluído" }, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-        },
-      })
-      .then(() => {
-        this.fetchLembretes();
-        Swal.fire({
-          title: "Concluído!",
-          text: "Lembrete marcado como concluído",
-          icon: "success",
-          showConfirmButton: false,
-          timer: 1500
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      };
+
+      const statusDto = { status: "Concluído" };
+
+      axios
+        .put(
+          `http://localhost:8080/api/lembretes/${lembrete.id}/status`,
+          statusDto,
+          { headers },
+        )
+        .then((response) => {
+          console.log("Lembrete marcado como concluído:", response.data);
+          this.fetchLembretes();
+          Swal.fire({
+            title: "Concluído!",
+            text: "Lembrete marcado como concluído",
+            icon: "success",
+            showConfirmButton: false,
+            timer: 1500,
+          });
+        })
+        .catch((error) => {
+          console.error("Erro ao atualizar status:", error);
+
+          if (error.response?.status === 401) {
+            console.error("Sessão expirada - redirecionando para login");
+            localStorage.removeItem("userToken");
+            this.$router.push("/login");
+            return;
+          }
+
+          Swal.fire({
+            title: "Erro",
+            text: "Não foi possível atualizar o status do lembrete",
+            icon: "error",
+          });
         });
-      })
-      .catch(error => {
-        console.error("Erro ao atualizar status:", error);
-        Swal.fire({
-          title: "Erro",
-          text: "Não foi possível atualizar o status do lembrete",
-          icon: "error"
-        });
-      });
-      */
     },
 
     confirmDeleteLembrete(lembrete) {
@@ -672,42 +704,48 @@ export default {
     },
 
     deletarLembrete(lembrete) {
-      // Mock para simulação
-      this.lembretes = this.lembretes.filter((l) => l.id !== lembrete.id);
-      Swal.fire({
-        title: "Excluído!",
-        text: "Lembrete excluído com sucesso",
-        icon: "success",
-        showConfirmButton: false,
-        timer: 1500,
-      });
+      const token = localStorage.getItem("userToken");
+      if (!token) {
+        console.error("Token não encontrado");
+        this.$router.push("/login");
+        return;
+      }
 
-      // Implementação real:
-      /*
-      axios.delete(`http://localhost:8080/api/lembretes/${lembrete.id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-        },
-      })
-      .then(() => {
-        this.fetchLembretes();
-        Swal.fire({
-          title: "Excluído!",
-          text: "Lembrete excluído com sucesso",
-          icon: "success",
-          showConfirmButton: false,
-          timer: 1500
+      const headers = {
+        Authorization: `Bearer ${token}`,
+      };
+
+      axios
+        .delete(`http://localhost:8080/api/lembretes/excluir/${lembrete.id}`, {
+          headers,
+        })
+        .then(() => {
+          console.log("Lembrete excluído com sucesso");
+          this.fetchLembretes();
+          Swal.fire({
+            title: "Excluído!",
+            text: "Lembrete excluído com sucesso",
+            icon: "success",
+            showConfirmButton: false,
+            timer: 1500,
+          });
+        })
+        .catch((error) => {
+          console.error("Erro ao excluir lembrete:", error);
+
+          if (error.response?.status === 401) {
+            console.error("Sessão expirada - redirecionando para login");
+            localStorage.removeItem("userToken");
+            this.$router.push("/login");
+            return;
+          }
+
+          Swal.fire({
+            title: "Erro",
+            text: "Não foi possível excluir o lembrete",
+            icon: "error",
+          });
         });
-      })
-      .catch(error => {
-        console.error("Erro ao excluir lembrete:", error);
-        Swal.fire({
-          title: "Erro",
-          text: "Não foi possível excluir o lembrete",
-          icon: "error"
-        });
-      });
-      */
     },
 
     getStatusColor(status) {
@@ -715,6 +753,7 @@ export default {
         Pendente: "orange",
         "Em andamento": "blue",
         Concluído: "green",
+        Atrasado: "red",
         Cancelado: "grey",
       };
       return colors[status] || "primary";
@@ -735,6 +774,50 @@ export default {
       this.priorityFilter = [];
       this.statusFilter = null;
       this.dateFilter = null;
+    },
+
+    checkWidth() {
+      this.isDesktop = window.innerWidth > 600;
+    },
+
+    // Método para lidar com sessão expirada
+    handleSessionExpired() {
+      console.error("Sessão expirada - redirecionando para login");
+      this.redirecionarParaLogin();
+    },
+
+    // Novo método para configurar interceptores do Axios
+    setupAxiosInterceptors() {
+      axios.interceptors.response.use(
+        (response) => response,
+        (error) => {
+          if (error.response?.status === 401) {
+            console.error("Erro de autenticação detectado pelo interceptor");
+            this.redirecionarParaLogin();
+          }
+          return Promise.reject(error);
+        },
+      );
+    },
+
+    redirecionarParaLogin() {
+      console.log("Redirecionando para login e limpando dados de autenticação");
+
+      // Limpar dados locais
+      this.lembretes = [];
+      this.flats = [];
+
+      // Limpar token e redirecionar
+      localStorage.removeItem("userToken");
+
+      // Usar o Vuex para fazer logout
+      this.logoutUser().then(() => {
+        this.$router.push("/login").catch((err) => {
+          if (err.name !== "NavigationDuplicated") {
+            throw err;
+          }
+        });
+      });
     },
   },
 };

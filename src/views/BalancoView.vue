@@ -2,13 +2,14 @@
 
 <template>
   <v-container class="container-color">
-    <div class="mt-5 mb-3 mt-5">
+    <div class="mt-5 mb-3 mt-9">
       <!-- Filtros -->
       <v-row>
-        <v-col cols="12" md="3">
+        <v-col cols="12" md="3" class="py-0">
           <v-menu
             v-model="menuDataInicio"
             :close-on-content-click="false"
+            x
             transition="scale-transition"
             offset-y
             min-width="290px"
@@ -20,6 +21,8 @@
                 readonly
                 v-bind="attrs"
                 v-on="on"
+                dense
+                hide-details
               ></v-text-field>
             </template>
             <v-date-picker
@@ -28,7 +31,7 @@
             ></v-date-picker>
           </v-menu>
         </v-col>
-        <v-col cols="12" md="3">
+        <v-col cols="12" md="3" class="py-0">
           <v-menu
             v-model="menuDataFim"
             :close-on-content-click="false"
@@ -43,6 +46,8 @@
                 readonly
                 v-bind="attrs"
                 v-on="on"
+                dense
+                hide-details
               ></v-text-field>
             </template>
             <v-date-picker
@@ -51,7 +56,7 @@
             ></v-date-picker>
           </v-menu>
         </v-col>
-        <v-col cols="12" md="3">
+        <v-col cols="12" md="3" class="py-0">
           <v-select
             v-model="flatFilter"
             :items="flats"
@@ -59,30 +64,33 @@
             item-value="id"
             label="Filtrar por Flat"
             clearable
+            dense
+            hide-details
           ></v-select>
         </v-col>
-        <v-col cols="12" md="auto" class="d-flex align-center justify-end">
+        <v-col cols="12" md="auto" class="d-flex align-center py-0">
           <v-tooltip bottom>
             <template v-slot:activator="{ on, attrs }">
               <v-btn
                 icon
+                small
                 v-bind="attrs"
                 v-on="on"
-                @click="gerarBalanco"
+                @click="limparFiltros"
                 color="primary"
               >
                 <span
-                  v-html="octicons['filter'].toSVG({ class: 'octicon' })"
+                  v-html="octicons['filter-remove'].toSVG({ class: 'octicon' })"
                 ></span>
               </v-btn>
             </template>
-            <span>Aplicar Filtro</span>
+            <span>Limpar Filtro</span>
           </v-tooltip>
         </v-col>
       </v-row>
 
       <!-- Cards de Resumo -->
-      <v-row class="mt-1">
+      <v-row class="mt-7">
         <v-col cols="12" md="4">
           <v-card class="resumo-card receitas-card" elevation="3">
             <v-card-title class="white--text"> Receitas </v-card-title>
@@ -241,6 +249,7 @@ import * as octicons from "@primer/octicons";
 export default {
   data() {
     return {
+      octicons,
       loading: false,
       dataInicio: subMonths(new Date(), 3).toISOString().substr(0, 10), // 3 meses atrás
       dataFim: new Date().toISOString().substr(0, 10), // hoje
@@ -262,7 +271,6 @@ export default {
         { text: "Categoria", value: "categoria" },
         { text: "Valor", value: "valor" },
       ],
-      octicons,
       categoriaCoresReceitas: {
         Aluguel: "teal",
         "Taxa de Limpeza": "indigo",
@@ -387,108 +395,173 @@ export default {
     async carregarDados() {
       this.loading = true;
       try {
+        const token = localStorage.getItem("userToken");
+        if (!token) {
+          console.error("Token não encontrado");
+          this.$router.push("/login");
+          return;
+        }
+
+        const headers = {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        };
+
         // Carregar flats do banco
-        await axios
-          .get("http://localhost:8080/api/flats/listar", {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-            },
-          })
-          .then((response) => {
-            this.flats = response.data;
-          })
-          .catch((error) => {
-            console.error("Erro ao buscar flats:", error);
-            // Usar dados mock em caso de erro
-            this.flats = [
-              { id: 1, nome: "Flat 101" },
-              { id: 2, nome: "Flat 202" },
-              { id: 3, nome: "Flat 303" },
-            ];
+        try {
+          console.log("Buscando flats...");
+          const responseFlats = await axios.get(
+            "http://localhost:8080/api/flats/listar",
+            { headers },
+          );
+          this.flats = responseFlats.data;
+          console.log("Flats carregados:", this.flats);
+        } catch (error) {
+          console.error("ERRO ao buscar flats:", error);
+          if (error.response?.status === 401) {
+            throw error;
+          }
+        }
+
+        // Carregar todas as transações
+        try {
+          console.log("=== INÍCIO DA BUSCA DE TRANSAÇÕES ===");
+
+          // Formatar datas para comparação
+          const dataInicio = this.dataInicio ? new Date(this.dataInicio) : null;
+          const dataFim = this.dataFim ? new Date(this.dataFim) : null;
+
+          console.log("Filtros aplicados:", {
+            dataInicio: this.dataInicio,
+            dataFim: this.dataFim,
+            flatId: this.flatFilter,
           });
 
-        // Carregar receitas (mock por enquanto)
-        this.receitas = [
-          {
-            id: 1,
-            descricao: "Receita de aluguel",
-            flatId: 1,
-            flatNome: "Flat 101",
-            categoria: "Aluguel",
-            valor: 1500,
-            data: "2025-03-01",
-          },
-          {
-            id: 2,
-            descricao: "Taxa de limpeza",
-            flatId: 2,
-            flatNome: "Flat 202",
-            categoria: "Taxa de Limpeza",
-            valor: 500,
-            data: "2025-03-02",
-          },
-          {
-            id: 3,
-            descricao: "Caução devolvido",
-            flatId: 1,
-            flatNome: "Flat 101",
-            categoria: "Caução",
-            valor: 1000,
-            data: "2025-03-05",
-          },
-          {
-            id: 4,
-            descricao: "Aluguel mensal",
-            flatId: 3,
-            flatNome: "Flat 303",
-            categoria: "Aluguel",
-            valor: 1800,
-            data: "2025-03-10",
-          },
-        ];
+          const responseTransacoes = await axios.get(
+            "http://localhost:8080/api/transacoes/flat/all",
+            { headers },
+          );
 
-        // Carregar despesas (mock por enquanto)
-        this.despesas = [
-          {
-            id: 1,
-            descricao: "Manutenção do ar-condicionado",
-            flatId: 1,
-            flatNome: "Flat 101",
-            categoria: "Manutenção",
-            valor: 350,
-            data: "2025-03-05",
-          },
-          {
-            id: 2,
-            descricao: "Conta de energia",
-            flatId: 2,
-            flatNome: "Flat 202",
-            categoria: "Energia",
-            valor: 180,
-            data: "2025-03-10",
-          },
-          {
-            id: 3,
-            descricao: "Limpeza pós-hospedagem",
-            flatId: 1,
-            flatNome: "Flat 101",
-            categoria: "Limpeza",
-            valor: 120,
-            data: "2025-03-15",
-          },
-        ];
+          console.log("RESPOSTA DA API:", responseTransacoes.data);
 
-        // Após carregar os dados, criar os gráficos
-        this.$nextTick(() => {
-          this.criarGraficos();
-        });
+          // Separar transações em receitas e despesas com filtros
+          const todasTransacoes = Array.isArray(responseTransacoes.data)
+            ? responseTransacoes.data
+            : [];
+
+          // Função auxiliar para verificar se a data está no intervalo
+          const estaNoIntervalo = (dataStr) => {
+            if (!dataStr) return false;
+            const data = new Date(dataStr);
+            if (dataInicio && data < dataInicio) return false;
+            if (dataFim && data > dataFim) return false;
+            return true;
+          };
+
+          // Aplicar filtros nas receitas
+          this.receitas = todasTransacoes
+            .filter((transacao) => {
+              // Filtro por tipo
+              if (transacao.tipo !== "RECEITA") return false;
+
+              // Filtro por flat
+              if (this.flatFilter && transacao.flatId !== this.flatFilter)
+                return false;
+
+              // Filtro por data
+              if (dataInicio || dataFim) {
+                return estaNoIntervalo(transacao.data);
+              }
+
+              return true;
+            })
+            .map((transacao) => {
+              const flatEncontrado = this.flats.find(
+                (f) => f.id === transacao.flatId,
+              );
+              return {
+                id: transacao.id,
+                descricao: transacao.descricao || "",
+                flatId: transacao.flatId,
+                flatNome: flatEncontrado
+                  ? flatEncontrado.nome
+                  : "Flat não encontrado",
+                categoria: transacao.categoria || "Outros",
+                valor: parseFloat(transacao.valor || 0),
+                data: transacao.data,
+              };
+            });
+
+          // Aplicar filtros nas despesas
+          this.despesas = todasTransacoes
+            .filter((transacao) => {
+              // Filtro por tipo
+              if (transacao.tipo !== "DESPESA") return false;
+
+              // Filtro por flat
+              if (this.flatFilter && transacao.flatId !== this.flatFilter)
+                return false;
+
+              // Filtro por data
+              if (dataInicio || dataFim) {
+                return estaNoIntervalo(transacao.data);
+              }
+
+              return true;
+            })
+            .map((transacao) => {
+              const flatEncontrado = this.flats.find(
+                (f) => f.id === transacao.flatId,
+              );
+              return {
+                id: transacao.id,
+                descricao: transacao.descricao || "",
+                flatId: transacao.flatId,
+                flatNome: flatEncontrado
+                  ? flatEncontrado.nome
+                  : "Flat não encontrado",
+                categoria: transacao.categoria || "Outros",
+                valor: parseFloat(transacao.valor || 0),
+                data: transacao.data,
+              };
+            });
+
+          console.log("=== DADOS CARREGADOS ===");
+          console.log("Total de Receitas:", this.receitas.length);
+          console.log("Total de Despesas:", this.despesas.length);
+          console.log("Receitas filtradas:", this.receitas);
+          console.log("Despesas filtradas:", this.despesas);
+
+          // Após carregar os dados, criar os gráficos
+          this.$nextTick(() => {
+            this.criarGraficos();
+          });
+        } catch (error) {
+          console.error("ERRO CRÍTICO ao buscar transações:", error);
+          if (error.response) {
+            console.error("Detalhes do erro:", {
+              status: error.response.status,
+              data: error.response.data,
+            });
+          }
+          if (error.response?.status === 401) {
+            throw error;
+          }
+          this.receitas = [];
+          this.despesas = [];
+        }
+      } catch (error) {
+        console.error("ERRO GERAL:", error);
+        if (error.response?.status === 401) {
+          console.error("Sessão expirada - redirecionando para login");
+          localStorage.removeItem("userToken");
+          this.$router.push("/login");
+          return;
+        }
       } finally {
         this.loading = false;
+        console.log("=== FIM DO CARREGAMENTO DE DADOS ===");
       }
-    },
-    gerarBalanco() {
-      // Recarregar os dados com os filtros aplicados
-      this.carregarDados();
     },
     criarGraficos() {
       this.criarGraficoReceitas();
@@ -751,9 +824,91 @@ export default {
 
       return corMap[cor] || corMap[corBase] || "#757575";
     },
+    limparFiltros() {
+      this.resetarFiltrosParaPadrao();
+      this.carregarDados();
+    },
+    resetarFiltrosParaPadrao() {
+      const hoje = new Date();
+      const primeiroDiaDoMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+      const ultimoDiaDoMes = new Date(
+        hoje.getFullYear(),
+        hoje.getMonth() + 1,
+        0,
+      );
+
+      this.dataInicio = primeiroDiaDoMes.toISOString().substr(0, 10);
+      this.dataFim = ultimoDiaDoMes.toISOString().substr(0, 10);
+      this.flatFilter = null;
+    },
+    // Método para fazer um refresh completo dos dados
+    refreshCompleto() {
+      console.log("Realizando refresh completo do balanço");
+
+      // Resetar filtros para o padrão
+      this.resetarFiltrosParaPadrao();
+
+      // Limpar dados existentes
+      this.receitas = [];
+      this.despesas = [];
+
+      // Destruir gráficos existentes para recriá-los
+      if (this.receitasChart) {
+        this.receitasChart.destroy();
+        this.receitasChart = null;
+      }
+      if (this.despesasChart) {
+        this.despesasChart.destroy();
+        this.despesasChart = null;
+      }
+      if (this.evolucaoChart) {
+        this.evolucaoChart.destroy();
+        this.evolucaoChart = null;
+      }
+
+      // Recarregar todos os dados
+      this.carregarDados();
+    },
+  },
+  watch: {
+    dataInicio(newVal) {
+      console.log("Data Início alterada:", newVal);
+      this.carregarDados();
+    },
+    dataFim(newVal) {
+      console.log("Data Fim alterada:", newVal);
+      this.carregarDados();
+    },
+    flatFilter(newVal) {
+      console.log("Flat selecionado alterado:", newVal);
+      this.carregarDados();
+    },
   },
   created() {
+    console.log("BalancoView criado - inicializando dados");
+    this.resetarFiltrosParaPadrao();
     this.carregarDados();
+  },
+  mounted() {
+    console.log("BalancoView montado - verificando dados");
+    if (this.receitas.length === 0 && this.despesas.length === 0) {
+      this.refreshCompleto();
+    }
+  },
+  activated() {
+    console.log("BalancoView ativado - realizando refresh completo");
+    this.refreshCompleto();
+  },
+  beforeRouteEnter(to, from, next) {
+    next((vm) => {
+      console.log("Navegando para BalancoView - realizando refresh completo");
+      vm.refreshCompleto();
+    });
+  },
+  beforeRouteUpdate(to, from, next) {
+    console.log("Rota de BalancoView atualizada - realizando refresh completo");
+    this.refreshCompleto();
+    next();
   },
   beforeDestroy() {
     // Destruir gráficos ao sair da página
