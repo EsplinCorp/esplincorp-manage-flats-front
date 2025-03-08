@@ -504,7 +504,7 @@ export default {
         console.log("Iniciando busca de flats...");
 
         const response = await axios.get(
-          "http://localhost:8080/api/flats/listar",
+          "https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/flats/listar",
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("userToken")}`,
@@ -564,7 +564,7 @@ export default {
 
         // Buscar todos os hóspedes para verificar ocupação atual
         const response = await axios.get(
-          "http://localhost:8080/api/hospedes/listar",
+          "https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/hospedes/listar",
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("userToken")}`,
@@ -662,7 +662,7 @@ export default {
 
         // Buscar reservas ativas
         const response = await axios.get(
-          "http://localhost:8080/api/reservas/ativas",
+          "https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/reservas/ativas",
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("userToken")}`,
@@ -913,7 +913,7 @@ export default {
 
         // Buscar todas as transações (mesmo endpoint usado no BalancoView)
         const response = await axios.get(
-          "http://localhost:8080/api/transacoes/flat/all",
+          "https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/transacoes/flat/all",
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("userToken")}`,
@@ -1118,7 +1118,7 @@ export default {
           console.log("Buscando dados de evolução financeira da API...");
 
           const response = await axios.get(
-            "http://localhost:8080/api/financeiro/evolucao/ultimos-6-meses",
+            "https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/financeiro/evolucao/ultimos-6-meses",
             {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("userToken")}`,
@@ -1228,7 +1228,7 @@ export default {
       try {
         // Buscar lembretes pendentes do mesmo endpoint usado em LembretesView
         const response = await axios.get(
-          "http://localhost:8080/api/lembretes/listar",
+          "https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/lembretes/listar",
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("userToken")}`,
@@ -1327,7 +1327,7 @@ export default {
 
         // Primeiro tenta obter dados da API
         const response = await axios.get(
-          "http://localhost:8080/api/indicadores/desempenho",
+          "https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/indicadores/desempenho",
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("userToken")}`,
@@ -1485,7 +1485,7 @@ export default {
         const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
 
         const response = await axios.get(
-          "http://localhost:8080/api/transacoes/flat/all",
+          "https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/transacoes/flat/all",
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("userToken")}`,

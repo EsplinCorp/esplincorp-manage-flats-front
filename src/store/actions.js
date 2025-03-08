@@ -35,7 +35,7 @@ export default {
 
   async fetchHospedes({ commit }) {
     try {
-      const response = await axios.get("http://localhost:8080/api/hospedes/listar", {
+      const response = await axios.get("https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/hospedes/listar", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("userToken")}`,
         },
@@ -49,7 +49,7 @@ export default {
 
   async createHospede({ commit }, hospedeData) {
     try {
-      const response = await axios.post("http://localhost:8080/hospedes", hospedeData, {
+      const response = await axios.post("https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/hospedes", hospedeData, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("userToken")}`,
@@ -65,7 +65,7 @@ export default {
   async updateHospede({ commit }, hospedeData) {
     try {
       const response = await axios.put(
-        `http://localhost:8080/api/hospedes/${hospedeData.id}`,
+        `https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/hospedes/${hospedeData.id}`,
         hospedeData,
         {
           headers: {
@@ -83,7 +83,7 @@ export default {
 
   async deleteHospede({ commit }, hospedeId) {
     try {
-      await axios.delete(`http://localhost:8080/api/hospedes/${hospedeId}`, {
+      await axios.delete(`https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/hospedes/${hospedeId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("userToken")}`,
         },
@@ -96,7 +96,7 @@ export default {
   },
   async fetchHistoricoHospedes({ commit }, flatId) {
     try {
-      const response = await axios.get(`http://localhost:8080/api/flats/${flatId}/historico`, {
+      const response = await axios.get(`https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/flats/${flatId}/historico`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("userToken")}`,
         },

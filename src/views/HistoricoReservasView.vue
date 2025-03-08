@@ -331,7 +331,7 @@ export default {
 
       // Implementação com axios para buscar os flats do banco
       axios
-        .get("http://localhost:8080/api/flats/listar", {
+        .get("https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/flats/listar", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("userToken")}`,
           },

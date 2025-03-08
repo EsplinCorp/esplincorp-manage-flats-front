@@ -31,7 +31,7 @@ export default new Vuex.Store({
     async fetchFlats({ commit }) {
       try {
         const response = await axios.get(
-          "http://localhost:8080/api/flats/listar",
+          "https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/flats/listar",
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("userToken")}`,
@@ -46,7 +46,7 @@ export default new Vuex.Store({
     async fetchReservas({ commit }) {
       try {
         const response = await axios.get(
-          "http://localhost:8080/api/reservas/listar",
+          "https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/reservas/listar",
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("userToken")}`,
@@ -68,7 +68,7 @@ export default new Vuex.Store({
         }
 
         const response = await axios.get(
-          "http://localhost:8080/api/hospedes/listar",
+          "https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/hospedes/listar",
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("userToken")}`,

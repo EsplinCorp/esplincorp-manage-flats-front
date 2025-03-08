@@ -418,7 +418,7 @@ export default {
       };
 
       // Fazer uma requisição simples para validar o token
-      return axios.get("http://localhost:8080/api/auth/validar", { headers });
+      return axios.get("https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/auth/validar", { headers });
     },
 
     carregarDados() {
@@ -459,7 +459,7 @@ export default {
       };
 
       return axios
-        .get("http://localhost:8080/api/flats/listar", { headers })
+        .get("https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/flats/listar", { headers })
         .then((response) => {
           this.flats = response.data;
           console.log("Flats carregados com sucesso:", this.flats.length);
@@ -487,7 +487,7 @@ export default {
       };
 
       return axios
-        .get("http://localhost:8080/api/lembretes/listar", { headers })
+        .get("https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/lembretes/listar", { headers })
         .then((response) => {
           console.log("Lembretes recebidos da API:", response.data);
 
@@ -594,8 +594,8 @@ export default {
 
         // Verificar endpoints corretos
         const url = isNew
-          ? "http://localhost:8080/api/lembretes/registrar"
-          : `http://localhost:8080/api/lembretes/atualizar/${this.lembrete.id}`;
+          ? "https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/lembretes/registrar"
+          : `https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/lembretes/atualizar/${this.lembrete.id}`;
 
         const method = isNew ? "post" : "put";
 
@@ -653,7 +653,7 @@ export default {
 
       axios
         .put(
-          `http://localhost:8080/api/lembretes/${lembrete.id}/status`,
+          `https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/lembretes/${lembrete.id}/status`,
           statusDto,
           { headers },
         )
@@ -716,7 +716,7 @@ export default {
       };
 
       axios
-        .delete(`http://localhost:8080/api/lembretes/excluir/${lembrete.id}`, {
+        .delete(`https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/lembretes/excluir/${lembrete.id}`, {
           headers,
         })
         .then(() => {

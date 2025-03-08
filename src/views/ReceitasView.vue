@@ -505,7 +505,7 @@ export default {
     },
     excluirReceita(receita) {
       axios
-        .delete(`http://localhost:8080/api/transacoes/excluir/${receita.id}`, {
+        .delete(`https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/transacoes/excluir/${receita.id}`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("userToken")}`,
           },
@@ -563,8 +563,8 @@ export default {
 
           // Usar endpoint correto baseado se é uma nova receita ou edição
           const url = isNew
-            ? "http://localhost:8080/api/transacoes/registrar"
-            : `http://localhost:8080/api/transacoes/atualizar/${this.receita.id}`;
+            ? "https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/transacoes/registrar"
+            : `https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/transacoes/atualizar/${this.receita.id}`;
 
           const method = isNew ? "post" : "put";
 
@@ -643,7 +643,7 @@ export default {
         try {
           console.log("Buscando flats...");
           const responseFlats = await axios.get(
-            "http://localhost:8080/api/flats/listar",
+            "https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/flats/listar",
             { headers },
           );
           this.flats = responseFlats.data;
@@ -658,7 +658,7 @@ export default {
         // Carregar hóspedes do banco
         try {
           const responseHospedes = await axios.get(
-            "http://localhost:8080/api/hospedes/listar",
+            "https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/hospedes/listar",
             { headers },
           );
           this.hospedes = responseHospedes.data;
@@ -673,7 +673,7 @@ export default {
         try {
           console.log("=== INÍCIO DA BUSCA DE TRANSAÇÕES ===");
           const responseTransacoes = await axios.get(
-            "http://localhost:8080/api/transacoes/flat/all",
+            "https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/transacoes/flat/all",
             { headers },
           );
 

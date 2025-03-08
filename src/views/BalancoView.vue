@@ -411,7 +411,7 @@ export default {
         try {
           console.log("Buscando flats...");
           const responseFlats = await axios.get(
-            "http://localhost:8080/api/flats/listar",
+            "https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/flats/listar",
             { headers },
           );
           this.flats = responseFlats.data;
@@ -438,7 +438,7 @@ export default {
           });
 
           const responseTransacoes = await axios.get(
-            "http://localhost:8080/api/transacoes/flat/all",
+            "https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/transacoes/flat/all",
             { headers },
           );
 

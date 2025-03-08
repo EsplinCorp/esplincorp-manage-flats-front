@@ -491,7 +491,7 @@ export default {
       };
 
       axios
-        .delete(`http://localhost:8080/api/transacoes/excluir/${despesa.id}`, {
+        .delete(`https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/transacoes/excluir/${despesa.id}`, {
           headers,
         })
         .then(() => {
@@ -549,8 +549,8 @@ export default {
           };
 
           const url = isNew
-            ? "http://localhost:8080/api/transacoes/registrar"
-            : `http://localhost:8080/api/transacoes/${this.despesa.id}`;
+            ? "https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/transacoes/registrar"
+            : `https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/transacoes/${this.despesa.id}`;
 
           const method = isNew ? "post" : "put";
           await axios[method](url, transacao, { headers });
@@ -645,8 +645,8 @@ export default {
 
         // Carregar flats e transações
         const [flatsResponse, transacoesResponse] = await Promise.all([
-          axios.get("http://localhost:8080/api/flats/listar", { headers }),
-          axios.get("http://localhost:8080/api/transacoes/flat/all", {
+          axios.get("https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/flats/listar", { headers }),
+          axios.get("https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/transacoes/flat/all", {
             headers,
           }),
         ]);

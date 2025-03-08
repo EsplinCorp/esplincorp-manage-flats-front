@@ -303,7 +303,7 @@ export default {
       }).then((result) => {
         if (result.isConfirmed) {
           axios
-            .delete(`http://localhost:8080/api/flats/${flat.id}`, {
+            .delete(`https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/flats/${flat.id}`, {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("userToken")}`,
               },
@@ -328,7 +328,7 @@ export default {
     fetchFlats() {
       this.loading = true;
       axios
-        .get("http://localhost:8080/api/flats/listar", {
+        .get("https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/flats/listar", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("userToken")}`,
           },
@@ -336,7 +336,7 @@ export default {
         .then((response) => {
           const flats = response.data;
           axios
-            .get("http://localhost:8080/api/hospedes/listar", {
+            .get("https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/hospedes/listar", {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("userToken")}`,
               },
@@ -376,7 +376,7 @@ export default {
     },
     checkAvailability(flatId) {
       axios
-        .get("http://localhost:8080/api/hospedes/listar", {
+        .get("https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/hospedes/listar", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("userToken")}`,
           },

@@ -112,8 +112,8 @@ export default {
     saveFlat() {
       if (this.$refs.form.validate()) {
         const url = this.isEditingLocal
-          ? `http://localhost:8080/api/flats/${this.flat.id}/atualizar`
-          : "http://localhost:8080/api/flats/registrar";
+          ? `https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/flats/${this.flat.id}/atualizar`
+          : "https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/flats/registrar";
         const method = this.isEditingLocal ? "put" : "post";
 
         axios[method](url, this.flat, {
