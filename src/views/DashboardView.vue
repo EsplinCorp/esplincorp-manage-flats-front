@@ -509,6 +509,7 @@ export default {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("userToken")}`,
             },
+            withCredentials: false
           },
         );
 
@@ -569,6 +570,7 @@ export default {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("userToken")}`,
             },
+            withCredentials: false
           },
         );
 
@@ -667,6 +669,7 @@ export default {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("userToken")}`,
             },
+            withCredentials: false
           },
         );
 
@@ -918,6 +921,7 @@ export default {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("userToken")}`,
             },
+            withCredentials: false
           },
         );
 
@@ -1123,6 +1127,7 @@ export default {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("userToken")}`,
               },
+              withCredentials: false
             },
           );
 
@@ -1233,6 +1238,7 @@ export default {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("userToken")}`,
             },
+            withCredentials: false
           },
         );
 
@@ -1332,6 +1338,7 @@ export default {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("userToken")}`,
             },
+            withCredentials: false
           },
         );
 
@@ -1490,6 +1497,7 @@ export default {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("userToken")}`,
             },
+            withCredentials: false
           },
         );
 

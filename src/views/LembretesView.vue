@@ -397,7 +397,7 @@ export default {
       }
 
       // Testar o token com uma requisição simples antes de carregar os dados
-      return this.testarToken()
+      return this.validarToken()
         .then(() => {
           console.log("Token válido, iniciando carregamento de dados");
           this.carregarDados();
@@ -411,14 +411,20 @@ export default {
     },
 
     // Novo método para testar o token
-    testarToken() {
+    validarToken() {
       const token = localStorage.getItem("userToken");
+      if (!token) {
+        return Promise.reject(new Error("Token não encontrado"));
+      }
+
       const headers = {
         Authorization: `Bearer ${token}`,
       };
 
-      // Fazer uma requisição simples para validar o token
-      return axios.get("https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/auth/validar", { headers });
+      return axios.get("https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/auth/validar", { 
+        headers,
+        withCredentials: false 
+      });
     },
 
     carregarDados() {
@@ -487,7 +493,10 @@ export default {
       };
 
       return axios
-        .get("https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/lembretes/listar", { headers })
+        .get("https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/lembretes/listar", { 
+          headers,
+          withCredentials: false
+        })
         .then((response) => {
           console.log("Lembretes recebidos da API:", response.data);
 
@@ -599,7 +608,10 @@ export default {
 
         const method = isNew ? "post" : "put";
 
-        axios[method](url, lembreteDto, { headers })
+        axios[method](url, lembreteDto, { 
+          headers,
+          withCredentials: false
+        })
           .then((response) => {
             console.log(
               `Lembrete ${isNew ? "criado" : "atualizado"} com sucesso:`,
@@ -655,7 +667,10 @@ export default {
         .put(
           `https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/lembretes/${lembrete.id}/status`,
           statusDto,
-          { headers },
+          { 
+            headers,
+            withCredentials: false
+          },
         )
         .then((response) => {
           console.log("Lembrete marcado como concluído:", response.data);
@@ -718,6 +733,7 @@ export default {
       axios
         .delete(`https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/lembretes/excluir/${lembrete.id}`, {
           headers,
+          withCredentials: false
         })
         .then(() => {
           console.log("Lembrete excluído com sucesso");

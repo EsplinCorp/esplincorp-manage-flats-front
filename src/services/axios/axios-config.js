@@ -3,6 +3,7 @@ import router from "../../router/index.js";
 
 const api = axios.create({
   baseURL: "https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com",
+  withCredentials: false,
 });
 
 // Interceptador de requisições
