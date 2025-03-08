@@ -353,14 +353,6 @@ export default {
                 flat.status = isOccupied ? "Ocupado" : "Disponível";
               });
               this.flats = flats;
-
-              if (flats.length === 0) {
-                Swal.fire({
-                  icon: "info",
-                  title: "Nenhum flat encontrado",
-                  text: "Cadastre flats para utilizar esta funcionalidade.",
-                });
-              }
             })
             .catch((error) => {
               console.error("Erro ao buscar hóspedes:", error);

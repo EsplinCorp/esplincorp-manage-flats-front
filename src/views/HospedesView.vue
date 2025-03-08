@@ -536,13 +536,14 @@ export default {
         })
         .then((response) => {
           this.flats = response.data;
-          if (this.flats.length === 0) {
-            Swal.fire({
-              icon: "info",
-              title: "Nenhum flat encontrado",
-              text: "Cadastre flats para utilizar esta funcionalidade.",
-            });
-          }
+          // Removendo o aviso quando não há flats cadastrados
+          // if (this.flats.length === 0) {
+          //   Swal.fire({
+          //     icon: "info",
+          //     title: "Nenhum flat encontrado",
+          //     text: "Cadastre flats para utilizar esta funcionalidade.",
+          //   });
+          // }
         })
         .catch((error) => {
           console.error("Erro ao carregar flats:", error);
