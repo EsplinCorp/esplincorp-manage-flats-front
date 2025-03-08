@@ -509,7 +509,7 @@ export default {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("userToken")}`,
             },
-            withCredentials: false
+            withCredentials: false,
           },
         );
 
@@ -522,17 +522,9 @@ export default {
         ) {
           this.flats = response.data;
         } else {
-          // Fallback para dados mockados se a API retornar array vazio
-          console.warn(
-            "API retornou array vazio para flats, usando dados mock",
-          );
-          this.flats = [
-            { id: 1, nome: "Flat 101", status: "Ocupado" },
-            { id: 2, nome: "Flat 202", status: "Disponível" },
-            { id: 3, nome: "Flat 303", status: "Ocupado" },
-            { id: 4, nome: "Flat 404", status: "Disponível" },
-            { id: 5, nome: "Flat 505", status: "Ocupado" },
-          ];
+          // Não usar dados mockados
+          console.warn("API retornou array vazio para flats");
+          this.flats = [];
         }
 
         // Verificar hóspedes ativos para determinar ocupação dos flats
@@ -548,14 +540,8 @@ export default {
         ]);
       } catch (error) {
         console.error("Erro ao buscar flats:", error);
-        // Fallback para dados mockados em caso de erro
-        this.flats = [
-          { id: 1, nome: "Flat 101", status: "Ocupado" },
-          { id: 2, nome: "Flat 202", status: "Disponível" },
-          { id: 3, nome: "Flat 303", status: "Ocupado" },
-          { id: 4, nome: "Flat 404", status: "Disponível" },
-          { id: 5, nome: "Flat 505", status: "Ocupado" },
-        ];
+        // Não usar dados mockados
+        this.flats = [];
         this.atualizarStatusFlats();
       }
     },
@@ -570,7 +556,7 @@ export default {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("userToken")}`,
             },
-            withCredentials: false
+            withCredentials: false,
           },
         );
 
@@ -669,7 +655,7 @@ export default {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("userToken")}`,
             },
-            withCredentials: false
+            withCredentials: false,
           },
         );
 
@@ -921,7 +907,7 @@ export default {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("userToken")}`,
             },
-            withCredentials: false
+            withCredentials: false,
           },
         );
 
@@ -1127,7 +1113,7 @@ export default {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("userToken")}`,
               },
-              withCredentials: false
+              withCredentials: false,
             },
           );
 
@@ -1203,30 +1189,14 @@ export default {
       }
     },
     gerarDadosMockadosEvolucao() {
-      // Gerar dados mockados para visualização
+      // Não gerar dados mockados, apenas inicializar arrays vazios
       this.dadosEvolucaoFinanceira.meses = [];
       this.dadosEvolucaoFinanceira.receitas = [];
       this.dadosEvolucaoFinanceira.despesas = [];
       this.dadosEvolucaoFinanceira.saldos = [];
 
-      for (let i = 5; i >= 0; i--) {
-        const data = subMonths(new Date(), i);
-        this.dadosEvolucaoFinanceira.meses.push(
-          format(data, "MMM/yyyy", { locale: ptBR }),
-        );
-
-        // Gerar valores aleatórios mas realistas
-        const receita = 3000 + Math.floor(Math.random() * 2000);
-        const despesa = 1000 + Math.floor(Math.random() * 1000);
-
-        this.dadosEvolucaoFinanceira.receitas.push(receita);
-        this.dadosEvolucaoFinanceira.despesas.push(despesa);
-        this.dadosEvolucaoFinanceira.saldos.push(receita - despesa);
-      }
-
       console.log(
-        "Dados mockados de evolução financeira gerados:",
-        this.dadosEvolucaoFinanceira,
+        "Dados de evolução financeira inicializados com arrays vazios",
       );
     },
     async fetchAlertas() {
@@ -1238,7 +1208,7 @@ export default {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("userToken")}`,
             },
-            withCredentials: false
+            withCredentials: false,
           },
         );
 
@@ -1284,35 +1254,13 @@ export default {
           console.log("Lembretes processados para dashboard:", this.alertas);
         } else {
           console.warn("Nenhum lembrete encontrado ou formato inválido");
-          // Usar dados de exemplo apenas se realmente não houver dados
-          this.alertas = [
-            {
-              tipo: "pagamento",
-              titulo: "Pagamento pendente",
-              descricao: "Flat 202 - Vencimento em 3 dias",
-            },
-            {
-              tipo: "manutencao",
-              titulo: "Manutenção programada",
-              descricao: "Flat 303 - Ar-condicionado em 15/04",
-            },
-          ];
+          // Não usar dados de exemplo
+          this.alertas = [];
         }
       } catch (error) {
         console.error("Erro ao buscar lembretes:", error);
-        // Dados de fallback em caso de erro
-        this.alertas = [
-          {
-            tipo: "pagamento",
-            titulo: "Pagamento pendente",
-            descricao: "Flat 202 - Vencimento em 3 dias",
-          },
-          {
-            tipo: "manutencao",
-            titulo: "Manutenção programada",
-            descricao: "Flat 303 - Ar-condicionado em 15/04",
-          },
-        ];
+        // Não usar dados de fallback
+        this.alertas = [];
       }
     },
 
@@ -1338,7 +1286,7 @@ export default {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("userToken")}`,
             },
-            withCredentials: false
+            withCredentials: false,
           },
         );
 
@@ -1497,7 +1445,7 @@ export default {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("userToken")}`,
             },
-            withCredentials: false
+            withCredentials: false,
           },
         );
 

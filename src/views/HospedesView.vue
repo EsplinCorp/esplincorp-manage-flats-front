@@ -547,12 +547,8 @@ export default {
         })
         .catch((error) => {
           console.error("Erro ao carregar flats:", error);
-          // Dados de exemplo para desenvolvimento
-          this.flats = [
-            { id: 1, nome: "Flat 101" },
-            { id: 2, nome: "Flat 202" },
-            { id: 3, nome: "Flat 303" },
-          ];
+          // Não usar dados de exemplo
+          this.flats = [];
         })
         .finally(() => {
           this.loading = false;
