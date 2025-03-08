@@ -421,10 +421,13 @@ export default {
         Authorization: `Bearer ${token}`,
       };
 
-      return axios.get("https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/auth/validar", { 
-        headers,
-        withCredentials: false 
-      });
+      return axios.get(
+        "https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/auth/validar",
+        {
+          headers,
+          withCredentials: false,
+        },
+      );
     },
 
     carregarDados() {
@@ -465,7 +468,10 @@ export default {
       };
 
       return axios
-        .get("https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/flats/listar", { headers })
+        .get(
+          "https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/flats/listar",
+          { headers },
+        )
         .then((response) => {
           this.flats = response.data;
           console.log("Flats carregados com sucesso:", this.flats.length);
@@ -493,10 +499,13 @@ export default {
       };
 
       return axios
-        .get("https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/lembretes/listar", { 
-          headers,
-          withCredentials: false
-        })
+        .get(
+          "https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/lembretes/listar",
+          {
+            headers,
+            withCredentials: false,
+          },
+        )
         .then((response) => {
           console.log("Lembretes recebidos da API:", response.data);
 
@@ -532,9 +541,20 @@ export default {
         })
         .catch((error) => {
           console.error("Erro ao buscar lembretes:", error);
-          if (error.response?.status === 401) {
+
+          // Inicializar array vazio para evitar erros de renderização
+          this.lembretes = [];
+
+          // Tratamento específico para erro 500
+          if (error.response && error.response.status === 500) {
+            console.warn(
+              "Erro 500 do servidor ao buscar lembretes. O servidor pode estar indisponível temporariamente.",
+            );
+            // Não exibir alerta para o usuário, apenas continuar com array vazio
+          } else if (error.response?.status === 401) {
             this.redirecionarParaLogin();
           }
+
           return Promise.reject(error);
         });
     },
@@ -608,9 +628,9 @@ export default {
 
         const method = isNew ? "post" : "put";
 
-        axios[method](url, lembreteDto, { 
+        axios[method](url, lembreteDto, {
           headers,
-          withCredentials: false
+          withCredentials: false,
         })
           .then((response) => {
             console.log(
@@ -667,9 +687,9 @@ export default {
         .put(
           `https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/lembretes/${lembrete.id}/status`,
           statusDto,
-          { 
+          {
             headers,
-            withCredentials: false
+            withCredentials: false,
           },
         )
         .then((response) => {
@@ -731,10 +751,13 @@ export default {
       };
 
       axios
-        .delete(`https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/lembretes/excluir/${lembrete.id}`, {
-          headers,
-          withCredentials: false
-        })
+        .delete(
+          `https://esplincorp-manage-flats-0ba3179f0512.herokuapp.com/api/lembretes/excluir/${lembrete.id}`,
+          {
+            headers,
+            withCredentials: false,
+          },
+        )
         .then(() => {
           console.log("Lembrete excluído com sucesso");
           this.fetchLembretes();

@@ -1259,8 +1259,17 @@ export default {
         }
       } catch (error) {
         console.error("Erro ao buscar lembretes:", error);
-        // Não usar dados de fallback
+
+        // Inicializar array vazio para evitar erros de renderização
         this.alertas = [];
+
+        // Tratamento específico para erro 500
+        if (error.response && error.response.status === 500) {
+          console.warn(
+            "Erro 500 do servidor ao buscar lembretes. O servidor pode estar indisponível temporariamente.",
+          );
+          // Continuar a execução do aplicativo com array vazio
+        }
       }
     },
 
