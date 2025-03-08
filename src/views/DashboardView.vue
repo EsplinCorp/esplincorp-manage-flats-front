@@ -321,7 +321,7 @@
 
 <script>
 import { mapActions, mapState } from "vuex";
-import { format, subMonths, parseISO } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import Chart from "chart.js/auto";
 import axios from "axios";
